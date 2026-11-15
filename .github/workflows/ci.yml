@@ -9,6 +9,10 @@ on:
     - cron: "0 21 * * *"
   workflow_dispatch:
 
+# 公開リポジトリなので、ワークフローの権限は読み取りだけにしておく
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
