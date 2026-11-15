@@ -9,6 +9,12 @@ export interface PythonOutput {
   readonly lineMap: readonly LineMapping[]
 }
 
+/** Kururi の型の名前を Python の型注釈にする（int[] → list[int]）。 */
+function pyType(name: string): string {
+  if (name.endsWith("[]")) return `list[${pyType(name.slice(0, -2))}]`
+  return PYTHON_TYPES[name] ?? name
+}
+
 const PYTHON_TYPES: Readonly<Record<string, string>> = {
   int: "int",
   float: "float",
@@ -63,7 +69,7 @@ export function emitPython(
 }
 
 function emitVar(decl: VarDecl, types: TypeTable, indent: number): Line {
-  const type = PYTHON_TYPES[decl.type.name] ?? decl.type.name
+  const type = pyType(decl.type.name)
   const init = emitCoerced(decl.init, decl.type.name as Type, types)
   return { text: `${" ".repeat(indent)}${decl.name}: ${type} = ${init}`, offset: decl.range.start }
 }
@@ -100,6 +106,8 @@ function emitStatement(stmt: Stmt, types: TypeTable, indent: number): Line[] {
         at(`for ${stmt.name} in range(${emitExpr(stmt.count, types)}):`, stmt.range.start),
         ...emitBlock(stmt.body, types, indent + 4),
       ]
+    case "foreach":
+      return [at(`for ${stmt.name} in ${emitExpr(stmt.iterable, types)}:`, stmt.range.start), ...emitBlock(stmt.body, types, indent + 4)]
     case "break":
     case "continue":
       return [at(stmt.kind, stmt.range.start)]

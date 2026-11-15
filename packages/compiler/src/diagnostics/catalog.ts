@@ -194,7 +194,7 @@ export const DIAGNOSTIC_CATALOG = {
   K0213: {
     code: "K0213",
     severity: "error",
-    message: ({ name = "" }) => `「${name}」は repeat が数える変数なので、代入できません`,
+    message: ({ name = "" }) => `「${name}」はループ（repeat / foreach）の変数なので、代入できません`,
     label: () => "ここで代入しています",
     hint: () => "別の変数に入れて使ってください。条件で回したいときは while を使います",
   },
@@ -255,8 +255,53 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: ({ what = "", expected = "", actual = "" }) => `${what}には ${expected} が必要ですが、${actual} です`,
     label: ({ actual = "" }) => `この値は ${actual} です`,
-    hint: ({ what = "" }) =>
-      what === "条件" ? "比べるときは == や < を使います（例: if x == 1）" : "整数になる式を書いてください",
+    hint: ({ what = "" }) => {
+      if (what === "条件") return "比べるときは == や < を使います（例: if x == 1）"
+      if (what.startsWith("foreach")) return "foreach の後ろには配列を書きます（例: foreach x in xs { ... }）"
+      return "整数になる式を書いてください"
+    },
+  },
+  K0313: {
+    code: "K0313",
+    severity: "error",
+    message: () => "配列はそのまま表示できません",
+    label: () => "配列です",
+    hint: () => "foreach で 1 つずつ output してください（例: foreach x in xs { output(x) }）",
+  },
+  K0314: {
+    code: "K0314",
+    severity: "error",
+    message: () => "空の配列 [] は、型が決まる場所でしか書けません",
+    label: () => "何の配列か分かりません",
+    hint: () => "let a: int[] = [] のように、型を書いた変数に入れてください",
+  },
+  K0315: {
+    code: "K0315",
+    severity: "error",
+    message: () => "添字に負の数は書けません",
+    label: () => "負の数です",
+    hint: () => "Python と違い、a[-1] は末尾を指しません。末尾は a[a.length - 1] と書きます",
+  },
+  K0316: {
+    code: "K0316",
+    severity: "error",
+    message: () => "文字列の 1 文字だけを書き換えることはできません",
+    label: () => "文字列は変更できません",
+    hint: () => "新しい文字列を作って、変数に代入し直してください",
+  },
+  K0317: {
+    code: "K0317",
+    severity: "error",
+    message: ({ type = "", name = "" }) => `${type} には「${name}」がありません`,
+    label: () => "使えません",
+    hint: () => "配列で使えるのは length、push(x)、removeAt(i) です。文字列で使えるのは length だけです",
+  },
+  K0319: {
+    code: "K0319",
+    severity: "error",
+    message: ({ type = "" }) => `${type} の値に [ ] は使えません`,
+    label: () => "添字は使えません",
+    hint: () => "[ ] が使えるのは、配列と文字列だけです",
   },
   K0307: {
     code: "K0307",

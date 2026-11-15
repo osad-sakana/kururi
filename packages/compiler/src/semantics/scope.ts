@@ -6,8 +6,8 @@ export type Symbol =
 
 export interface Local {
   readonly type: Type
-  /** let / const / repeat が数える変数（代入できない） */
-  readonly kind: "let" | "const" | "repeat"
+  /** let / const / ループ（repeat・foreach）の変数（代入できない） */
+  readonly kind: "let" | "const" | "loop"
 }
 
 /** 名前の表。トップレベルの名前と、今チェックしている関数のローカル変数を持つ。 */

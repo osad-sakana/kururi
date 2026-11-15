@@ -3,8 +3,10 @@ import type { Expr } from "../syntax/ast"
 import type { Range } from "../syntax/tokens"
 import type { Scope } from "./scope"
 import { PLANNED_BUILTINS } from "./scope"
-import { isNumeric } from "./types"
+import { EMPTY_ARRAY, elementType, isArray, isAssignable, isNumeric, typeLabel } from "./types"
 import type { Type } from "./types"
+
+type Node<K extends Expr["kind"]> = Extract<Expr, { kind: K }>
 
 const ARITHMETIC: ReadonlySet<string> = new Set(["-", "*", "%"])
 const ORDERING: ReadonlySet<string> = new Set(["<", "<=", ">", ">="])
@@ -15,19 +17,60 @@ export class ExprChecker {
 
   constructor(private readonly reporter: Reporter) {}
 
-  /** 値として使う式の型。値を返さない呼び出し（output など）は、ここでエラーにする。 */
-  valueType(expr: Expr, scope: Scope): Type {
+  /**
+   * 値として使う式の型。値を返さない呼び出し（output など）は、ここでエラーにする。
+   * 空の配列 [] は、型が決まる場所（allowEmpty）でだけ使える。
+   */
+  valueType(expr: Expr, scope: Scope, allowEmpty = false): Type {
     const type = this.typeOf(expr, scope)
-    if (type !== "void") return type
-    this.reporter.report("K0304", expr.range, { name: calleeName(expr) })
-    this.types.set(expr, "error")
-    return "error"
+    if (type === "void") {
+      this.reporter.report("K0304", expr.range, { name: calleeName(expr) })
+      return this.fail(expr)
+    }
+    if (type === EMPTY_ARRAY && !allowEmpty) {
+      this.reporter.report("K0314", expr.range)
+      return this.fail(expr)
+    }
+    return type
+  }
+
+  /**
+   * 値を expected の型の場所に入れられるか調べ、だめなら K0301 を出す。
+   * 配列リテラルは要素ごとに調べるので、[1, 2] を float[] に入れられる。
+   */
+  checkAssignable(expr: Expr, scope: Scope, expected: Type): Type {
+    if (expected !== "error" && expr.kind === "array" && isArray(expected)) {
+      const element = elementType(expected)
+      const results = expr.elements.map((e) => this.checkAssignable(e, scope, element))
+      const type = results.includes("error") ? "error" : expected
+      this.types.set(expr, type)
+      return type
+    }
+    const actual = this.valueType(expr, scope, true)
+    if (expected !== "error" && actual !== "error" && !isAssignable(expected, actual)) {
+      this.reporter.report("K0301", expr.range, { expected, actual: typeLabel(actual) })
+      return this.fail(expr)
+    }
+    return actual
+  }
+
+  /** 画面に出せる値の型（配列は出せない）。output・toString・補間で使う。 */
+  displayType(expr: Expr, scope: Scope): Type {
+    const type = this.valueType(expr, scope)
+    if (!isArray(type)) return type
+    this.reporter.report("K0313", expr.range)
+    return this.fail(expr)
   }
 
   typeOf(expr: Expr, scope: Scope): Type {
     const type = this.compute(expr, scope)
     this.types.set(expr, type)
     return type
+  }
+
+  private fail(expr: Expr): Type {
+    this.types.set(expr, "error")
+    return "error"
   }
 
   private compute(expr: Expr, scope: Scope): Type {
@@ -42,7 +85,7 @@ export class ExprChecker {
         return "boolean"
       case "template":
         for (const part of expr.parts) {
-          if (part.kind === "expr") this.valueType(part.expr, scope)
+          if (part.kind === "expr") this.displayType(part.expr, scope)
         }
         return "string"
       case "ident":
@@ -52,7 +95,20 @@ export class ExprChecker {
       case "unary":
         return this.unaryType(expr, scope)
       case "binary":
-        return this.binaryType(expr, scope)
+        return this.combine(
+          expr.op,
+          this.valueType(expr.left, scope),
+          this.valueType(expr.right, scope),
+          expr.left,
+          expr.right,
+          expr.range,
+        )
+      case "array":
+        return this.arrayType(expr, scope)
+      case "index":
+        return this.indexType(expr, scope)
+      case "member":
+        return this.memberType(expr, scope)
       case "call":
         return this.callType(expr, scope)
     }
@@ -81,19 +137,13 @@ export class ExprChecker {
     return "error"
   }
 
-  private unaryType(expr: Extract<Expr, { kind: "unary" }>, scope: Scope): Type {
+  private unaryType(expr: Node<"unary">, scope: Scope): Type {
     const operand = this.valueType(expr.operand, scope)
     if (operand === "error") return "error"
     const ok = expr.op === "not" ? operand === "boolean" : isNumeric(operand)
     if (ok) return operand
     this.reporter.report("K0303", expr.range, { op: expr.op, left: operand })
     return "error"
-  }
-
-  private binaryType(expr: Extract<Expr, { kind: "binary" }>, scope: Scope): Type {
-    const left = this.valueType(expr.left, scope)
-    const right = this.valueType(expr.right, scope)
-    return this.combine(expr.op, left, right, expr.left, expr.right, expr.range)
   }
 
   /** 二項演算（複合代入の展開後も含む）の型。使えない組み合わせなら診断を出して "error"。 */
@@ -108,12 +158,61 @@ export class ExprChecker {
         return "error"
       }
     }
-    this.reporter.report("K0303", range, { op, left, right })
+    this.reporter.report("K0303", range, { op, left: typeLabel(left), right: typeLabel(right) })
     return "error"
   }
 
-  private callType(expr: Extract<Expr, { kind: "call" }>, scope: Scope): Type {
+  private arrayType(expr: Node<"array">, scope: Scope): Type {
+    const types = expr.elements.map((element) => this.valueType(element, scope))
+    if (types.includes("error")) return "error"
+    const [first] = types
+    if (first === undefined) return EMPTY_ARRAY
+    // int と float が混ざっていれば float の配列にする
+    let common: Type = first
+    for (const [i, type] of types.entries()) {
+      if (type === common) continue
+      if (isNumeric(type) && isNumeric(common)) {
+        common = "float"
+        continue
+      }
+      this.reporter.report("K0301", expr.elements[i]?.range ?? expr.range, { expected: common, actual: type })
+      return "error"
+    }
+    return `${common}[]`
+  }
+
+  private indexType(expr: Node<"index">, scope: Scope): Type {
+    const base = this.valueType(expr.target, scope)
+    this.checkIndex(expr.index, scope)
+    if (base === "error") return "error"
+    if (base === "string") return "string"
+    if (isArray(base)) return elementType(base)
+    this.reporter.report("K0319", expr.target.range, { type: base })
+    return "error"
+  }
+
+  /** 添字は int で、負の数のリテラルは書けない。位置の引数（removeAt）でも使う。 */
+  checkIndex(index: Expr, scope: Scope, what = "添字"): void {
+    const type = this.valueType(index, scope)
+    if (type !== "error" && type !== "int") {
+      this.reporter.report("K0306", index.range, { what, expected: "int", actual: type })
+    } else if (index.kind === "unary" && index.op === "-" && index.operand.kind === "int") {
+      this.reporter.report("K0315", index.range)
+    }
+  }
+
+  /** .length（メソッドの呼び出しは callType が扱う）。 */
+  private memberType(expr: Node<"member">, scope: Scope): Type {
+    const base = this.valueType(expr.object, scope)
+    if (base === "error") return "error"
+    if (expr.name === "length" && (base === "string" || isArray(base))) return "int"
+    this.reporter.report("K0317", expr.nameRange, { type: base, name: expr.name })
+    return "error"
+  }
+
+  private callType(expr: Node<"call">, scope: Scope): Type {
     const callee = expr.callee
+    if (callee.kind === "member") return this.methodCall(expr, callee, scope)
     if (callee.kind !== "ident") {
       this.reporter.report("K0308", callee.range, { name: "この式" })
       return "error"
@@ -137,14 +236,40 @@ export class ExprChecker {
     return "error"
   }
 
-  private builtinCall(name: "output" | "toString", expr: Extract<Expr, { kind: "call" }>, scope: Scope): Type {
-    const argTypes = expr.args.map((arg) => this.valueType(arg, scope))
+  private builtinCall(name: "output" | "toString", expr: Node<"call">, scope: Scope): Type {
+    const argTypes = expr.args.map((arg) => this.displayType(arg, scope))
     if (expr.args.length !== 1) {
       this.reporter.report("K0305", expr.range, { name, expected: "1", actual: String(expr.args.length) })
       return "error"
     }
     if (argTypes[0] === "error") return "error"
     return name === "output" ? "void" : "string"
+  }
+
+  /** a.push(x) と a.removeAt(i)。 */
+  private methodCall(expr: Node<"call">, callee: Node<"member">, scope: Scope): Type {
+    const base = this.valueType(callee.object, scope)
+    if (base === "error") {
+      expr.args.forEach((arg) => this.valueType(arg, scope, true))
+      return "error"
+    }
+    const method = callee.name
+    if (!isArray(base) || (method !== "push" && method !== "removeAt")) {
+      this.reporter.report("K0317", callee.nameRange, { type: base, name: method })
+      return "error"
+    }
+    const [arg] = expr.args
+    if (arg === undefined || expr.args.length !== 1) {
+      expr.args.forEach((a) => this.valueType(a, scope, true))
+      this.reporter.report("K0305", expr.range, { name: method, expected: "1", actual: String(expr.args.length) })
+      return "error"
+    }
+    if (method === "removeAt") {
+      this.checkIndex(arg, scope, "位置")
+      return "void"
+    }
+    this.checkAssignable(arg, scope, elementType(base))
+    return "void"
   }
 }
 
@@ -153,7 +278,9 @@ function isBuiltin(name: string): boolean {
 }
 
 function calleeName(expr: Expr): string {
-  return expr.kind === "call" && expr.callee.kind === "ident" ? expr.callee.name : "この式"
+  if (expr.kind !== "call") return "この式"
+  if (expr.callee.kind === "ident") return expr.callee.name
+  return expr.callee.kind === "member" ? expr.callee.name : "この式"
 }
 
 /** 二項演算の結果の型。その組み合わせが使えなければ undefined。 */

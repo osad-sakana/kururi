@@ -4,7 +4,6 @@ import { ExprChecker } from "./check-expr"
 import { checkBlock, resolveType } from "./check-stmt"
 import type { FunctionContext } from "./check-stmt"
 import type { Scope, Symbol } from "./scope"
-import { isAssignable } from "./types"
 import type { Type } from "./types"
 
 export interface CheckResult {
@@ -25,7 +24,7 @@ export function check(program: Program, reporter: Reporter): CheckResult {
       const scope: Scope = { globals, locals: new Map(), visibleBefore: order }
       const symbol = globals.get(item.name)
       const declared = symbol?.kind === "variable" && symbol.order === order ? symbol.type : "error"
-      checkInit(item, declared, scope, exprs, reporter)
+      checkInit(item, declared, scope, exprs)
     } else {
       const writes = checkFunction(item, { globals, exprs, reporter, declared: new Map(), globalWrites: new Set() })
       globalWrites.set(item, writes)
@@ -57,11 +56,8 @@ function registerTopLevel(program: Program, reporter: Reporter): ReadonlyMap<str
   return globals
 }
 
-function checkInit(decl: VarDecl, declared: Type, scope: Scope, exprs: ExprChecker, reporter: Reporter): void {
-  const actual = exprs.valueType(decl.init, scope)
-  if (declared !== "error" && actual !== "error" && !isAssignable(declared, actual)) {
-    reporter.report("K0301", decl.init.range, { expected: declared, actual })
-  }
+function checkInit(decl: VarDecl, declared: Type, scope: Scope, exprs: ExprChecker): void {
+  exprs.checkAssignable(decl.init, scope, declared)
 }
 
 /** 関数の中を調べて、書き換えたトップレベルの let の名前を返す。 */

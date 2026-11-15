@@ -1,0 +1,11 @@
+function main(): void {
+    let xs: int[] = [1, 2]
+    output(xs)
+    output(xs[-1])
+    output(xs["a"])
+    xs.push("x")
+    xs.size()
+    let s: string = "abc"
+    s[0] = "z"
+    output([])
+}

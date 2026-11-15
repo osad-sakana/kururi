@@ -3,7 +3,7 @@ import type { AssignStmt, Expr, Stmt } from "../syntax/ast"
 import type { Range } from "../syntax/tokens"
 import type { ExprChecker } from "./check-expr"
 import type { Local, Scope, Symbol } from "./scope"
-import { VALUE_TYPE_NAMES, isAssignable } from "./types"
+import { VALUE_TYPE_NAMES, elementType, isArray, isAssignable, typeLabel } from "./types"
 import type { Type } from "./types"
 
 type Locals = ReadonlyMap<string, Local>
@@ -20,8 +20,10 @@ export interface FunctionContext {
 }
 
 export function resolveType(name: string, range: Range, reporter: Reporter, allowVoid: boolean): Type {
-  if (VALUE_TYPE_NAMES.has(name) || (allowVoid && name === "void")) return name as Type
-  reporter.report("K0208", range, { name })
+  const base = name.replace(/(\[\])+$/, "")
+  const isVoid = allowVoid && name === "void"
+  if (VALUE_TYPE_NAMES.has(base) || isVoid) return name as Type
+  reporter.report("K0208", range, { name: base })
   return "error"
 }
 
@@ -62,7 +64,17 @@ function checkStatement(stmt: Stmt, locals: Locals, loopDepth: number, ctx: Func
       return locals
     case "repeat": {
       checkCondition(stmt.count, "repeat の回数", "int", scope, ctx)
-      const inner = declare(stmt.name, "int", "repeat", stmt.nameRange, locals, ctx)
+      const inner = declare(stmt.name, "int", "loop", stmt.nameRange, locals, ctx)
+      checkBlock(stmt.body, inner, loopDepth + 1, ctx)
+      return locals
+    }
+    case "foreach": {
+      const iterable = ctx.exprs.valueType(stmt.iterable, scope)
+      if (iterable !== "error" && !isArray(iterable)) {
+        ctx.reporter.report("K0306", stmt.iterable.range, { what: "foreach の対象", expected: "配列", actual: iterable })
+      }
+      const element = isArray(iterable) ? elementType(iterable) : "error"
+      const inner = declare(stmt.name, element, "loop", stmt.nameRange, locals, ctx)
       checkBlock(stmt.body, inner, loopDepth + 1, ctx)
       return locals
     }
@@ -75,10 +87,7 @@ function checkStatement(stmt: Stmt, locals: Locals, loopDepth: number, ctx: Func
 
 function checkVar(stmt: Extract<Stmt, { kind: "var" }>, locals: Locals, scope: Scope, ctx: FunctionContext): Locals {
   const declared = resolveType(stmt.type.name, stmt.type.range, ctx.reporter, false)
-  const actual = ctx.exprs.valueType(stmt.init, scope)
-  if (declared !== "error" && actual !== "error" && !isAssignable(declared, actual)) {
-    ctx.reporter.report("K0301", stmt.init.range, { expected: declared, actual })
-  }
+  ctx.exprs.checkAssignable(stmt.init, scope, declared)
   return declare(stmt.name, declared, stmt.mutable ? "let" : "const", stmt.nameRange, locals, ctx)
 }
 
@@ -103,14 +112,15 @@ function checkCondition(expr: Expr, what: string, expected: Type, scope: Scope, 
   }
 }
 
-/** 代入先の変数の型。代入できない変数なら診断を出して "error"。 */
+/** 代入先の型。代入できない先なら診断を出して "error"。 */
 function targetType(target: Expr, scope: Scope, ctx: FunctionContext): Type {
+  if (target.kind === "index") return elementTargetType(target, scope, ctx)
   if (target.kind !== "ident") return "error"
   const name = target.name
   const local = scope.locals.get(name)
   if (local !== undefined) {
     if (local.kind === "const") ctx.reporter.report("K0212", target.range, { name })
-    if (local.kind === "repeat") ctx.reporter.report("K0213", target.range, { name })
+    if (local.kind === "loop") ctx.reporter.report("K0213", target.range, { name })
     return local.kind === "let" ? local.type : "error"
   }
   const global = ctx.globals.get(name)
@@ -127,16 +137,27 @@ function targetType(target: Expr, scope: Scope, ctx: FunctionContext): Type {
   return "error"
 }
 
+/** a[i] への代入。const の配列でも要素は書き換えられるが、文字列は書き換えられない。 */
+function elementTargetType(target: Extract<Expr, { kind: "index" }>, scope: Scope, ctx: FunctionContext): Type {
+  const base = ctx.exprs.valueType(target.target, scope)
+  if (base === "string") {
+    ctx.reporter.report("K0316", target.range)
+    return "error"
+  }
+  return ctx.exprs.typeOf(target, scope)
+}
+
 function checkAssign(stmt: AssignStmt, scope: Scope, ctx: FunctionContext): void {
   const target = targetType(stmt.target, scope, ctx)
   ctx.exprs.types.set(stmt.target, target)
+  if (stmt.op === "=") {
+    ctx.exprs.checkAssignable(stmt.value, scope, target)
+    return
+  }
   const value = ctx.exprs.valueType(stmt.value, scope)
   if (target === "error" || value === "error") return
-  const result =
-    stmt.op === "="
-      ? value
-      : ctx.exprs.combine(stmt.op.slice(0, -1), target, value, stmt.target, stmt.value, stmt.range)
+  const result = ctx.exprs.combine(stmt.op.slice(0, -1), target, value, stmt.target, stmt.value, stmt.range)
   if (result !== "error" && !isAssignable(target, result)) {
-    ctx.reporter.report("K0301", stmt.value.range, { expected: target, actual: result })
+    ctx.reporter.report("K0301", stmt.value.range, { expected: target, actual: typeLabel(result) })
   }
 }

@@ -13,7 +13,7 @@ export interface ParseResult {
 const ASSIGN_OPS: ReadonlySet<string> = new Set(["=", "+=", "-=", "*=", "/=", "%="])
 /** 文の先頭に書けるが、まだ対応していないキーワード */
 const UNSUPPORTED_STATEMENTS: ReadonlySet<string> = new Set([
-  "foreach", "return", "class", "public", "private", "function", "constructor",
+  "return", "class", "public", "private", "function", "constructor",
 ])
 
 export function parse(tokens: readonly Token[], source: string): ParseResult {
@@ -53,11 +53,20 @@ function parseType(c: Cursor): TypeRef | undefined {
     return undefined
   }
   c.next()
-  if (c.isOp("[") || c.isOp("?")) {
-    c.report("K0002", c.peek().range, { text: c.peek().text === "?" ? "T?" : "T[]" })
+  let name = tok.text
+  let end = tok.range.end
+  while (c.isOp("[")) {
+    c.next()
+    const close = c.expectOp("]")
+    if (close === undefined) return undefined
+    name += "[]"
+    end = close.range.end
+  }
+  if (c.isOp("?")) {
+    c.report("K0002", c.peek().range, { text: "T?" })
     return undefined
   }
-  return { name: tok.text, range: tok.range }
+  return { name, range: { start: tok.range.start, end } }
 }
 
 function parseVarDecl(c: Cursor): VarDecl | undefined {
@@ -181,6 +190,8 @@ function parseStatementBody(c: Cursor): Stmt | undefined {
       return parseWhile(c)
     case "repeat":
       return parseRepeat(c)
+    case "foreach":
+      return parseForeach(c)
     case "break":
     case "continue":
       c.next()
@@ -272,13 +283,37 @@ function parseRepeat(c: Cursor): Stmt | undefined {
   }
 }
 
+function parseForeach(c: Cursor): Stmt | undefined {
+  const keyword = c.next()
+  const nameTok = c.peek()
+  if (!c.checkDeclName(nameTok)) return undefined
+  c.next()
+  if (!c.isKeyword("in")) {
+    c.expected("「in」", "配列から 1 つずつ取り出します（例: foreach x in xs { ... }）")
+    return undefined
+  }
+  c.next()
+  const iterable = parseExpr(c)
+  const body = iterable === undefined ? undefined : parseBlock(c)
+  if (iterable === undefined || body === undefined) return undefined
+  if (!c.expectNewline()) return undefined
+  return {
+    kind: "foreach",
+    name: nameTok.text,
+    nameRange: nameTok.range,
+    iterable,
+    body: body.statements,
+    range: { start: keyword.range.start, end: body.end },
+  }
+}
+
 /** 式の文、または代入。 */
 function parseSimpleStatement(c: Cursor): Stmt | undefined {
   const expr = parseExpr(c)
   if (expr === undefined) return undefined
   const next = c.peek()
   if (next.kind === "op" && ASSIGN_OPS.has(next.text)) {
-    if (expr.kind !== "ident") {
+    if (expr.kind !== "ident" && expr.kind !== "index") {
       c.report("K0112", expr.range)
       return undefined
     }

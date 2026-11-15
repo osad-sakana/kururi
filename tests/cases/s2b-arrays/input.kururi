@@ -1,0 +1,22 @@
+const names: string[] = ["apple", "banana"]
+
+function main(): void {
+    let fruits: string[] = ["apple", "banana"]
+    fruits[1] = "melon"
+    fruits.push("grape")
+    fruits.removeAt(0)
+    let count: int = fruits.length
+    let weights: float[] = [1, 2.5]
+    let grid: int[][] = [[1, 2], [3, 4]]
+    let empty: int[] = []
+    output(`${count} 個`)
+    foreach fruit in fruits {
+        output(fruit)
+    }
+    foreach row in grid {
+        foreach v in row {
+            weights.push(v)
+        }
+    }
+    output(names[0][0])
+}

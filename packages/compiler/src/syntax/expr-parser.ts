@@ -90,14 +90,50 @@ function parsePostfix(c: Cursor): Expr | undefined {
   while (expr !== undefined) {
     if (c.isOp("(")) {
       expr = parseCall(c, expr)
-    } else if (c.isOp("[") || c.isOp(".")) {
-      c.report("K0002", c.peek().range, { text: c.peek().text })
-      return undefined
+    } else if (c.isOp("[")) {
+      expr = parseIndex(c, expr)
+    } else if (c.isOp(".")) {
+      expr = parseMember(c, expr)
     } else {
       break
     }
   }
   return expr
+}
+
+function parseIndex(c: Cursor, target: Expr): Expr | undefined {
+  c.next()
+  const index = parseExpr(c)
+  if (index === undefined) return undefined
+  const close = c.expectOp("]")
+  if (close === undefined) return undefined
+  return { kind: "index", target, index, range: { start: target.range.start, end: close.range.end } }
+}
+
+function parseMember(c: Cursor, object: Expr): Expr | undefined {
+  c.next()
+  const name = c.peek()
+  if (name.kind !== "ident") {
+    c.expected("名前", "「.」のあとには、メンバの名前を書きます（例: a.length）")
+    return undefined
+  }
+  c.next()
+  return { kind: "member", object, name: name.text, nameRange: name.range, range: { start: object.range.start, end: name.range.end } }
+}
+
+function parseArray(c: Cursor): Expr | undefined {
+  const open = c.next()
+  const elements: Expr[] = []
+  while (!c.isOp("]")) {
+    const element = parseExpr(c)
+    if (element === undefined) return undefined
+    elements.push(element)
+    if (!c.isOp(",")) break
+    c.next()
+  }
+  const close = c.expectOp("]")
+  if (close === undefined) return undefined
+  return { kind: "array", elements, range: { start: open.range.start, end: close.range.end } }
 }
 
 function parseCall(c: Cursor, callee: Expr): Expr | undefined {
@@ -147,10 +183,7 @@ function parseKeywordOrParen(c: Cursor, tok: Token): Expr | undefined {
     c.report("K0002", tok.range, { text: tok.text })
     return undefined
   }
-  if (tok.kind === "op" && tok.text === "[") {
-    c.report("K0002", tok.range, { text: "[" })
-    return undefined
-  }
+  if (tok.kind === "op" && tok.text === "[") return parseArray(c)
   if (tok.kind === "op" && tok.text === "(") {
     c.next()
     const inner = parseExpr(c)

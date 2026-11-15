@@ -1,4 +1,5 @@
 import type { Expr } from "../syntax/ast"
+import { elementType, isArray } from "../semantics/types"
 import type { Type } from "../semantics/types"
 
 export type TypeTable = ReadonlyMap<Expr, Type>
@@ -28,6 +29,12 @@ export function emitExpr(expr: Expr, types: TypeTable): string {
       return `${emitExpr(expr.left, types)} ${expr.op} ${emitExpr(expr.right, types)}`
     case "template":
       return emitTemplate(expr, types)
+    case "array":
+      return `[${expr.elements.map((e) => emitExpr(e, types)).join(", ")}]`
+    case "index":
+      return `${emitExpr(expr.target, types)}[${emitExpr(expr.index, types)}]`
+    case "member":
+      return `len(${emitExpr(expr.object, types)})`
     case "call":
       return emitCall(expr, types)
   }
@@ -35,6 +42,10 @@ export function emitExpr(expr: Expr, types: TypeTable): string {
 
 /** 値を target の型の場所に入れるコード。int を float に入れるときは、Python では自動で変わらないので変換する。 */
 export function emitCoerced(expr: Expr, target: Type | undefined, types: TypeTable): string {
+  if (expr.kind === "array" && target !== undefined && isArray(target)) {
+    const element = elementType(target)
+    return `[${expr.elements.map((e) => emitCoerced(e, element, types)).join(", ")}]`
+  }
   const code = emitExpr(expr, types)
   if (target !== "float" || types.get(expr) !== "int") return code
   return expr.kind === "int" ? `${code}.0` : `float(${code})`
@@ -46,7 +57,18 @@ function emitShown(expr: Expr, types: TypeTable): string {
   return types.get(expr) === "boolean" ? showBoolean(code) : code
 }
 
+function emitMethodCall(expr: Extract<Expr, { kind: "call" }>, callee: Extract<Expr, { kind: "member" }>, types: TypeTable): string {
+  const object = emitExpr(callee.object, types)
+  const [arg] = expr.args
+  if (arg === undefined) return ""
+  if (callee.name === "removeAt") return `${object}.pop(${emitExpr(arg, types)})`
+  const objectType = types.get(callee.object)
+  const element = objectType === undefined ? undefined : elementType(objectType)
+  return `${object}.append(${emitCoerced(arg, element, types)})`
+}
+
 function emitCall(expr: Extract<Expr, { kind: "call" }>, types: TypeTable): string {
+  if (expr.callee.kind === "member") return emitMethodCall(expr, expr.callee, types)
   const name = expr.callee.kind === "ident" ? expr.callee.name : ""
   const arg = expr.args[0]
   if (arg === undefined) return ""

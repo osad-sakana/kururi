@@ -97,3 +97,31 @@ describe.skipIf(python === undefined)("E2E: 制御構文", () => {
     expect(run(main("  let f: float = 1.5\n  let n: int = 4\n  f = n\n  output(f)\n  f /= 8\n  output(f)"))).toBe("4.0\n0.5\n")
   })
 })
+
+describe.skipIf(python === undefined)("E2E: 配列", () => {
+  it("README の配列の例", () => {
+    const out = run(
+      main(
+        '  let fruits: string[] = ["apple", "banana"]\n  fruits[1] = "melon"\n  fruits.push("grape")\n  fruits.removeAt(0)\n  output(fruits.length)\n  foreach fruit in fruits {\n    output(fruit)\n  }',
+      ),
+    )
+    expect(out).toBe("2\nmelon\ngrape\n")
+  })
+
+  it("float の配列は float として表示される", () => {
+    expect(run(main("  let a: float[] = [1, 2]\n  a.push(3)\n  foreach x in a {\n    output(x)\n  }"))).toBe("1.0\n2.0\n3.0\n")
+  })
+
+  it("入れ子の配列と合計", () => {
+    const out = run(
+      main(
+        "  let grid: int[][] = [[1, 2], [3, 4]]\n  let sum: int = 0\n  foreach row in grid {\n    foreach v in row {\n      sum += v\n    }\n  }\n  grid[1][0] += 10\n  output(sum)\n  output(grid[1][0])",
+      ),
+    )
+    expect(out).toBe("10\n13\n")
+  })
+
+  it("文字列の添字と長さ", () => {
+    expect(run(main('  let s: string = "こんにちは"\n  output(s[1])\n  output(s.length)'))).toBe("ん\n5\n")
+  })
+})

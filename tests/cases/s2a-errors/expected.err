@@ -6,7 +6,7 @@ error[K0212]: 「limit」は const なので、代入し直せません
   |
 help: 値を変えたいときは、宣言を let limit に変えてください
 
-error[K0213]: 「i」は repeat が数える変数なので、代入できません
+error[K0213]: 「i」はループ（repeat / foreach）の変数なので、代入できません
  --> input.kururi:6:9
   |
 6 |         i += 1

@@ -25,6 +25,9 @@ export type Expr =
   | { readonly kind: "unary"; readonly op: "-" | "not"; readonly operand: Expr; readonly range: Range }
   | { readonly kind: "binary"; readonly op: BinaryOp; readonly left: Expr; readonly right: Expr; readonly range: Range }
   | { readonly kind: "paren"; readonly inner: Expr; readonly range: Range }
+  | { readonly kind: "array"; readonly elements: readonly Expr[]; readonly range: Range }
+  | { readonly kind: "index"; readonly target: Expr; readonly index: Expr; readonly range: Range }
+  | { readonly kind: "member"; readonly object: Expr; readonly name: string; readonly nameRange: Range; readonly range: Range }
   | { readonly kind: "call"; readonly callee: Expr; readonly args: readonly Expr[]; readonly range: Range }
 
 export interface VarDecl {
@@ -82,12 +85,21 @@ export interface RepeatStmt {
   readonly range: Range
 }
 
+export interface ForeachStmt {
+  readonly kind: "foreach"
+  readonly name: string
+  readonly nameRange: Range
+  readonly iterable: Expr
+  readonly body: readonly Stmt[]
+  readonly range: Range
+}
+
 export interface JumpStmt {
   readonly kind: "break" | "continue"
   readonly range: Range
 }
 
-export type Stmt = VarDecl | ExprStmt | AssignStmt | IfStmt | WhileStmt | RepeatStmt | JumpStmt
+export type Stmt = VarDecl | ExprStmt | AssignStmt | IfStmt | WhileStmt | RepeatStmt | ForeachStmt | JumpStmt
 
 export interface Param {
   readonly name: string
