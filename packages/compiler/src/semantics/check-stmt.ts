@@ -13,6 +13,8 @@ export interface FunctionContext {
   readonly globals: ReadonlyMap<string, Symbol>
   readonly exprs: ExprChecker
   readonly reporter: Reporter
+  /** この関数の戻り値の型 */
+  readonly returnType: Type
   /** この関数で宣言した名前と型（兄弟のブロックで型が食い違わないか調べる用） */
   readonly declared: Map<string, Type>
   /** この関数の中で書き換えるトップレベルの let（global 宣言が必要） */
@@ -78,6 +80,9 @@ function checkStatement(stmt: Stmt, locals: Locals, loopDepth: number, ctx: Func
       checkBlock(stmt.body, inner, loopDepth + 1, ctx)
       return locals
     }
+    case "return":
+      checkReturn(stmt, scope, ctx)
+      return locals
     case "break":
     case "continue":
       if (loopDepth === 0) ctx.reporter.report("K0210", stmt.range, { name: stmt.kind })
@@ -92,7 +97,7 @@ function checkVar(stmt: Extract<Stmt, { kind: "var" }>, locals: Locals, scope: S
 }
 
 /** 名前を宣言する。シャドーイングと、兄弟のブロックでの型の食い違いを調べる。 */
-function declare(name: string, type: Type, kind: Local["kind"], range: Range, locals: Locals, ctx: FunctionContext): Locals {
+export function declare(name: string, type: Type, kind: Local["kind"], range: Range, locals: Locals, ctx: FunctionContext): Locals {
   if (locals.has(name) || ctx.globals.has(name)) {
     ctx.reporter.report("K0202", range, { name })
     return locals
@@ -160,4 +165,45 @@ function checkAssign(stmt: AssignStmt, scope: Scope, ctx: FunctionContext): void
   if (result !== "error" && !isAssignable(target, result)) {
     ctx.reporter.report("K0301", stmt.value.range, { expected: target, actual: typeLabel(result) })
   }
+}
+
+function checkReturn(stmt: Extract<Stmt, { kind: "return" }>, scope: Scope, ctx: FunctionContext): void {
+  const expected = ctx.returnType
+  if (stmt.value === undefined) {
+    if (expected !== "void" && expected !== "error") ctx.reporter.report("K0320", stmt.range, { expected })
+    return
+  }
+  if (expected === "void") {
+    ctx.exprs.valueType(stmt.value, scope, true)
+    ctx.reporter.report("K0321", stmt.value.range)
+    return
+  }
+  ctx.exprs.checkAssignable(stmt.value, scope, expected)
+}
+
+/** この文の並びを最後まで実行すると、必ず return に行き着くか（return 抜けの検出用）。 */
+export function alwaysReturns(stmts: readonly Stmt[]): boolean {
+  return stmts.some((stmt) => {
+    if (stmt.kind === "return") return true
+    if (stmt.kind === "if") {
+      return (
+        stmt.otherwise !== undefined &&
+        alwaysReturns(stmt.otherwise) &&
+        stmt.branches.every((branch) => alwaysReturns(branch.body))
+      )
+    }
+    // while true で break がなければ、ループの外へは出ない
+    return stmt.kind === "while" && stmt.condition.kind === "bool" && stmt.condition.value && !containsBreak(stmt.body)
+  })
+}
+
+/** ループの本体から、そのループを抜ける break があるか（入れ子のループの break は数えない）。 */
+function containsBreak(stmts: readonly Stmt[]): boolean {
+  return stmts.some((stmt) => {
+    if (stmt.kind === "break") return true
+    if (stmt.kind === "if") {
+      return stmt.branches.some((b) => containsBreak(b.body)) || (stmt.otherwise !== undefined && containsBreak(stmt.otherwise))
+    }
+    return false
+  })
 }

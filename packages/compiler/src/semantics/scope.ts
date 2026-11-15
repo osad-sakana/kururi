@@ -2,7 +2,12 @@ import type { Type } from "./types"
 
 export type Symbol =
   | { readonly kind: "variable"; readonly type: Type; readonly order: number; readonly mutable: boolean }
-  | { readonly kind: "function"; readonly name: string }
+  | {
+      readonly kind: "function"
+      readonly name: string
+      readonly params: readonly Type[]
+      readonly returnType: Type
+    }
 
 export interface Local {
   readonly type: Type

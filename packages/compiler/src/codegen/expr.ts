@@ -1,8 +1,12 @@
 import type { Expr } from "../syntax/ast"
-import { elementType, isArray } from "../semantics/types"
 import type { Type } from "../semantics/types"
 
-export type TypeTable = ReadonlyMap<Expr, Type>
+/** 型検査の結果のうち、Python の生成に要るもの。 */
+export interface TypeInfo {
+  readonly types: ReadonlyMap<Expr, Type>
+  /** int → float の変換が要る式 */
+  readonly widened: ReadonlySet<Expr>
+}
 
 /** boolean は true / false と表示する（Python の True / False のままにしない）。 */
 function showBoolean(code: string): string {
@@ -10,7 +14,13 @@ function showBoolean(code: string): string {
 }
 
 /** 式を Python のコードにする。括弧はソースのとおりに残す。 */
-export function emitExpr(expr: Expr, types: TypeTable): string {
+export function emitExpr(expr: Expr, info: TypeInfo): string {
+  const code = emitRaw(expr, info)
+  if (!info.widened.has(expr)) return code
+  return expr.kind === "int" ? `${code}.0` : `float(${code})`
+}
+
+function emitRaw(expr: Expr, info: TypeInfo): string {
   switch (expr.kind) {
     case "int":
     case "float":
@@ -22,76 +32,66 @@ export function emitExpr(expr: Expr, types: TypeTable): string {
     case "ident":
       return expr.name
     case "paren":
-      return `(${emitExpr(expr.inner, types)})`
+      return `(${emitExpr(expr.inner, info)})`
     case "unary":
-      return expr.op === "not" ? `not ${emitExpr(expr.operand, types)}` : `-${emitExpr(expr.operand, types)}`
+      return expr.op === "not" ? `not ${emitExpr(expr.operand, info)}` : `-${emitExpr(expr.operand, info)}`
     case "binary":
-      return `${emitExpr(expr.left, types)} ${expr.op} ${emitExpr(expr.right, types)}`
+      return `${emitExpr(expr.left, info)} ${expr.op} ${emitExpr(expr.right, info)}`
     case "template":
-      return emitTemplate(expr, types)
+      return emitTemplate(expr, info)
     case "array":
-      return `[${expr.elements.map((e) => emitExpr(e, types)).join(", ")}]`
+      return `[${expr.elements.map((e) => emitExpr(e, info)).join(", ")}]`
     case "index":
-      return `${emitExpr(expr.target, types)}[${emitExpr(expr.index, types)}]`
+      return `${emitExpr(expr.target, info)}[${emitExpr(expr.index, info)}]`
     case "member":
-      return `len(${emitExpr(expr.object, types)})`
+      return `len(${emitExpr(expr.object, info)})`
     case "call":
-      return emitCall(expr, types)
+      return emitCall(expr, info)
   }
-}
-
-/** 値を target の型の場所に入れるコード。int を float に入れるときは、Python では自動で変わらないので変換する。 */
-export function emitCoerced(expr: Expr, target: Type | undefined, types: TypeTable): string {
-  if (expr.kind === "array" && target !== undefined && isArray(target)) {
-    const element = elementType(target)
-    return `[${expr.elements.map((e) => emitCoerced(e, element, types)).join(", ")}]`
-  }
-  const code = emitExpr(expr, types)
-  if (target !== "float" || types.get(expr) !== "int") return code
-  return expr.kind === "int" ? `${code}.0` : `float(${code})`
 }
 
 /** 文字列として表示するときの Python コード（括弧なし）。 */
-function emitShown(expr: Expr, types: TypeTable): string {
-  const code = emitExpr(expr, types)
-  return types.get(expr) === "boolean" ? showBoolean(code) : code
+function emitShown(expr: Expr, info: TypeInfo): string {
+  const code = emitExpr(expr, info)
+  return info.types.get(expr) === "boolean" ? showBoolean(code) : code
 }
 
-function emitMethodCall(expr: Extract<Expr, { kind: "call" }>, callee: Extract<Expr, { kind: "member" }>, types: TypeTable): string {
-  const object = emitExpr(callee.object, types)
+function emitMethodCall(expr: Extract<Expr, { kind: "call" }>, callee: Extract<Expr, { kind: "member" }>, info: TypeInfo): string {
+  const object = emitExpr(callee.object, info)
   const [arg] = expr.args
   if (arg === undefined) return ""
-  if (callee.name === "removeAt") return `${object}.pop(${emitExpr(arg, types)})`
-  const objectType = types.get(callee.object)
-  const element = objectType === undefined ? undefined : elementType(objectType)
-  return `${object}.append(${emitCoerced(arg, element, types)})`
+  if (callee.name === "removeAt") return `${object}.pop(${emitExpr(arg, info)})`
+  return `${object}.append(${emitExpr(arg, info)})`
 }
 
-function emitCall(expr: Extract<Expr, { kind: "call" }>, types: TypeTable): string {
-  if (expr.callee.kind === "member") return emitMethodCall(expr, expr.callee, types)
+function emitCall(expr: Extract<Expr, { kind: "call" }>, info: TypeInfo): string {
+  if (expr.callee.kind === "member") return emitMethodCall(expr, expr.callee, info)
   const name = expr.callee.kind === "ident" ? expr.callee.name : ""
   const arg = expr.args[0]
+  if (name !== "output" && name !== "toString") {
+    return `${name}(${expr.args.map((a) => emitExpr(a, info)).join(", ")})`
+  }
   if (arg === undefined) return ""
-  if (name === "output") return `print(${emitShown(arg, types)})`
-  const type = types.get(arg)
-  if (type === "string") return emitExpr(arg, types)
-  if (type === "boolean") return `(${showBoolean(emitExpr(arg, types))})`
-  return `str(${emitExpr(arg, types)})`
+  if (name === "output") return `print(${emitShown(arg, info)})`
+  const type = info.types.get(arg)
+  if (type === "string") return emitExpr(arg, info)
+  if (type === "boolean") return `(${showBoolean(emitExpr(arg, info))})`
+  return `str(${emitExpr(arg, info)})`
 }
 
 function escapeText(text: string): string {
   return JSON.stringify(text).slice(1, -1).replaceAll("{", "{{").replaceAll("}", "}}")
 }
 
-function emitTemplate(expr: Extract<Expr, { kind: "template" }>, types: TypeTable): string {
+function emitTemplate(expr: Extract<Expr, { kind: "template" }>, info: TypeInfo): string {
   if (expr.parts.every((part) => part.kind === "text")) {
     return JSON.stringify(expr.parts.map((part) => (part.kind === "text" ? part.value : "")).join(""))
   }
   const body = expr.parts
     .map((part) => {
       if (part.kind === "text") return escapeText(part.value)
-      const code = emitExpr(part.expr, types)
-      return types.get(part.expr) === "boolean" ? `{(${showBoolean(code)})}` : `{${code}}`
+      const code = emitExpr(part.expr, info)
+      return info.types.get(part.expr) === "boolean" ? `{(${showBoolean(code)})}` : `{${code}}`
     })
     .join("")
   return `f"${body}"`

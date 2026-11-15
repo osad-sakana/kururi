@@ -94,12 +94,18 @@ export interface ForeachStmt {
   readonly range: Range
 }
 
+export interface ReturnStmt {
+  readonly kind: "return"
+  readonly value: Expr | undefined
+  readonly range: Range
+}
+
 export interface JumpStmt {
   readonly kind: "break" | "continue"
   readonly range: Range
 }
 
-export type Stmt = VarDecl | ExprStmt | AssignStmt | IfStmt | WhileStmt | RepeatStmt | ForeachStmt | JumpStmt
+export type Stmt = VarDecl | ExprStmt | AssignStmt | IfStmt | WhileStmt | RepeatStmt | ForeachStmt | ReturnStmt | JumpStmt
 
 export interface Param {
   readonly name: string

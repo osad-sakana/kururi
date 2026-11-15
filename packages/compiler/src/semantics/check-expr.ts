@@ -1,7 +1,7 @@
 import type { Reporter } from "../reporter"
 import type { Expr } from "../syntax/ast"
 import type { Range } from "../syntax/tokens"
-import type { Scope } from "./scope"
+import type { Scope, Symbol } from "./scope"
 import { PLANNED_BUILTINS } from "./scope"
 import { EMPTY_ARRAY, elementType, isArray, isAssignable, isNumeric, typeLabel } from "./types"
 import type { Type } from "./types"
@@ -14,6 +14,8 @@ const ORDERING: ReadonlySet<string> = new Set(["<", "<=", ">", ">="])
 /** 式の型を調べる。調べた型は types に記録する（Python 生成が使う）。 */
 export class ExprChecker {
   readonly types = new Map<Expr, Type>()
+  /** int の値を float の場所に入れる式（Python では float(...) への変換が要る） */
+  readonly widened = new Set<Expr>()
 
   constructor(private readonly reporter: Reporter) {}
 
@@ -51,6 +53,7 @@ export class ExprChecker {
       this.reporter.report("K0301", expr.range, { expected, actual: typeLabel(actual) })
       return this.fail(expr)
     }
+    if (expected === "float" && actual === "int") this.widened.add(expr)
     return actual
   }
 
@@ -228,12 +231,37 @@ export class ExprChecker {
       this.reporter.report("K0002", callee.range, { text: `${name}()` })
       return "error"
     }
-    if (global?.kind === "function") {
-      if (name === "main") this.reporter.report("K0205", expr.range)
-      return "error"
-    }
+    if (global?.kind === "function") return this.userCall(name, expr, global, scope)
     this.reporter.report("K0201", callee.range, { name })
     return "error"
+  }
+
+  /** 自分で作った関数の呼び出し。引数は型を確かめ、int は float の引数に渡せる。 */
+  private userCall(
+    name: string,
+    expr: Node<"call">,
+    fn: Extract<Symbol, { kind: "function" }>,
+    scope: Scope,
+  ): Type {
+    if (name === "main") {
+      this.reporter.report("K0205", expr.range)
+      return "error"
+    }
+    if (scope.visibleBefore !== undefined) {
+      this.reporter.report("K0323", expr.range, { name })
+      return "error"
+    }
+    if (expr.args.length !== fn.params.length) {
+      expr.args.forEach((arg) => this.valueType(arg, scope, true))
+      this.reporter.report("K0305", expr.range, {
+        name,
+        expected: String(fn.params.length),
+        actual: String(expr.args.length),
+      })
+      return fn.returnType
+    }
+    expr.args.forEach((arg, i) => this.checkAssignable(arg, scope, fn.params[i] ?? "error"))
+    return fn.returnType
   }
 
   private builtinCall(name: "output" | "toString", expr: Node<"call">, scope: Scope): Type {

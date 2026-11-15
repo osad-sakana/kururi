@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { runCli } from "../src/cli"
 import type { CliIo } from "../src/cli"
 
-const UNSUPPORTED = "function main(): void {\n  return\n}\n"
+const UNSUPPORTED = "function main(): void {\n  class\n}\n"
 const HELLO = 'function main(): void {\n  output("hi")\n}\n'
 
 function io(files: Record<string, string>, ran: string[] = [], pythonExit = 0): CliIo {

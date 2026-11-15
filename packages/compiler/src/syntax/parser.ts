@@ -13,7 +13,7 @@ export interface ParseResult {
 const ASSIGN_OPS: ReadonlySet<string> = new Set(["=", "+=", "-=", "*=", "/=", "%="])
 /** 文の先頭に書けるが、まだ対応していないキーワード */
 const UNSUPPORTED_STATEMENTS: ReadonlySet<string> = new Set([
-  "return", "class", "public", "private", "function", "constructor",
+  "class", "public", "private", "function", "constructor",
 ])
 
 export function parse(tokens: readonly Token[], source: string): ParseResult {
@@ -192,6 +192,8 @@ function parseStatementBody(c: Cursor): Stmt | undefined {
       return parseRepeat(c)
     case "foreach":
       return parseForeach(c)
+    case "return":
+      return parseReturn(c)
     case "break":
     case "continue":
       c.next()
@@ -281,6 +283,17 @@ function parseRepeat(c: Cursor): Stmt | undefined {
     body: body.statements,
     range: { start: keyword.range.start, end: body.end },
   }
+}
+
+function parseReturn(c: Cursor): Stmt | undefined {
+  const keyword = c.next()
+  if (c.peek().kind === "nl") {
+    c.next()
+    return { kind: "return", value: undefined, range: keyword.range }
+  }
+  const value = parseExpr(c)
+  if (value === undefined || !c.expectNewline()) return undefined
+  return { kind: "return", value, range: { start: keyword.range.start, end: value.range.end } }
 }
 
 function parseForeach(c: Cursor): Stmt | undefined {

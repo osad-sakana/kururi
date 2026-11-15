@@ -1,0 +1,61 @@
+error[K0323]: トップレベルの初期値で、自分で作った関数「twice」は呼べません
+ --> input.kururi:1:19
+  |
+1 | const base: int = twice(2)
+  |                   ^^^^^^^^ ここでは呼べません
+  |
+help: 初期値に使えるのは、リテラル・演算・const・組み込み関数だけです。main の中で計算してください
+
+error[K0322]: 関数「check」は boolean の値を返す関数なのに、return しない道があります
+ --> input.kururi:7:10
+  |
+7 | function check(n: int, label: string): boolean {
+  |          ^^^^^ ここで関数が終わってしまうことがあります
+  |
+help: if / else のすべての場合と、関数の最後に return を書いてください
+
+error[K0202]: 「n」はすでに宣言されています
+ --> input.kururi:8:9
+  |
+8 |     let n: int = 1
+  |         ^ 同じ名前をもう一度宣言しています
+  |
+help: 別の名前にしてください（関数の中では、外の変数と同じ名前も使えません）
+
+error[K0321]: 戻り値の型が void の関数は、値を返せません
+  --> input.kururi:15:12
+   |
+15 |     return 1
+   |            ^ 値を返しています
+   |
+help: 値を返したいときは、関数の戻り値の型を int などに変えてください。値を返さないなら return だけを書きます
+
+error[K0305]: twice には引数が 1 個必要ですが、2 個書かれています
+  --> input.kururi:19:5
+   |
+19 |     twice(1, 2)
+   |     ^^^^^^^^^^^ 引数は 1 個です
+
+error[K0301]: string の値を int には入れられません
+  --> input.kururi:20:11
+   |
+20 |     twice("a")
+   |           ^^^ この値は string です
+   |
+help: int の値を書くか、型を string に変えてください
+
+error[K0305]: check には引数が 2 個必要ですが、1 個書かれています
+  --> input.kururi:21:23
+   |
+21 |     let ok: boolean = check(1)
+   |                       ^^^^^^^^ 引数は 2 個です
+
+error[K0304]: 「show」は値を返さないので、値としては使えません
+  --> input.kururi:22:18
+   |
+22 |     let v: int = show()
+   |                  ^^^^^^ 値がありません
+   |
+help: show は文として、単独で書いてください
+
+エラー 8 件

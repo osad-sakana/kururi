@@ -1,8 +1,8 @@
-error[K0001]: 「return」から始まる書き方には、まだ対応していません
+error[K0001]: 「class」から始まる書き方には、まだ対応していません
  --> input.kururi:2:5
   |
-2 |     return
-  |     ^^^^^^
+2 |     class
+  |     ^^^^^
   |
 help: Kururi は開発中です。対応している書き方は PLAN.md を見てください
 

@@ -1,0 +1,34 @@
+let calls: int = 0
+
+function main(): void {
+    output(fact(5))
+    output(average([80, 65, 91]))
+    output(sign(-3))
+    output(calls)
+}
+
+function fact(n: int): int {
+    calls += 1
+    if n <= 1 {
+        return 1
+    }
+    return n * fact(n - 1)
+}
+
+function average(scores: int[]): float {
+    let sum: int = 0
+    foreach s in scores {
+        sum += s
+    }
+    return sum / scores.length
+}
+
+function sign(n: int): int {
+    if n < 0 {
+        return -1
+    } elseif n == 0 {
+        return 0
+    } else {
+        return 1
+    }
+}

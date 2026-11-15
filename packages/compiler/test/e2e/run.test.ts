@@ -125,3 +125,23 @@ describe.skipIf(python === undefined)("E2E: 配列", () => {
     expect(run(main('  let s: string = "こんにちは"\n  output(s[1])\n  output(s.length)'))).toBe("ん\n5\n")
   })
 })
+
+describe.skipIf(python === undefined)("E2E: 関数", () => {
+  it("再帰（階乗とフィボナッチ）", () => {
+    const out = run(
+      `function fact(n: int): int {\n  if n <= 1 {\n    return 1\n  }\n  return n * fact(n - 1)\n}\nfunction fib(n: int): int {\n  if n < 2 { return n }\n  return fib(n - 1) + fib(n - 2)\n}\n${main("  output(fact(10))\n  output(fib(15))")}`,
+    )
+    expect(out).toBe("3628800\n610\n")
+  })
+
+  it("float の引数・戻り値", () => {
+    expect(run(`function half(x: float): float {\n  return x / 2\n}\nfunction one(): float {\n  return 1\n}\n${main("  output(half(5))\n  output(one())")}`)).toBe("2.5\n1.0\n")
+  })
+
+  it("配列を渡して書き換える・グローバルを更新する", () => {
+    const out = run(
+      `let calls: int = 0\nfunction addAll(xs: int[], v: int): void {\n  calls += 1\n  repeat i: xs.length {\n    xs[i] += v\n  }\n}\n${main("  let a: int[] = [1, 2]\n  addAll(a, 10)\n  addAll(a, 1)\n  output(a[0] + a[1])\n  output(calls)")}`,
+    )
+    expect(out).toBe("25\n2\n")
+  })
+})

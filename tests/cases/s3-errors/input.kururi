@@ -1,0 +1,23 @@
+const base: int = twice(2)
+
+function twice(n: int): int {
+    return n * 2
+}
+
+function check(n: int, label: string): boolean {
+    let n: int = 1
+    if n > 0 {
+        return true
+    }
+}
+
+function show(): void {
+    return 1
+}
+
+function main(): void {
+    twice(1, 2)
+    twice("a")
+    let ok: boolean = check(1)
+    let v: int = show()
+}
