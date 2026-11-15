@@ -1,0 +1,6 @@
+function main(): void {
+    let a: boolean = true
+    if a && false || !a {
+        output("x")
+    }
+}

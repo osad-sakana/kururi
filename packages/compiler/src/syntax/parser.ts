@@ -292,6 +292,7 @@ function parseStatementBody(c: Cursor): Stmt | undefined {
       return c.expectNewline() ? { kind: tok.text, range: tok.range } : undefined
     case "for":
       c.report("K0503", tok.range)
+      c.recover()
       return undefined
     case "elseif":
     case "else":

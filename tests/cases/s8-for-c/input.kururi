@@ -1,0 +1,5 @@
+function main(): void {
+    for (let i: int = 0; i < 3; i += 1) {
+        output(i)
+    }
+}

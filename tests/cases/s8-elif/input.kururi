@@ -1,0 +1,8 @@
+function main(): void {
+    let a: int = 1
+    if a == 1 {
+        output("one")
+    } elif a == 2 {
+        output("two")
+    }
+}

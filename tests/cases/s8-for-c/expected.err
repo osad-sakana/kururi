@@ -1,0 +1,17 @@
+error[K0503]: Kururi には for がありません
+ --> input.kururi:2:5
+  |
+2 |     for (let i: int = 0; i < 3; i += 1) {
+  |     ^^^ for は使えません
+  |
+help: 回数で回すときは repeat i: 10 { ... } と書きます
+
+error[K0103]: 「;」は Kururi では使えない文字です
+ --> input.kururi:2:24
+  |
+2 |     for (let i: int = 0; i < 3; i += 1) {
+  |                        ^
+  |
+help: Kururi では文の終わりに ; は要りません。改行で文が終わります
+
+エラー 2 件

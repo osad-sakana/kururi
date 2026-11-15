@@ -56,6 +56,23 @@ function unknownCharHint(text: string): string | undefined {
   return undefined
 }
 
+/** 他の言語でよく使う名前には、Kururi での書き方を案内する。 */
+const OTHER_LANGUAGE_NAMES: Readonly<Record<string, string>> = {
+  print: "表示するときは output(...) と書きます",
+  println: "表示するときは output(...) と書きます",
+  len: "配列や文字列の長さは x.length と書きます",
+  length: "配列や文字列の長さは x.length と書きます",
+  str: "文字列にするときは toString(x) と書きます",
+  parseInt: "整数にするときは toInt(x) と書きます",
+  parseFloat: "小数にするときは toFloat(x) と書きます",
+  range: "回数で回すときは repeat i: 10 { ... } と書きます",
+  append: "配列に足すときは list.push(x) と書きます",
+}
+
+function undeclaredHint(name: string): string {
+  return OTHER_LANGUAGE_NAMES[name] ?? "先に let か const で宣言してください。綴りも見直してください"
+}
+
 /** 診断の文言はここに集める。文言の見直しはこのファイルだけで済むようにする。 */
 export const DIAGNOSTIC_CATALOG = {
   K0001: {
@@ -124,6 +141,13 @@ export const DIAGNOSTIC_CATALOG = {
     label: () => "ここには代入できません",
     hint: () => "左側には変数の名前を書いてください（例: x = 1）。比べるときは == です",
   },
+  K0113: {
+    code: "K0113",
+    severity: "error",
+    message: ({ op = "" }) => `「${op}${op}」は Kururi では使えません`,
+    label: () => "1 ずつ増やす・減らす書き方はありません",
+    hint: ({ op = "" }) => `x ${op}= 1 と書きます（例: ${op === "+" ? "count += 1" : "count -= 1"}）`,
+  },
   K0110: {
     code: "K0110",
     severity: "error",
@@ -135,7 +159,7 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: ({ name = "" }) => `「${name}」という名前は宣言されていません`,
     label: () => "この名前は見つかりません",
-    hint: () => "先に let か const で宣言してください。綴りも見直してください",
+    hint: ({ name = "" }) => undeclaredHint(name),
   },
   K0202: {
     code: "K0202",
@@ -386,7 +410,10 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: () => "この式は何もしません",
     label: () => "値を計算するだけです",
-    hint: () => "文として書けるのは、関数の呼び出し（例: output(...)）だけです",
+    hint: ({ op }) =>
+      op === "=="
+        ? "値を入れるときは = と書きます（例: a = 2）。== は比べるだけで、変数は変わりません"
+        : "文として書けるのは、関数の呼び出し（例: output(...)）だけです",
   },
   K0308: {
     code: "K0308",

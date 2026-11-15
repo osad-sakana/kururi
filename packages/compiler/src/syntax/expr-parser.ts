@@ -59,6 +59,13 @@ function parseLeftAssoc(c: Cursor, ops: ReadonlySet<string>, operand: (c: Cursor
   let left = operand(c)
   while (left !== undefined && c.peek().kind === "op" && ops.has(c.peek().text)) {
     const op = c.next()
+    const again = c.peek()
+    if (ADDITIVE.has(op.text) && again.kind === "op" && again.text === op.text && c.peek(1).kind === "nl") {
+      // x++ / x-- のように、増やす・減らす書き方
+      c.next()
+      c.report("K0113", { start: op.range.start, end: again.range.end }, { op: op.text })
+      return undefined
+    }
     const right = operand(c)
     left = right === undefined ? undefined : binary(op.text as BinaryOp, left, right)
   }

@@ -83,7 +83,10 @@ function checkStatement(
       return checkVar(stmt, locals, scope, ctx)
     case "exprStmt":
       ctx.exprs.typeOf(stmt.expr, scope)
-      if (stmt.expr.kind !== "call") ctx.reporter.report("K0307", stmt.expr.range)
+      if (stmt.expr.kind !== "call") {
+        const comparison = stmt.expr.kind === "binary" && stmt.expr.op === "=="
+        ctx.reporter.report("K0307", stmt.expr.range, comparison ? { op: "==" } : {})
+      }
       return locals
     case "assign":
       checkAssign(stmt, scope, ctx)

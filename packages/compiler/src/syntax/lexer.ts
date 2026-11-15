@@ -84,7 +84,9 @@ export function lex(source: string): LexResult {
           if (ch === "{") braces += 1
           if (ch === "}") braces = Math.max(0, braces - 1)
         } else {
-          readUnknown()
+          const substitute = readUnknown()
+          // 他の言語の演算子は、対応する Kururi の語として読み進める（診断は出したので、続きのエラーを増やさない）
+          if (substitute !== undefined) tokens.push({ kind: "keyword", text: substitute, range: { start, end: pos } })
         }
       }
     }
@@ -231,12 +233,20 @@ export function lex(source: string): LexResult {
     push("template", start, pos, { parts })
   }
 
-  function readUnknown(): void {
+  let lastSemicolon = -1
+  const SUBSTITUTES: Readonly<Record<string, string>> = { "&&": "and", "||": "or", "!": "not" }
+
+  function readUnknown(): string | undefined {
     const start = pos
     const two = source.slice(pos, pos + 2)
     const length = two === "&&" || two === "||" ? 2 : (String.fromCodePoint(source.codePointAt(pos) ?? 0).length)
     pos += length
-    reporter.report("K0103", { start, end: pos }, { text: source.slice(start, pos) })
+    const text = source.slice(start, pos)
+    // 1 行に ; が何度もあっても、診断は最初の 1 件だけ（for (...; ...; ...) などで同じ案内が並ばないように）
+    const repeated = text === ";" && lastSemicolon >= 0 && !source.slice(lastSemicolon, start).includes("\n")
+    if (text === ";") lastSemicolon = start
+    if (!repeated) reporter.report("K0103", { start, end: pos }, { text })
+    return SUBSTITUTES[text]
   }
 
   const tokens = readTokens(false)

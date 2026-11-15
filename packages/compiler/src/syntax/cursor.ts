@@ -80,7 +80,12 @@ export class Cursor {
       this.next()
       return true
     }
-    this.expected("改行", "1 行に書く文は 1 つだけです。続きは次の行に書いてください")
+    const found = this.peek()
+    const hint =
+      found.kind === "ident" && found.text === "elif"
+        ? "Kururi では elif ではなく elseif と書きます"
+        : "1 行に書く文は 1 つだけです。続きは次の行に書いてください"
+    this.expected("改行", hint)
     return false
   }
 
