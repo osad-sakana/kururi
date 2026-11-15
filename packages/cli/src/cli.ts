@@ -2,6 +2,8 @@ import { compile, formatDiagnostics } from "@kururi/compiler"
 
 export interface CliIo {
   readonly readFile: (path: string) => string
+  /** Python のコードを実行して、終了コードを返す。出力はそのまま画面に出す。 */
+  readonly runPython: (code: string) => number
 }
 
 export interface CliResult {
@@ -10,7 +12,7 @@ export interface CliResult {
   readonly stderr: string
 }
 
-const USAGE = "使い方: kururi check <ファイル.kururi>"
+const USAGE = "使い方: kururi check <ファイル.kururi>  /  kururi run <ファイル.kururi>"
 
 function result(exitCode: number, stdout: string, stderr: string): CliResult {
   return { exitCode, stdout, stderr }
@@ -25,13 +27,13 @@ export function runCli(args: readonly string[], io: CliIo): CliResult {
   if (command === undefined || file === undefined) {
     return result(2, "", `${USAGE}\n`)
   }
-  if (command !== "check") {
+  if (command !== "check" && command !== "run") {
     return result(2, "", `不明なコマンドです: ${command}\n${USAGE}\n`)
   }
-  return check(file, io)
+  return build(command, file, io)
 }
 
-function check(file: string, io: CliIo): CliResult {
+function build(command: "check" | "run", file: string, io: CliIo): CliResult {
   let source: string
   try {
     source = io.readFile(file)
@@ -39,9 +41,10 @@ function check(file: string, io: CliIo): CliResult {
     return result(2, "", `ファイルを読めません: ${file}\n`)
   }
 
-  const { diagnostics } = compile(source)
-  if (diagnostics.length === 0) {
-    return result(0, `${file}: エラーはありません\n`, "")
+  const { python, diagnostics } = compile(source)
+  if (diagnostics.length > 0) {
+    return result(1, "", `${formatDiagnostics(diagnostics, { source, fileName: file })}\n`)
   }
-  return result(1, "", `${formatDiagnostics(diagnostics, { source, fileName: file })}\n`)
+  if (command === "check") return result(0, `${file}: エラーはありません\n`, "")
+  return result(python === "" ? 0 : io.runPython(python), "", "")
 }

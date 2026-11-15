@@ -1,0 +1,33 @@
+error[K0501]: 「class」は Kururi の予約語なので、名前には使えません
+ --> input.kururi:2:9
+  |
+2 |     let class: int = 1
+  |         ^^^^^ 予約語です
+  |
+help: 別の名前にしてください
+
+error[K0502]: 「lambda」は Kururi では予約語ではありませんが、Python の予約語です。変換後の Python で動かなくなるため使えません
+ --> input.kururi:3:9
+  |
+3 |     let lambda: int = 2
+  |         ^^^^^^ Python の予約語です
+  |
+help: 別の名前にしてください
+
+error[K0505]: 「ｘ」は全角英数字や半角カナを含むため、名前に使えません
+ --> input.kururi:4:9
+  |
+4 |     let ｘ: int = 3
+  |         ^^ Python では別の文字に変わってしまいます
+  |
+help: 「x」のように、半角の英数字か日本語（ひらがな・カタカナ・漢字）で書いてください
+
+error[K0503]: Kururi には for がありません
+ --> input.kururi:5:5
+  |
+5 |     for
+  |     ^^^ for は使えません
+  |
+help: 回数で回すときは repeat i: 10 { ... } と書きます
+
+エラー 4 件

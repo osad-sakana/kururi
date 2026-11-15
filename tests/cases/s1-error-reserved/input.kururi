@@ -1,0 +1,6 @@
+function main(): void {
+    let class: int = 1
+    let lambda: int = 2
+    let ｘ: int = 3
+    for
+}

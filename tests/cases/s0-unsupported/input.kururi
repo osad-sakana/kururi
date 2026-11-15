@@ -1,1 +1,4 @@
-let a: int = 1
+function main(): void {
+    if true {
+    }
+}

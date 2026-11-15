@@ -1,5 +1,9 @@
-import { createDiagnostic, positionAt } from "./diagnostics"
+import { emitPython } from "./codegen/python"
 import type { Diagnostic } from "./diagnostics"
+import { Reporter } from "./reporter"
+import { check } from "./semantics/check"
+import { lex } from "./syntax/lexer"
+import { parse } from "./syntax/parser"
 
 /** Kururi の行と、生成した Python の行の対応（並べて表示するための表）。 */
 export interface LineMapping {
@@ -17,28 +21,32 @@ export interface CompileResult {
  * Kururi のソースを Python に変換する。
  * ファイルや DOM には触れない純粋な関数。
  *
- * S0 時点では空のソースだけを扱い、それ以外は「未対応」の診断を返す。
+ * 字句・構文の診断があるときは、名前や型の検査には進まない（読み取れていない部分のせいで
+ * 余計なエラーが連鎖するのを避けるため）。診断が 1 件でもあれば python は空になる。
  */
 export function compile(source: string): CompileResult {
-  const firstNonSpace = source.search(/\S/)
-  if (firstNonSpace === -1) {
-    return result("", [])
-  }
+  const lexed = lex(source)
+  const parsed = parse(lexed.tokens, source)
+  const syntaxDiagnostics = [...lexed.diagnostics, ...parsed.diagnostics]
+  if (syntaxDiagnostics.length > 0) return result("", syntaxDiagnostics, [])
 
-  const text = /^\S+/.exec(source.slice(firstNonSpace))?.[0] ?? ""
-  const end = firstNonSpace + Math.max(text.length, 1)
-  const diagnostic = createDiagnostic(
-    "K0001",
-    { start: positionAt(source, firstNonSpace), end: positionAt(source, end) },
-    { text },
-  )
-  return result("", [diagnostic])
+  const reporter = new Reporter(source)
+  const { types } = check(parsed.program, reporter)
+  if (reporter.count > 0) return result("", reporter.list(), [])
+
+  const output = emitPython(parsed.program, types, source)
+  return result(output.python, [], output.lineMap)
 }
 
-function result(python: string, diagnostics: readonly Diagnostic[]): CompileResult {
+function result(
+  python: string,
+  diagnostics: readonly Diagnostic[],
+  lineMap: CompileResult["lineMap"],
+): CompileResult {
+  const sorted = [...diagnostics].sort((a, b) => a.span.start.offset - b.span.start.offset)
   return Object.freeze({
     python,
-    diagnostics: Object.freeze([...diagnostics]),
-    lineMap: Object.freeze([]),
+    diagnostics: Object.freeze(sorted),
+    lineMap: Object.freeze([...lineMap]),
   })
 }

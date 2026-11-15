@@ -1,0 +1,68 @@
+import type { Range } from "./tokens"
+
+/** 構文木。作った後は変更しない。 */
+export interface TypeRef {
+  readonly name: string
+  readonly range: Range
+}
+
+export type TemplateNodePart =
+  | { readonly kind: "text"; readonly value: string }
+  | { readonly kind: "expr"; readonly expr: Expr }
+
+export type BinaryOp =
+  | "+" | "-" | "*" | "/" | "%"
+  | "==" | "!=" | "<" | "<=" | ">" | ">="
+  | "and" | "or"
+
+export type Expr =
+  | { readonly kind: "int"; readonly text: string; readonly range: Range }
+  | { readonly kind: "float"; readonly text: string; readonly range: Range }
+  | { readonly kind: "string"; readonly value: string; readonly range: Range }
+  | { readonly kind: "bool"; readonly value: boolean; readonly range: Range }
+  | { readonly kind: "ident"; readonly name: string; readonly range: Range }
+  | { readonly kind: "template"; readonly parts: readonly TemplateNodePart[]; readonly range: Range }
+  | { readonly kind: "unary"; readonly op: "-" | "not"; readonly operand: Expr; readonly range: Range }
+  | { readonly kind: "binary"; readonly op: BinaryOp; readonly left: Expr; readonly right: Expr; readonly range: Range }
+  | { readonly kind: "paren"; readonly inner: Expr; readonly range: Range }
+  | { readonly kind: "call"; readonly callee: Expr; readonly args: readonly Expr[]; readonly range: Range }
+
+export interface VarDecl {
+  readonly kind: "var"
+  readonly mutable: boolean
+  readonly name: string
+  readonly nameRange: Range
+  readonly type: TypeRef
+  readonly init: Expr
+  readonly range: Range
+}
+
+export interface ExprStmt {
+  readonly kind: "exprStmt"
+  readonly expr: Expr
+  readonly range: Range
+}
+
+export type Stmt = VarDecl | ExprStmt
+
+export interface Param {
+  readonly name: string
+  readonly nameRange: Range
+  readonly type: TypeRef
+}
+
+export interface FunctionDecl {
+  readonly kind: "function"
+  readonly name: string
+  readonly nameRange: Range
+  readonly params: readonly Param[]
+  readonly returnType: TypeRef
+  readonly body: readonly Stmt[]
+  readonly range: Range
+}
+
+export type TopLevel = VarDecl | FunctionDecl
+
+export interface Program {
+  readonly items: readonly TopLevel[]
+}

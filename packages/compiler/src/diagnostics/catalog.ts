@@ -35,8 +35,25 @@ interface CatalogEntry {
   readonly code: string
   readonly severity: Severity
   readonly message: (params: Params) => string
-  readonly label?: (params: Params) => string
-  readonly hint?: (params: Params) => string
+  readonly label?: (params: Params) => string | undefined
+  readonly hint?: (params: Params) => string | undefined
+}
+
+const COMPARISON_OPS: ReadonlySet<string> = new Set(["<", "<=", ">", ">=", "==", "!="])
+const LOGICAL_OPS: ReadonlySet<string> = new Set(["and", "or", "not"])
+
+function operatorHint(op: string): string {
+  if (LOGICAL_OPS.has(op)) return "and / or / not は boolean（true か false）どうしで使います"
+  if (COMPARISON_OPS.has(op)) return "比べられるのは、数値どうしか、同じ型どうしです"
+  return "「+」は数値どうしか文字列どうし、「- * / %」は数値（int か float）だけで使えます"
+}
+
+function unknownCharHint(text: string): string | undefined {
+  if (text === "!") return "「でない」は not と書きます（例: not x）"
+  if (text === "&&") return "「かつ」は and と書きます"
+  if (text === "||") return "「または」は or と書きます"
+  if (text === ";") return "Kururi では文の終わりに ; は要りません。改行で文が終わります"
+  return undefined
 }
 
 /** 診断の文言はここに集める。文言の見直しはこのファイルだけで済むようにする。 */
@@ -47,19 +64,215 @@ export const DIAGNOSTIC_CATALOG = {
     message: ({ text = "" }) => `「${text}」から始まる書き方には、まだ対応していません`,
     hint: () => "Kururi は開発中です。対応している書き方は PLAN.md を見てください",
   },
+  K0002: {
+    code: "K0002",
+    severity: "error",
+    message: ({ text = "" }) => `「${text}」はまだ使えません`,
+    hint: () => "Kururi は開発中です。この書き方は次の版で対応します",
+  },
+  K0101: {
+    code: "K0101",
+    severity: "error",
+    message: ({ expected = "", found = "" }) => `ここには${expected}が必要ですが、${found}がありました`,
+    label: ({ expected = "" }) => `${expected}が必要です`,
+    hint: ({ hint }) => hint,
+  },
+  K0102: {
+    code: "K0102",
+    severity: "error",
+    message: ({ kind = "" }) => `${kind}が閉じられていません`,
+    label: () => "ここから始まっています",
+    hint: ({ close = "" }) => `閉じる ${close} を書いてください`,
+  },
+  K0103: {
+    code: "K0103",
+    severity: "error",
+    message: ({ text = "" }) => `「${text}」は Kururi では使えない文字です`,
+    hint: ({ text = "" }) => unknownCharHint(text),
+  },
+  K0104: {
+    code: "K0104",
+    severity: "error",
+    message: ({ text = "" }) => `文字列の中の「${text}」は使えない書き方です`,
+    hint: () => "使えるのは \\\" \\\\ \\n \\t です。\\ そのものを書くときは \\\\ と書きます",
+  },
+  K0105: {
+    code: "K0105",
+    severity: "error",
+    message: () => "整数の先頭に 0 は付けられません",
+    label: () => "先頭の 0 が不要です",
+    hint: () => "先頭の 0 を取って書いてください（例: 7）",
+  },
+  K0106: {
+    code: "K0106",
+    severity: "error",
+    message: () => "比較は 2 つの値のあいだにしか書けません",
+    label: () => "ここで比較が続いています",
+    hint: () => "a < b and b < c のように、and でつないで書いてください",
+  },
+  K0110: {
+    code: "K0110",
+    severity: "error",
+    message: ({ text = "" }) => `トップレベルに「${text}」は書けません`,
+    hint: () => "トップレベルに書けるのは function、class、let、const だけです。文は function の中に書いてください",
+  },
+  K0201: {
+    code: "K0201",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」という名前は宣言されていません`,
+    label: () => "この名前は見つかりません",
+    hint: () => "先に let か const で宣言してください。綴りも見直してください",
+  },
+  K0202: {
+    code: "K0202",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」はすでに宣言されています`,
+    label: () => "同じ名前をもう一度宣言しています",
+    hint: () => "別の名前にしてください（関数の中では、外の変数と同じ名前も使えません）",
+  },
+  K0203: {
+    code: "K0203",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」は、この行より後ろで宣言されています`,
+    label: () => "まだ宣言されていません",
+    hint: () => "トップレベルの変数は、使う行より前に宣言してください",
+  },
+  K0204: {
+    code: "K0204",
+    severity: "error",
+    message: () => "main 関数がありません",
+    hint: () => "function main(): void { ... } を書いてください。プログラムはここから始まります",
+  },
+  K0205: {
+    code: "K0205",
+    severity: "error",
+    message: () => "main は自分で呼び出せません",
+    label: () => "ここで main を呼んでいます",
+    hint: () => "main はプログラムの入り口で、自動で呼ばれます",
+  },
+  K0207: {
+    code: "K0207",
+    severity: "error",
+    message: () => "main は「function main(): void」と書きます",
+    label: () => "ここが違います",
+    hint: () => "main には引数を付けられず、戻り値の型は void にします",
+  },
+  K0208: {
+    code: "K0208",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」という型はありません`,
+    label: () => "知らない型です",
+    hint: () => "使える型は int、float、string、boolean です",
+  },
+  K0301: {
+    code: "K0301",
+    severity: "error",
+    message: ({ expected = "", actual = "" }) => `${actual} の値を ${expected} には入れられません`,
+    label: ({ actual = "" }) => `この値は ${actual} です`,
+    hint: ({ expected = "", actual = "" }) => `${expected} の値を書くか、型を ${actual} に変えてください`,
+  },
+  K0302: {
+    code: "K0302",
+    severity: "error",
+    message: () => "文字列と数値は + でつなげません",
+    label: ({ actual = "" }) => `この値は ${actual} です`,
+    hint: () => "toString(値) で文字列にするか、文字列補間 `${値}` を使ってください",
+  },
+  K0303: {
+    code: "K0303",
+    severity: "error",
+    message: ({ op = "", left = "", right }) =>
+      right === undefined
+        ? `${left} には「${op}」を使えません`
+        : `${left} と ${right} には「${op}」を使えません`,
+    label: ({ op = "" }) => `「${op}」が使えません`,
+    hint: ({ op = "" }) => operatorHint(op),
+  },
+  K0304: {
+    code: "K0304",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」は値を返さないので、値としては使えません`,
+    label: () => "値がありません",
+    hint: ({ name = "" }) => `${name} は文として、単独で書いてください`,
+  },
+  K0305: {
+    code: "K0305",
+    severity: "error",
+    message: ({ name = "", expected = "", actual = "" }) =>
+      `${name} には引数が ${expected} 個必要ですが、${actual} 個書かれています`,
+    label: ({ expected = "" }) => `引数は ${expected} 個です`,
+  },
+  K0307: {
+    code: "K0307",
+    severity: "error",
+    message: () => "この式は何もしません",
+    label: () => "値を計算するだけです",
+    hint: () => "文として書けるのは、関数の呼び出し（例: output(...)）だけです",
+  },
+  K0308: {
+    code: "K0308",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」は関数ではないので、呼び出せません`,
+    label: () => "関数ではありません",
+  },
+  K0309: {
+    code: "K0309",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」は関数です。値としては使えません`,
+    hint: ({ name = "" }) => `呼び出すときは ${name}(...) と書きます`,
+  },
+  K0501: {
+    code: "K0501",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」は Kururi の予約語なので、名前には使えません`,
+    label: () => "予約語です",
+    hint: () => "別の名前にしてください",
+  },
+  K0502: {
+    code: "K0502",
+    severity: "error",
+    message: ({ name = "" }) =>
+      `「${name}」は Kururi では予約語ではありませんが、Python の予約語です。変換後の Python で動かなくなるため使えません`,
+    label: () => "Python の予約語です",
+    hint: () => "別の名前にしてください",
+  },
+  K0503: {
+    code: "K0503",
+    severity: "error",
+    message: () => "Kururi には for がありません",
+    label: () => "for は使えません",
+    hint: () => "回数で回すときは repeat i: 10 { ... } と書きます",
+  },
+  K0504: {
+    code: "K0504",
+    severity: "error",
+    message: () => "「__」で始まる名前は使えません",
+    label: () => "「__」で始まっています",
+    hint: () => "変換後の Python が使う名前と重なるためです。「_」を 1 つにするか、別の名前にしてください",
+  },
+  K0505: {
+    code: "K0505",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」は全角英数字や半角カナを含むため、名前に使えません`,
+    label: () => "Python では別の文字に変わってしまいます",
+    hint: ({ normalized = "" }) =>
+      `「${normalized}」のように、半角の英数字か日本語（ひらがな・カタカナ・漢字）で書いてください`,
+  },
 } as const satisfies Readonly<Record<string, CatalogEntry>>
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CATALOG
 
 export function createDiagnostic(code: DiagnosticCode, span: Span, params: Params = {}): Diagnostic {
   const entry: CatalogEntry = DIAGNOSTIC_CATALOG[code]
+  const label = entry.label?.(params)
+  const hint = entry.hint?.(params)
   const diagnostic: Diagnostic = {
     code: entry.code,
     severity: entry.severity,
     message: entry.message(params),
     span,
-    ...(entry.label === undefined ? {} : { label: entry.label(params) }),
-    ...(entry.hint === undefined ? {} : { hint: entry.hint(params) }),
+    ...(label === undefined ? {} : { label }),
+    ...(hint === undefined ? {} : { hint }),
   }
   return Object.freeze(diagnostic)
 }

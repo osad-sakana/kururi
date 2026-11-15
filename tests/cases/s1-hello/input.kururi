@@ -1,0 +1,4 @@
+// はじめてのプログラム
+function main(): void {
+    output("こんにちは、Kururi")
+}

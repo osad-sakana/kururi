@@ -1,8 +1,8 @@
-error[K0001]: 「let」から始まる書き方には、まだ対応していません
- --> input.kururi:1:1
+error[K0001]: 「if」から始まる書き方には、まだ対応していません
+ --> input.kururi:2:5
   |
-1 | let a: int = 1
-  | ^^^
+2 |     if true {
+  |     ^^
   |
 help: Kururi は開発中です。対応している書き方は PLAN.md を見てください
 
