@@ -8,9 +8,10 @@
   },
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json && pnpm --filter @kururi/playground typecheck",
     "narapy-compat": "tsx scripts/narapy-compat.ts",
-    "kururi": "tsx packages/cli/src/bin.ts"
+    "kururi": "tsx packages/cli/src/bin.ts",
+    "playground": "pnpm --filter @kururi/playground dev"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

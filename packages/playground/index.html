@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kururi Playground</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Kururi</h1>
+      <span id="status" role="status"></span>
+      <button id="open-narapy" type="button" disabled>narapy で開く</button>
+    </header>
+    <main>
+      <section aria-label="Kururi">
+        <div id="editor"></div>
+      </section>
+      <section aria-label="Python">
+        <div id="python"></div>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

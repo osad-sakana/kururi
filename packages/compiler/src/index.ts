@@ -18,3 +18,4 @@ export type {
   Severity,
   Span,
 } from "./diagnostics"
+export { BUILTIN_NAMES, KEYWORDS } from "./syntax/tokens"

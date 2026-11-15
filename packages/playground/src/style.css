@@ -1,0 +1,17 @@
+:root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+html, body { height: 100%; margin: 0; }
+body { display: flex; flex-direction: column; }
+header { display: flex; align-items: center; gap: 1rem; padding: 0.5rem 1rem; border-bottom: 1px solid #8884; }
+h1 { font-size: 1.1rem; margin: 0; }
+#status { flex: 1; font-size: 0.9rem; }
+#status.error { color: #d33; }
+button { padding: 0.35rem 0.8rem; font-size: 0.9rem; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: 0; }
+section { min-width: 0; min-height: 0; }
+section + section { border-left: 1px solid #8884; }
+#editor, #python { height: 100%; }
+@media (max-width: 700px) {
+  main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  section + section { border-left: 0; border-top: 1px solid #8884; }
+}
