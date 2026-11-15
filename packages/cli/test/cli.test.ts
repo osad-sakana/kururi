@@ -5,8 +5,16 @@ import type { CliIo } from "../src/cli"
 const UNSUPPORTED = "function main(): void {\n  class\n}\n"
 const HELLO = 'function main(): void {\n  output("hi")\n}\n'
 
-function io(files: Record<string, string>, ran: string[] = [], pythonExit = 0): CliIo {
+function io(
+  files: Record<string, string>,
+  ran: string[] = [],
+  pythonExit = 0,
+  written: Record<string, Uint8Array> = {},
+): CliIo {
   return {
+    writeFile: (path, data) => {
+      written[path] = data
+    },
     readFile: (path) => {
       const content = files[path]
       if (content === undefined) throw new Error(`ENOENT: ${path}`)
@@ -84,5 +92,50 @@ describe("kururi run", () => {
 
   it("ファイルが読めなければ終了コード 2", () => {
     expect(runCli(["run", "none.kururi"], io({})).exitCode).toBe(2)
+  })
+})
+
+describe("kururi export", () => {
+  it("narapy で開く URL を標準出力に出す", () => {
+    const r = runCli(["export", "a.kururi"], io({ "a.kururi": HELLO }))
+    expect(r.exitCode).toBe(0)
+    expect(r.stdout.startsWith("https://narapy.shisui.tokyo/#project=")).toBe(true)
+    expect(r.stdout.trim().split("\n")).toHaveLength(1)
+  })
+
+  it("--base-url で narapy の場所を変えられる", () => {
+    const r = runCli(["export", "a.kururi", "--base-url", "http://localhost:5173"], io({ "a.kururi": HELLO }))
+    expect(r.stdout.startsWith("http://localhost:5173/#project=")).toBe(true)
+  })
+
+  it("--out で .narapy ファイルを書き出す", () => {
+    const written: Record<string, Uint8Array> = {}
+    const r = runCli(["export", "a.kururi", "--out", "a.narapy"], io({ "a.kururi": HELLO }, [], 0, written))
+    expect(r.exitCode).toBe(0)
+    expect(r.stdout).toContain("a.narapy")
+    expect(written["a.narapy"]?.length).toBeGreaterThan(0)
+  })
+
+  it("コンパイルエラーがあれば出力せず終了コード 1", () => {
+    const r = runCli(["export", "a.kururi"], io({ "a.kururi": UNSUPPORTED }))
+    expect(r.exitCode).toBe(1)
+    expect(r.stdout).toBe("")
+    expect(r.stderr).toContain("error[K0001]")
+  })
+
+  it("空のプログラム・読めないファイル・不明なオプションは案内して失敗する", () => {
+    expect(runCli(["export", "a.kururi"], io({ "a.kururi": "" })).exitCode).toBe(1)
+    expect(runCli(["export", "none.kururi"], io({})).exitCode).toBe(2)
+    const bad = runCli(["export", "a.kururi", "--nope"], io({ "a.kururi": HELLO }))
+    expect(bad.exitCode).toBe(2)
+    expect(bad.stderr).toContain("--nope")
+    expect(runCli(["export", "a.kururi", "--out"], io({ "a.kururi": HELLO })).exitCode).toBe(2)
+  })
+
+  it("URL が長すぎるときは .narapy を使うよう案内する", () => {
+    const body = Array.from({ length: 6000 }, (_, i) => `  output(${i * 7919})`).join("\n")
+    const r = runCli(["export", "a.kururi"], io({ "a.kururi": `function main(): void {\n${body}\n}\n` }))
+    expect(r.exitCode).toBe(1)
+    expect(r.stderr).toContain("長すぎ")
   })
 })

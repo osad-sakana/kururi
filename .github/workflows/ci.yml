@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # narapy 側の変更で受け渡しが壊れていないか、毎日確かめる
+    - cron: "0 21 * * *"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      # 生成した Python を実行するテスト（E2E）は Python 3.12 で動かす
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+
+  narapy-compat:
+    # 生成した受け渡しデータを、narapy の main 自身のデコード処理で読めるか確かめる
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: osad-sakana/narapy
+          ref: main
+          path: narapy-src
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir narapy-src --ignore-workspace install --frozen-lockfile --ignore-scripts
+      - run: pnpm narapy-compat
+        env:
+          NARAPY_SRC: narapy-src

@@ -9,6 +9,7 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "narapy-compat": "tsx scripts/narapy-compat.ts",
     "kururi": "tsx packages/cli/src/bin.ts"
   },
   "devDependencies": {

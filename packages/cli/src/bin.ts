@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process"
-import { readFileSync } from "node:fs"
+import { readFileSync, writeFileSync } from "node:fs"
 import { runCli } from "./cli"
 import { resolvePython } from "./python"
 
@@ -16,6 +16,7 @@ function runPython(code: string): number {
 const { exitCode, stdout, stderr } = runCli(process.argv.slice(2), {
   readFile: (path) => readFileSync(path, "utf8"),
   runPython,
+  writeFile: (path, data) => writeFileSync(path, data),
 })
 
 if (stdout !== "") process.stdout.write(stdout)

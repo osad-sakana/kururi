@@ -298,7 +298,7 @@ help: toString(result) で文字列に変換してください
 [narapy](https://github.com/osad-sakana/narapy)（ブラウザ完結の Python 学習環境。TypeScript・Vite・Monaco・Pyodide）は、同じ作者が別に管理している。**Kururi のために narapy を変更せず、narapy の公開されている入口だけを使う**。
 
 - narapy は postMessage を使えず（COOP `same-origin`）、外から渡せるのは URL の `#code=` / `#project=` / `?project=` だけ（narapy の README・docs より）。
-- そこで Kururi は独自のプレイグラウンドを持ち、実行したいときに「narapy で開く」で生成した Python を `#project=` に載せて渡す。`.narapy` 形式（zip + `narapy.json`）を zlib + base64url にしたもので、`main.py` と参照用の `main.kururi` を入れる。
+- そこで Kururi は独自のプレイグラウンドを持ち、実行したいときに「narapy で開く」で生成した Python を `#project=` に載せて渡す。`.narapy` 形式（zip + `narapy.json`）を zlib + base64url にしたもので、`main.py` と参照用の `main.kururi.txt`（narapy は未知の拡張子をバイナリ扱いするため、.txt を付ける）を入れる。
 - 変更の追従：
   - CI で narapy の `main` を取得し、Kururi が作った受け渡しデータを narapy 自身のデコード処理で読めるかテストする（毎日と PR ごと）。
   - narapy の変更で壊れたら、そのテストが落ちる。同じ作者なので、Kururi 側を直す／narapy の URL 形式を明文化してもらう／必要なら narapy 側に入口を足す、のどれで解消するかをその時に選ぶ。
