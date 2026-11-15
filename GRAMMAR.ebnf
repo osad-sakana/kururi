@@ -1,0 +1,208 @@
+(* ============================================================
+   Kururi 文法 草案 v0.2
+
+   記法
+     =        定義          |      または
+     { X }    0回以上       [ X ]  省略可能
+     ( X )    グループ      "x"    そのままの文字列（トークン）
+     (* … *)  コメント
+     大文字   字句（トークン）  小文字  構文規則
+   ============================================================ *)
+
+
+(* ------------------------------------------------------------
+   1. 字句
+   ------------------------------------------------------------ *)
+
+(* 空白（スペース・タブ）はトークンの区切りで、それ以外に意味を持たない。
+   改行は NL トークンになり、「文の終わり」を表す。 *)
+
+(* 1-1. NL の扱い（字句解析器が行う。文法の外の規則。上から順に適用する）
+
+     ( ) と [ ] の深さを数える。{ } は深さに数えない（文のブロックのため）。
+
+     1. 深さが 1 以上のあいだ、NL はすべて捨てる。
+          （複数行の引数・配列リテラルで、行頭に演算子があってもよい）
+     2. 深さが 0 のとき、直前のトークンが次のどれかなら NL を捨てる（次の行へ続く）。
+          二項演算子（行末の "-" は常に二項演算子として扱う）/ 代入演算子 / "," / "."
+          ※ "{" の直後の NL は捨てない（文法の { NL } が受ける）。
+     3. 直前のトークンが "}" で、次のトークンが "else" / "elseif" のとき、NL を捨てる。
+     4. "}" の直前に NL がなければ補う（{ return 1 } のような 1 行ブロックのため）。
+          ※ 文字列補間の ${ ... } を閉じる "}" は対象外。
+     5. 連続する NL は 1 つにまとめる。
+     6. 行頭が演算子の行は、深さ 0 では前の行の続きにならない（新しい文として扱う）。 *)
+
+IDENT     = idStart { idContinue } ;
+                (* idStart / idContinue は Python の XID_Start / XID_Continue に揃える
+                   （ひらがな・カタカナ・漢字・ASCII の英字と "_"。数字は ASCII の 0〜9 のみ）。
+                   予約語は除く。"__" で始まる名前は使えない。
+                   NFKC 正規化で形が変わる文字（全角英数字・半角カナなど）はエラー *)
+
+INT       = "0" | nonZeroDigit { digit } ;               (* 007 は書けない *)
+FLOAT     = INT "." digit { digit } ;
+digit     = "0" … "9" ;
+nonZeroDigit = "1" … "9" ;
+
+STRING    = '"' { stringChar | escape } '"' ;
+escape    = "\" ( '"' | "\" | "n" | "t" ) ;              (* これ以外のエスケープはエラー *)
+
+(* 文字列補間。`...${式}...` 。中の式は通常の expr。
+   字句解析器は、バッククォートの中ではテンプレートモードに入り、
+   "${" で通常モードに戻って式を読み、対応する "}"（入れ子の深さで判定）でテンプレートモードに戻る。
+   テンプレートの文字としては "{" "}" をそのまま書ける。 *)
+template  = "`" { templateText | templateEscape | "${" expr "}" } "`" ;
+templateEscape = "\" ( "`" | "$" | "\" | "n" | "t" ) ;   (* \` と \${ で文字として書く *)
+
+(* コメント：  // 行末まで    /* 次の */ まで（入れ子なし） *)
+
+(* 予約語（IDENT にできない）
+   const let function return class public private new constructor self
+   if elseif else while repeat foreach in break continue for
+   true false null and or not
+   int float string boolean void
+   組み込み名: output input toString toInt toFloat div random *)
+
+
+(* ------------------------------------------------------------
+   2. プログラム全体
+   ------------------------------------------------------------ *)
+
+program      = { NL } { topLevel { NL } } EOF ;
+topLevel     = functionDecl | classDecl | varDecl ;
+                (* main の存在と形 function main(): void は意味検査で確認 *)
+
+
+(* ------------------------------------------------------------
+   3. 型
+   ------------------------------------------------------------ *)
+
+type         = baseType [ "?" ] { "[" "]" [ "?" ] } ;
+                (* string?   string[]   string[]?   string?[]   int[][] *)
+baseType     = "int" | "float" | "string" | "boolean" | IDENT ;
+                (* IDENT はクラス名 *)
+returnType   = "void" | type ;                        (* void は戻り値の型にだけ書ける *)
+
+
+(* ------------------------------------------------------------
+   4. 宣言
+   ------------------------------------------------------------ *)
+
+varDecl      = ( "let" | "const" ) IDENT ":" type "=" expr NL ;
+
+functionDecl = "function" IDENT "(" [ params ] ")" ":" returnType block ;
+params       = param { "," param } ;
+param        = IDENT ":" type ;
+
+classDecl    = "class" IDENT "{" { NL } { member { NL } } "}" ;
+member       = fieldDecl | constructorDecl | methodDecl ;
+access       = "public" | "private" ;                 (* 省略すると private *)
+fieldDecl    = [ access ] IDENT ":" type [ "=" expr ] NL ;
+constructorDecl = "constructor" "(" [ params ] ")" block ;      (* 常に外から呼べる。access は付けられない *)
+methodDecl   = [ access ] functionDecl ;
+
+
+(* ------------------------------------------------------------
+   5. 文
+   ------------------------------------------------------------ *)
+
+block        = "{" { NL } { statement { NL } } "}" ;
+
+statement    = varDecl
+             | simpleStmt NL
+             | ifStmt
+             | whileStmt
+             | repeatStmt
+             | foreachStmt
+             | returnStmt NL
+             | "break" NL
+             | "continue" NL ;
+
+(* 代入 または 式文。
+   意味検査:  代入の左辺は 変数 / a[i] / a.b のみ。
+              式文は関数・メソッド呼び出しのみ（それ以外は「意味のない式」エラー）。
+              x += 1 は x = x + 1 と同じ（左辺は 1 回だけ評価）。型は x = x + 1 と同じ規則で検査する
+              （例: int の x に x /= 2 は float になるのでエラー）。
+              a == b = c のように、比較が代入の左辺になっているときは
+              「== は比べる記号です。代入は =」と案内する。 *)
+simpleStmt   = expr [ assignOp expr ] ;
+assignOp     = "=" | "+=" | "-=" | "*=" | "/=" | "%=" ;
+
+returnStmt   = "return" [ expr ] ;
+
+(* 条件の位置に assignOp が来たとき（if x = 1 { ）は、構文エラーとして
+   「条件には == を使います。= は代入です」と案内する。 *)
+ifStmt       = "if" expr block { "elseif" expr block } [ "else" block ] ;
+whileStmt    = "while" expr block ;
+
+(* 回数で回す。IDENT は新しい int 変数（0 から n-1。読み取り専用で、ループの外では使えない）。
+   expr は int で、ループに入るときに 1 回だけ評価する（Python の for i in range(n) に対応）。 *)
+repeatStmt   = "repeat" IDENT ":" expr block ;
+foreachStmt  = "foreach" IDENT "in" expr block ;   (* IDENT の型は要素の型から決まる *)
+
+
+(* ------------------------------------------------------------
+   6. 式（優先順位は Python に準拠。上ほど弱く、下ほど強い）
+   ------------------------------------------------------------ *)
+
+expr           = orExpr ;
+orExpr         = andExpr { "or" andExpr } ;
+andExpr        = notExpr { "and" notExpr } ;
+notExpr        = "not" notExpr | comparison ;
+
+(* [ ] なので a < b < c は構文エラーになる。
+   パーサーはここで「比較は連鎖できません。a < b and b < c と書いてください」と案内する。 *)
+comparison     = additive [ compareOp additive ] ;
+compareOp      = "==" | "!=" | "<" | "<=" | ">" | ">=" ;
+
+additive       = multiplicative { ( "+" | "-" ) multiplicative } ;
+multiplicative = unary { ( "*" | "/" | "%" ) unary } ;
+unary          = "-" unary | postfix ;
+
+postfix        = primary { call | index | member } ;
+call           = "(" [ args ] ")" ;
+index          = "[" expr "]" ;
+member         = "." IDENT ;                        (* a.length / a.push(x) / pl.run() / self.name *)
+args           = expr { "," expr } ;
+
+primary        = INT | FLOAT | STRING | template
+               | "true" | "false" | "null" | "self"
+               | IDENT
+               | "(" expr ")"
+               | arrayLiteral
+               | newExpr ;
+
+newExpr        = "new" IDENT "(" [ args ] ")" ;     (* コンストラクタを呼ぶ。() は必須 *)
+arrayLiteral   = "[" [ expr { "," expr } [ "," ] ] "]" ;   (* 末尾カンマ可。改行は NL 規則 1 で吸収 *)
+
+
+(* ------------------------------------------------------------
+   7. 文法では表せない検査（意味検査。エラーメッセージの対象）
+   ------------------------------------------------------------
+   型
+   - 型の一致（代入、引数、戻り値、演算。int→float のみ暗黙変換可。配列は型が一致するものだけ）
+   - T? を T として使う誤り（if x != null の中は T として可）
+   - 空の配列 [] を、型が決まらない場所で使った
+   - boolean・T? 以外で表示できない型（配列・オブジェクト）を output / toString / 補間に渡した
+   - 文字列の要素への代入（s[i] = ...）
+   - 添字に負の整数リテラル（a[-1]）
+   - T? の絞り込み範囲の外で T として使った（絞り込みはローカル変数・引数のみ）
+   - void 以外の関数で return が抜けている
+   - repeat の回数が int でない
+   名前・スコープ
+   - const の再代入禁止 / repeat の変数への代入禁止
+   - 関数内でのシャドーイング（引数・ローカル・トップレベルと同名の宣言）
+       兄弟のブロックでの再宣言は、型が同じ場合のみ可
+   - 変数のスコープ外の使用
+   - クラスを定義より前の行で型や new に使った（自分自身の本体の中は可）
+   - トップレベルの変数の初期値に自作の関数・クラスを使った
+   - main の有無と形 (function main(): void) / main を呼び出した
+   - self をクラスの外で使った
+   予約語・識別子
+   - 予約語 / Python予約語を識別子に使った
+   - for を使った（「repeat を使います」と案内）
+   - NFKC 正規化で形が変わる識別子（全角英数字・半角カナなど）、"__" で始まる識別子
+   - 同じクラスでフィールドとメソッドが同名
+   クラス
+   - private / public のアクセス違反
+   - 初期値のない T? 以外のフィールドを constructor が代入していない
+   ------------------------------------------------------------ *)
