@@ -28,6 +28,7 @@ export type Expr =
   | { readonly kind: "array"; readonly elements: readonly Expr[]; readonly range: Range }
   | { readonly kind: "index"; readonly target: Expr; readonly index: Expr; readonly range: Range }
   | { readonly kind: "member"; readonly object: Expr; readonly name: string; readonly nameRange: Range; readonly range: Range }
+  | { readonly kind: "null"; readonly range: Range }
   | { readonly kind: "self"; readonly range: Range }
   | { readonly kind: "new"; readonly className: string; readonly classRange: Range; readonly args: readonly Expr[]; readonly range: Range }
   | { readonly kind: "call"; readonly callee: Expr; readonly args: readonly Expr[]; readonly range: Range }

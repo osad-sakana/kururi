@@ -217,7 +217,11 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: ({ expected = "", actual = "" }) => `${actual} の値を ${expected} には入れられません`,
     label: ({ actual = "" }) => `この値は ${actual} です`,
-    hint: ({ expected = "", actual = "" }) => `${expected} の値を書くか、型を ${actual} に変えてください`,
+    hint: ({ expected = "", actual = "" }) => {
+      if (actual === "null") return `null を入れたいときは、型の後ろに ? を付けてください（例: ${expected}?）`
+      if (actual.endsWith("?")) return "null かもしれない値は、if x != null { ... } の中なら使えます"
+      return `${expected} の値を書くか、型を ${actual} に変えてください`
+    },
   },
   K0302: {
     code: "K0302",
@@ -333,6 +337,13 @@ export const DIAGNOSTIC_CATALOG = {
     message: ({ name = "" }) => `トップレベルの初期値で、自分で作った関数「${name}」は呼べません`,
     label: () => "ここでは呼べません",
     hint: () => "初期値に使えるのは、リテラル・演算・const・組み込み関数だけです。main の中で計算してください",
+  },
+  K0330: {
+    code: "K0330",
+    severity: "error",
+    message: ({ type = "" }) => `${type} の値は null かもしれないので、このまま使えません`,
+    label: () => "null かもしれません",
+    hint: () => "if x != null { ... } の中なら使えます。いったん変数に入れてから確かめてください",
   },
   K0401: {
     code: "K0401",

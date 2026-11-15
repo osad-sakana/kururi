@@ -23,7 +23,9 @@ export function elementType(type: Type): Type {
 
 /** value の型の値を、declared の型の場所に入れられるか（int → float と、空の配列だけ特別扱い）。 */
 export function isAssignable(declared: Type, value: Type): boolean {
-  if (declared === value || (declared === "float" && value === "int")) return true
+  if (declared === value) return true
+  if (isNullable(declared)) return value === NULL_TYPE || isAssignable(nonNull(declared), value)
+  if (declared === "float" && value === "int") return true
   return value === EMPTY_ARRAY && isArray(declared)
 }
 
@@ -32,9 +34,22 @@ export function typeLabel(type: Type): string {
   return type === EMPTY_ARRAY ? "空の配列" : type
 }
 
-const NON_CLASS_TYPES: ReadonlySet<string> = new Set(["int", "float", "string", "boolean", "void", "error"])
+const NON_CLASS_TYPES: ReadonlySet<string> = new Set(["int", "float", "string", "boolean", "void", "error", "null"])
 
 /** クラスのオブジェクトの型か（配列と組み込みの型以外）。 */
 export function isClassType(type: Type): boolean {
-  return !isArray(type) && !NON_CLASS_TYPES.has(type)
+  return !isArray(type) && !isNullable(type) && !NON_CLASS_TYPES.has(type)
+}
+
+/** null の型（null リテラルだけがこの型を持つ）。 */
+export const NULL_TYPE: Type = "null"
+
+/** T? の型か（"int?"、"string[]?"）。"string?[]" は配列なので違う。 */
+export function isNullable(type: Type): boolean {
+  return type.endsWith("?")
+}
+
+/** T? から T を取り出す。T? でなければそのまま。 */
+export function nonNull(type: Type): Type {
+  return isNullable(type) ? (type.slice(0, -1) as Type) : type
 }

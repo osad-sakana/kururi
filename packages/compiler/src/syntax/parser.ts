@@ -137,16 +137,20 @@ function parseType(c: Cursor): TypeRef | undefined {
   c.next()
   let name = tok.text
   let end = tok.range.end
-  while (c.isOp("[")) {
-    c.next()
-    const close = c.expectOp("]")
-    if (close === undefined) return undefined
-    name += "[]"
-    end = close.range.end
-  }
-  if (c.isOp("?")) {
-    c.report("K0002", c.peek().range, { text: "T?" })
-    return undefined
+  // T?  T[]  T[]?  T?[]  のように、? と [] を続けて書ける
+  for (;;) {
+    if (c.isOp("?")) {
+      end = c.next().range.end
+      name += "?"
+    } else if (c.isOp("[")) {
+      c.next()
+      const close = c.expectOp("]")
+      if (close === undefined) return undefined
+      end = close.range.end
+      name += "[]"
+    } else {
+      break
+    }
   }
   return { name, range: { start: tok.range.start, end } }
 }

@@ -3,7 +3,6 @@ import type { Cursor } from "./cursor"
 import type { Token } from "./tokens"
 
 const COMPARE_OPS: ReadonlySet<string> = new Set(["==", "!=", "<", "<=", ">", ">="])
-const UNSUPPORTED_PRIMARY: ReadonlySet<string> = new Set(["null"])
 
 /** 式の構文解析（優先順位は Python に準拠）。失敗したら診断を出して undefined を返す。 */
 export function parseExpr(c: Cursor): Expr | undefined {
@@ -213,9 +212,9 @@ function parseKeywordOrParen(c: Cursor, tok: Token): Expr | undefined {
     return { kind: "self", range: tok.range }
   }
   if (tok.kind === "keyword" && tok.text === "new") return parseNew(c)
-  if (tok.kind === "keyword" && UNSUPPORTED_PRIMARY.has(tok.text)) {
-    c.report("K0002", tok.range, { text: tok.text })
-    return undefined
+  if (tok.kind === "keyword" && tok.text === "null") {
+    c.next()
+    return { kind: "null", range: tok.range }
   }
   if (tok.kind === "op" && tok.text === "[") return parseArray(c)
   if (tok.kind === "op" && tok.text === "(") {

@@ -46,7 +46,9 @@ export interface Scope {
   readonly visibleBefore: number | undefined
   /** 今チェックしているクラス（クラスの外では undefined） */
   readonly cls?: ClassInfo | undefined
+  /** いま null でないと分かっているローカル変数・引数（T? を T として使える） */
+  readonly narrowed?: ReadonlySet<string> | undefined
 }
 
-/** まだ対応していない組み込み関数 */
-export const PLANNED_BUILTINS: ReadonlySet<string> = new Set(["input", "toInt", "toFloat", "div", "random"])
+/** 組み込み関数の名前（output と toString は表示できる値なら何でも受ける特別な関数）。 */
+export const BUILTIN_FUNCTIONS: ReadonlySet<string> = new Set(["output", "toString", "input", "toInt", "toFloat", "div", "random"])

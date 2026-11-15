@@ -168,3 +168,34 @@ describe.skipIf(python === undefined)("E2E: クラス", () => {
     expect(out).toBe("4\n")
   })
 })
+
+describe.skipIf(python === undefined)("E2E: null・組み込み", () => {
+  it("null と boolean の表示", () => {
+    const out = run(
+      main('  let a: string? = null\n  let b: int? = 5\n  let c: boolean? = false\n  output(a)\n  output(b)\n  output(c)\n  output(`${a} ${b} ${c}`)\n  a = "x"\n  output(toString(a))'),
+    )
+    expect(out).toBe("null\n5\nfalse\nnull 5 false\nx\n")
+  })
+
+  it("絞り込みと連結リスト", () => {
+    const out = run(
+      `class Node {\n  public value: int\n  public next: Node? = null\n  constructor(value: int) {\n    self.value = value\n  }\n}\n${main("  let head: Node = new Node(1)\n  head.next = new Node(2)\n  let cur: Node? = head\n  let sum: int = 0\n  while cur != null {\n    sum += cur.value\n    cur = cur.next\n  }\n  output(sum)")}`,
+    )
+    expect(out).toBe("3\n")
+  })
+
+  it("div は切り下げ、% と対になる", () => {
+    expect(run(main("  output(div(7, 2))\n  output(div(-7, 2))\n  output(-7 % 3)\n  output(2 * div(9, 4) + 1)"))).toBe("3\n-4\n2\n5\n")
+  })
+
+  it("toInt / toFloat / random", () => {
+    const out = run(main('  output(toInt("42") + 1)\n  output(toFloat("1.5") * 2)\n  let r: int = random(3, 3)\n  output(r)\n  output(toInt(2.9))'))
+    expect(out).toBe("43\n3.0\n3\n2\n")
+  })
+
+  it("input を受けて計算する", () => {
+    const { python: code } = compile(main('  let a: int = toInt(input())\n  let b: int = toInt(input())\n  output(a + b)'))
+    const out = execFileSync(python as string, ["-c", code], { encoding: "utf8", input: "3\n4\n" })
+    expect(out).toBe("7\n")
+  })
+})

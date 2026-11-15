@@ -1,0 +1,13 @@
+function main(): void {
+    let s: string? = null
+    let n: int = s
+    let m: int = null
+    output(s.length)
+    output(1 + toInt())
+    if s != null {
+        s = null
+        output(s.length)
+    }
+    let t: string = "a"
+    output(t == null)
+}

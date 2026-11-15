@@ -2,8 +2,9 @@ import type { Reporter } from "../reporter"
 import type { Expr } from "../syntax/ast"
 import type { Range } from "../syntax/tokens"
 import type { ClassInfo, Scope, Symbol } from "./scope"
-import { PLANNED_BUILTINS } from "./scope"
-import { EMPTY_ARRAY, elementType, isArray, isAssignable, isClassType, isNumeric, typeLabel } from "./types"
+import { BUILTIN_FUNCTIONS } from "./scope"
+import { union, whenFalse, whenTrue } from "./narrowing"
+import { EMPTY_ARRAY, NULL_TYPE, elementType, isArray, isAssignable, isClassType, isNullable, isNumeric, nonNull, typeLabel } from "./types"
 import type { Type } from "./types"
 
 type Node<K extends Expr["kind"]> = Extract<Expr, { kind: K }>
@@ -36,13 +37,21 @@ export class ExprChecker {
     return type
   }
 
+  /** null かもしれない値は、このまま使えない（K0330）。使えるなら型をそのまま返す。 */
+  nonNullType(expr: Expr, type: Type): Type {
+    if (!isNullable(type)) return type
+    this.reporter.report("K0330", expr.range, { type })
+    return this.fail(expr)
+  }
+
   /**
    * 値を expected の型の場所に入れられるか調べ、だめなら K0301 を出す。
    * 配列リテラルは要素ごとに調べるので、[1, 2] を float[] に入れられる。
    */
   checkAssignable(expr: Expr, scope: Scope, expected: Type): Type {
-    if (expected !== "error" && expr.kind === "array" && isArray(expected)) {
-      const element = elementType(expected)
+    const target = nonNull(expected)
+    if (expected !== "error" && expr.kind === "array" && isArray(target)) {
+      const element = elementType(target)
       const results = expr.elements.map((e) => this.checkAssignable(e, scope, element))
       const type = results.includes("error") ? "error" : expected
       this.types.set(expr, type)
@@ -53,15 +62,16 @@ export class ExprChecker {
       this.reporter.report("K0301", expr.range, { expected, actual: typeLabel(actual) })
       return this.fail(expr)
     }
-    if (expected === "float" && actual === "int") this.widened.add(expr)
+    if (target === "float" && actual === "int") this.widened.add(expr)
     return actual
   }
 
   /** 画面に出せる値の型（配列は出せない）。output・toString・補間で使う。 */
   displayType(expr: Expr, scope: Scope): Type {
     const type = this.valueType(expr, scope)
-    if (!isArray(type) && !isClassType(type)) return type
-    this.reporter.report("K0313", expr.range, { what: isArray(type) ? "配列" : "オブジェクト" })
+    const base = nonNull(type)
+    if (!isArray(base) && !isClassType(base)) return type
+    this.reporter.report("K0313", expr.range, { what: isArray(base) ? "配列" : "オブジェクト" })
     return this.fail(expr)
   }
 
@@ -86,6 +96,8 @@ export class ExprChecker {
         return "string"
       case "bool":
         return "boolean"
+      case "null":
+        return NULL_TYPE
       case "template":
         for (const part of expr.parts) {
           if (part.kind === "expr") this.displayType(part.expr, scope)
@@ -98,14 +110,7 @@ export class ExprChecker {
       case "unary":
         return this.unaryType(expr, scope)
       case "binary":
-        return this.combine(
-          expr.op,
-          this.valueType(expr.left, scope),
-          this.valueType(expr.right, scope),
-          expr.left,
-          expr.right,
-          expr.range,
-        )
+        return this.binaryType(expr, scope)
       case "array":
         return this.arrayType(expr, scope)
       case "index":
@@ -119,6 +124,15 @@ export class ExprChecker {
       case "call":
         return this.callType(expr, scope)
     }
+  }
+
+  private binaryType(expr: Node<"binary">, scope: Scope): Type {
+    const left = this.valueType(expr.left, scope)
+    // x != null and ... の右側では x は null でない（or なら x == null or ... の右側）
+    const known = expr.op === "and" ? whenTrue(expr.left) : expr.op === "or" ? whenFalse(expr.left) : new Set<string>()
+    const rightScope = known.size === 0 ? scope : { ...scope, narrowed: union(scope.narrowed ?? new Set(), known) }
+    const right = this.valueType(expr.right, rightScope)
+    return this.combine(expr.op, left, right, expr.left, expr.right, expr.range)
   }
 
   private selfType(expr: Expr, scope: Scope): Type {
@@ -168,7 +182,7 @@ export class ExprChecker {
 
   private identType(name: string, expr: Expr, scope: Scope): Type {
     const local = scope.locals.get(name)
-    if (local !== undefined) return local.type
+    if (local !== undefined) return scope.narrowed?.has(name) === true ? nonNull(local.type) : local.type
     const global = scope.globals.get(name)
     if (global?.kind === "variable") {
       if (scope.visibleBefore !== undefined && global.order >= scope.visibleBefore) {
@@ -194,7 +208,7 @@ export class ExprChecker {
   }
 
   private unaryType(expr: Node<"unary">, scope: Scope): Type {
-    const operand = this.valueType(expr.operand, scope)
+    const operand = this.nonNullType(expr.operand, this.valueType(expr.operand, scope))
     if (operand === "error") return "error"
     const ok = expr.op === "not" ? operand === "boolean" : isNumeric(operand)
     if (ok) return operand
@@ -205,6 +219,11 @@ export class ExprChecker {
   /** 二項演算（複合代入の展開後も含む）の型。使えない組み合わせなら診断を出して "error"。 */
   combine(op: string, left: Type, right: Type, leftExpr: Expr, rightExpr: Expr, range: Range): Type {
     if (left === "error" || right === "error") return "error"
+    if (op !== "==" && op !== "!=") {
+      const l = this.nonNullType(leftExpr, left)
+      const r = this.nonNullType(rightExpr, right)
+      if (l === "error" || r === "error") return "error"
+    }
     const result = binaryResult(op, left, right)
     if (result !== undefined) return result
     if (op === "+" && (left === "string") !== (right === "string")) {
@@ -221,11 +240,14 @@ export class ExprChecker {
   private arrayType(expr: Node<"array">, scope: Scope): Type {
     const types = expr.elements.map((element) => this.valueType(element, scope))
     if (types.includes("error")) return "error"
-    const [first] = types
-    if (first === undefined) return EMPTY_ARRAY
+    // null が混ざっていれば、要素の型は T? にする
+    const hasNull = types.includes(NULL_TYPE)
+    const values = types.filter((type) => type !== NULL_TYPE)
+    const [first] = values
+    if (first === undefined) return types.length === 0 ? EMPTY_ARRAY : `${NULL_TYPE}[]`
     // int と float が混ざっていれば float の配列にする
     let common: Type = first
-    for (const [i, type] of types.entries()) {
+    for (const [i, type] of values.entries()) {
       if (type === common) continue
       if (isNumeric(type) && isNumeric(common)) {
         common = "float"
@@ -234,11 +256,11 @@ export class ExprChecker {
       this.reporter.report("K0301", expr.elements[i]?.range ?? expr.range, { expected: common, actual: type })
       return "error"
     }
-    return `${common}[]`
+    return `${common}${hasNull && !isNullable(common) ? "?" : ""}[]`
   }
 
   private indexType(expr: Node<"index">, scope: Scope): Type {
-    const base = this.valueType(expr.target, scope)
+    const base = this.nonNullType(expr.target, this.valueType(expr.target, scope))
     this.checkIndex(expr.index, scope)
     if (base === "error") return "error"
     if (base === "string") return "string"
@@ -249,7 +271,7 @@ export class ExprChecker {
 
   /** 添字は int で、負の数のリテラルは書けない。位置の引数（removeAt）でも使う。 */
   checkIndex(index: Expr, scope: Scope, what = "添字"): void {
-    const type = this.valueType(index, scope)
+    const type = this.nonNullType(index, this.valueType(index, scope))
     if (type !== "error" && type !== "int") {
       this.reporter.report("K0306", index.range, { what, expected: "int", actual: type })
     } else if (index.kind === "unary" && index.op === "-" && index.operand.kind === "int") {
@@ -259,7 +281,7 @@ export class ExprChecker {
 
   /** .length（メソッドの呼び出しは callType が扱う）。 */
   private memberType(expr: Node<"member">, scope: Scope): Type {
-    const base = this.valueType(expr.object, scope)
+    const base = this.nonNullType(expr.object, this.valueType(expr.object, scope))
     if (base === "error") return "error"
     if (expr.name === "length" && (base === "string" || isArray(base))) return "int"
     const info = this.classOf(base, scope)
@@ -301,10 +323,7 @@ export class ExprChecker {
       return "error"
     }
     if (name === "output" || name === "toString") return this.builtinCall(name, expr, scope)
-    if (PLANNED_BUILTINS.has(name)) {
-      this.reporter.report("K0002", callee.range, { text: `${name}()` })
-      return "error"
-    }
+    if (BUILTIN_FUNCTIONS.has(name)) return this.convertCall(name, expr, scope)
     if (global?.kind === "function") return this.userCall(name, expr, global, scope)
     if (global?.kind === "class") {
       expr.args.forEach((arg) => this.valueType(arg, scope, true))
@@ -362,9 +381,28 @@ export class ExprChecker {
     return method.returnType
   }
 
+  /** input / toInt / toFloat / div / random。 */
+  private convertCall(name: string, expr: Node<"call">, scope: Scope): Type {
+    const spec = FIXED_BUILTINS[name]
+    if (spec === undefined) return "error"
+    const actual = expr.args.map((arg) => this.nonNullType(arg, this.valueType(arg, scope)))
+    if (expr.args.length !== spec.accepts.length) {
+      this.reporter.report("K0305", expr.range, { name, expected: String(spec.accepts.length), actual: String(expr.args.length) })
+      return spec.returns
+    }
+    spec.accepts.forEach((types, i) => {
+      const type = actual[i] ?? "error"
+      const arg = expr.args[i]
+      if (type !== "error" && arg !== undefined && !types.includes(type)) {
+        this.reporter.report("K0301", arg.range, { expected: types.join(" か "), actual: typeLabel(type) })
+      }
+    })
+    return spec.returns
+  }
+
   /** a.push(x) と a.removeAt(i)。 */
   private methodCall(expr: Node<"call">, callee: Node<"member">, scope: Scope): Type {
-    const base = this.valueType(callee.object, scope)
+    const base = this.nonNullType(callee.object, this.valueType(callee.object, scope))
     if (base === "error") {
       expr.args.forEach((arg) => this.valueType(arg, scope, true))
       return "error"
@@ -392,7 +430,16 @@ export class ExprChecker {
 }
 
 function isBuiltin(name: string): boolean {
-  return name === "output" || name === "toString" || PLANNED_BUILTINS.has(name)
+  return BUILTIN_FUNCTIONS.has(name)
+}
+
+/** 引数が決まっている組み込み関数。accepts は各引数で受け付ける型（どれか 1 つ）。 */
+const FIXED_BUILTINS: Readonly<Record<string, { accepts: readonly (readonly Type[])[]; returns: Type }>> = {
+  input: { accepts: [], returns: "string" },
+  toInt: { accepts: [["string", "float", "int"]], returns: "int" },
+  toFloat: { accepts: [["string", "int", "float"]], returns: "float" },
+  div: { accepts: [["int"], ["int"]], returns: "int" },
+  random: { accepts: [["int"], ["int"]], returns: "int" },
 }
 
 function calleeName(expr: Expr): string {
@@ -406,10 +453,20 @@ function binaryResult(op: string, left: Type, right: Type): Type | undefined {
   const bothNumeric = isNumeric(left) && isNumeric(right)
   const widest: Type = left === "float" || right === "float" ? "float" : "int"
   if (op === "and" || op === "or") return left === "boolean" && right === "boolean" ? "boolean" : undefined
-  if (op === "==" || op === "!=") return bothNumeric || left === right ? "boolean" : undefined
+  if (op === "==" || op === "!=") return equalityResult(left, right)
   if (ORDERING.has(op)) return bothNumeric || (left === "string" && right === "string") ? "boolean" : undefined
   if (op === "+") return left === "string" && right === "string" ? "string" : bothNumeric ? widest : undefined
   if (op === "/") return bothNumeric ? "float" : undefined
   if (ARITHMETIC.has(op)) return bothNumeric ? widest : undefined
   return undefined
+}
+
+/** == と != の結果。null とは T? の値としか比べられない。T? と T は T どうしとして比べる。 */
+function equalityResult(left: Type, right: Type): Type | undefined {
+  if (left === NULL_TYPE || right === NULL_TYPE) {
+    const other = left === NULL_TYPE ? right : left
+    return other === NULL_TYPE || isNullable(other) ? "boolean" : undefined
+  }
+  const [l, r] = [nonNull(left), nonNull(right)]
+  return (isNumeric(l) && isNumeric(r)) || l === r ? "boolean" : undefined
 }

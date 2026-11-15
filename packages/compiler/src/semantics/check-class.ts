@@ -5,6 +5,7 @@ import { checkCallable } from "./check-function"
 import { resolveType } from "./check-stmt"
 import type { FunctionContext } from "./check-stmt"
 import type { ClassInfo, Scope, Symbol } from "./scope"
+import { isNullable } from "./types"
 import type { Type } from "./types"
 
 type Globals = ReadonlyMap<string, Symbol>
@@ -97,7 +98,9 @@ function checkFieldsAssigned(
 ): void {
   for (const member of decl.members) {
     if (member.kind !== "field" || !accepted.has(member) || member.init !== undefined) continue
-    if (info.fields.get(member.name)?.type === "error") continue
+    const type = info.fields.get(member.name)?.type
+    // T? のフィールドは、初期値がなければ null になる
+    if (type === "error" || (type !== undefined && isNullable(type))) continue
     if (constructor === undefined || !definitelyAssigns(constructor.body, member.name)) {
       reporter.report("K0405", member.nameRange, { name: member.name })
     }

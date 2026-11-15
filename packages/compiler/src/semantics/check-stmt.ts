@@ -2,8 +2,9 @@ import type { Reporter } from "../reporter"
 import type { AssignStmt, Expr, Stmt } from "../syntax/ast"
 import type { Range } from "../syntax/tokens"
 import type { ExprChecker } from "./check-expr"
+import { assignedNames, union, whenFalse, whenTrue, without } from "./narrowing"
 import type { ClassInfo, Local, Scope, Symbol } from "./scope"
-import { VALUE_TYPE_NAMES, elementType, isArray, isAssignable, isClassType, typeLabel } from "./types"
+import { VALUE_TYPE_NAMES, elementType, isArray, isAssignable, isClassType, nonNull, typeLabel } from "./types"
 import type { Type } from "./types"
 
 type Locals = ReadonlyMap<string, Local>
@@ -31,7 +32,7 @@ export function resolveType(
   allowVoid: boolean,
   globals: ReadonlyMap<string, Symbol>,
 ): Type {
-  const base = name.replace(/(\[\])+$/, "")
+  const base = name.replace(/(\[\]|\?)+$/, "")
   if (VALUE_TYPE_NAMES.has(base) || (allowVoid && name === "void")) return name as Type
   const symbol = globals.get(base)
   if (symbol?.kind === "class") {
@@ -44,19 +45,39 @@ export function resolveType(
 }
 
 /** ブロックの中の文を順に調べる。ブロックの中の変数は、ブロックの外へ出ると見えなくなる。 */
-export function checkBlock(stmts: readonly Stmt[], outer: Locals, loopDepth: number, ctx: FunctionContext): void {
+export function checkBlock(
+  stmts: readonly Stmt[],
+  outer: Locals,
+  loopDepth: number,
+  ctx: FunctionContext,
+  outerNarrowed: ReadonlySet<string> = new Set(),
+): void {
   let locals = outer
+  let narrowed = outerNarrowed
   for (const stmt of stmts) {
-    locals = checkStatement(stmt, locals, loopDepth, ctx)
+    locals = checkStatement(stmt, locals, loopDepth, ctx, narrowed)
+    // 代入された変数は、その後は null かもしれない値に戻る
+    narrowed = without(narrowed, assignedNames([stmt]))
   }
 }
 
-function scopeOf(locals: Locals, ctx: FunctionContext): Scope {
-  return { globals: ctx.globals, locals, visibleBefore: undefined, cls: ctx.cls }
+function scopeOf(locals: Locals, ctx: FunctionContext, narrowed: ReadonlySet<string>): Scope {
+  return { globals: ctx.globals, locals, visibleBefore: undefined, cls: ctx.cls, narrowed }
 }
 
-function checkStatement(stmt: Stmt, locals: Locals, loopDepth: number, ctx: FunctionContext): Locals {
-  const scope = scopeOf(locals, ctx)
+/** ループの本体では、本体の中で代入される変数の絞り込みを外す（2 周目には null かもしれないため）。 */
+function loopNarrowing(narrowed: ReadonlySet<string>, body: readonly Stmt[]): ReadonlySet<string> {
+  return without(narrowed, assignedNames(body))
+}
+
+function checkStatement(
+  stmt: Stmt,
+  locals: Locals,
+  loopDepth: number,
+  ctx: FunctionContext,
+  narrowed: ReadonlySet<string>,
+): Locals {
+  const scope = scopeOf(locals, ctx, narrowed)
   switch (stmt.kind) {
     case "var":
       return checkVar(stmt, locals, scope, ctx)
@@ -70,28 +91,34 @@ function checkStatement(stmt: Stmt, locals: Locals, loopDepth: number, ctx: Func
     case "if":
       for (const branch of stmt.branches) {
         checkCondition(branch.condition, "条件", "boolean", scope, ctx)
-        checkBlock(branch.body, locals, loopDepth, ctx)
+        checkBlock(branch.body, locals, loopDepth, ctx, union(narrowed, whenTrue(branch.condition)))
       }
-      if (stmt.otherwise !== undefined) checkBlock(stmt.otherwise, locals, loopDepth, ctx)
+      if (stmt.otherwise !== undefined) {
+        // if x == null { ... } else { ... } の else の中だけ（elseif があるときは絞り込まない）
+        const [only] = stmt.branches
+        const known = stmt.branches.length === 1 && only !== undefined ? whenFalse(only.condition) : new Set<string>()
+        checkBlock(stmt.otherwise, locals, loopDepth, ctx, union(narrowed, known))
+      }
       return locals
     case "while":
       checkCondition(stmt.condition, "条件", "boolean", scope, ctx)
-      checkBlock(stmt.body, locals, loopDepth + 1, ctx)
+      // while x != null { ... } の本体では、毎回条件を確かめ直すので x は null でない
+      checkBlock(stmt.body, locals, loopDepth + 1, ctx, union(loopNarrowing(narrowed, stmt.body), whenTrue(stmt.condition)))
       return locals
     case "repeat": {
       checkCondition(stmt.count, "repeat の回数", "int", scope, ctx)
       const inner = declare(stmt.name, "int", "loop", stmt.nameRange, locals, ctx)
-      checkBlock(stmt.body, inner, loopDepth + 1, ctx)
+      checkBlock(stmt.body, inner, loopDepth + 1, ctx, loopNarrowing(narrowed, stmt.body))
       return locals
     }
     case "foreach": {
-      const iterable = ctx.exprs.valueType(stmt.iterable, scope)
+      const iterable = ctx.exprs.nonNullType(stmt.iterable, ctx.exprs.valueType(stmt.iterable, scope))
       if (iterable !== "error" && !isArray(iterable)) {
         ctx.reporter.report("K0306", stmt.iterable.range, { what: "foreach の対象", expected: "配列", actual: iterable })
       }
       const element = isArray(iterable) ? elementType(iterable) : "error"
       const inner = declare(stmt.name, element, "loop", stmt.nameRange, locals, ctx)
-      checkBlock(stmt.body, inner, loopDepth + 1, ctx)
+      checkBlock(stmt.body, inner, loopDepth + 1, ctx, loopNarrowing(narrowed, stmt.body))
       return locals
     }
     case "return":
@@ -125,7 +152,7 @@ export function declare(name: string, type: Type, kind: Local["kind"], range: Ra
 }
 
 function checkCondition(expr: Expr, what: string, expected: Type, scope: Scope, ctx: FunctionContext): void {
-  const actual = ctx.exprs.valueType(expr, scope)
+  const actual = ctx.exprs.nonNullType(expr, ctx.exprs.valueType(expr, scope))
   if (actual !== "error" && actual !== expected) {
     ctx.reporter.report("K0306", expr.range, { what, expected, actual })
   }
@@ -188,7 +215,9 @@ function checkAssign(stmt: AssignStmt, scope: Scope, ctx: FunctionContext): void
   }
   const value = ctx.exprs.valueType(stmt.value, scope)
   if (target === "error" || value === "error") return
-  const result = ctx.exprs.combine(stmt.op.slice(0, -1), target, value, stmt.target, stmt.value, stmt.range)
+  const known = stmt.target.kind === "ident" && scope.narrowed?.has(stmt.target.name) === true
+  const left = known ? nonNull(target) : target
+  const result = ctx.exprs.combine(stmt.op.slice(0, -1), left, value, stmt.target, stmt.value, stmt.range)
   if (result !== "error" && !isAssignable(target, result)) {
     ctx.reporter.report("K0301", stmt.value.range, { expected: target, actual: typeLabel(result) })
   }

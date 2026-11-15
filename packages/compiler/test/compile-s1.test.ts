@@ -152,7 +152,6 @@ describe("compile (S1): 型・名前の診断", () => {
 
   it("まだ使えない機能は K0001 / K0002", () => {
     expect(codesOf(main("  class"))).toEqual(["K0001"])
-    expect(codesOf(main("  let a: int = null"))).toEqual(["K0002"])
   })
 })
 

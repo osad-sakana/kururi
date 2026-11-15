@@ -10,6 +10,7 @@ export interface PythonOutput {
 
 /** Kururi の型の名前を Python の型注釈にする（int[] → list[int]）。 */
 function pyType(name: string): string {
+  if (name.endsWith("?")) return `${pyType(name.slice(0, -1))} | None`
   if (name.endsWith("[]")) return `list[${pyType(name.slice(0, -2))}]`
   return PYTHON_TYPES[name] ?? name
 }
@@ -27,6 +28,18 @@ interface Line {
   /** 元の Kururi のソースの位置（行の対応づけ用）。 */
   readonly offset?: number
 }
+
+/** boolean と T? を true / false / null と表示するための補助関数。使うときだけ出力する。 */
+const SHOW_HELPER: readonly string[] = [
+  "def __kururi_show(value: object) -> str:",
+  "    if value is None:",
+  '        return "null"',
+  "    if value is True:",
+  '        return "true"',
+  "    if value is False:",
+  '        return "false"',
+  "    return str(value)",
+]
 
 /** 型検査を通ったプログラムを Python にする。 */
 export function emitPython(
@@ -55,6 +68,10 @@ export function emitPython(
   if (program.items.some((item) => item.kind === "function" && item.name === "main")) {
     blocks.push([{ text: 'if __name__ == "__main__":' }, { text: "    main()" }])
   }
+
+  const body = blocks.flat().map((line) => line.text).join("\n")
+  if (body.includes("random.randint(")) blocks[0]?.push({ text: "import random" })
+  if (body.includes("__kururi_show(")) blocks.splice(1, 0, SHOW_HELPER.map((text) => ({ text })))
 
   const lines: Line[] = []
   blocks.forEach((block, index) => {
@@ -157,9 +174,12 @@ type WriteTable = ReadonlyMap<FunctionDecl | ConstructorDecl, readonly string[]>
 
 /** クラスを class にする。フィールドの初期値は __init__ の先頭に出す。 */
 function emitClass(decl: ClassDecl, info: TypeInfo, writes: WriteTable): Line[] {
-  const fields = decl.members.filter((m): m is FieldDecl => m.kind === "field" && m.init !== undefined)
+  // 初期値のある T? でないフィールドと、初期値のない T? のフィールド（None になる）
+  const fields = decl.members.filter(
+    (m): m is FieldDecl => m.kind === "field" && (m.init !== undefined || m.type.name.endsWith("?")),
+  )
   const initLines: Line[] = fields.map((f) => ({
-    text: `        self.${f.name} = ${f.init === undefined ? "" : emitExpr(f.init, info)}`,
+    text: `        self.${f.name} = ${f.init === undefined ? "None" : emitExpr(f.init, info)}`,
     offset: f.range.start,
   }))
   const constructor = decl.members.find((m): m is ConstructorDecl => m.kind === "constructor")

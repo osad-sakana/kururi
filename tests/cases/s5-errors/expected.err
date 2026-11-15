@@ -1,0 +1,47 @@
+error[K0301]: string? の値を int には入れられません
+ --> input.kururi:3:18
+  |
+3 |     let n: int = s
+  |                  ^ この値は string? です
+  |
+help: null かもしれない値は、if x != null { ... } の中なら使えます
+
+error[K0301]: null の値を int には入れられません
+ --> input.kururi:4:18
+  |
+4 |     let m: int = null
+  |                  ^^^^ この値は null です
+  |
+help: null を入れたいときは、型の後ろに ? を付けてください（例: int?）
+
+error[K0330]: string? の値は null かもしれないので、このまま使えません
+ --> input.kururi:5:12
+  |
+5 |     output(s.length)
+  |            ^ null かもしれません
+  |
+help: if x != null { ... } の中なら使えます。いったん変数に入れてから確かめてください
+
+error[K0305]: toInt には引数が 1 個必要ですが、0 個書かれています
+ --> input.kururi:6:16
+  |
+6 |     output(1 + toInt())
+  |                ^^^^^^^ 引数は 1 個です
+
+error[K0330]: string? の値は null かもしれないので、このまま使えません
+ --> input.kururi:9:16
+  |
+9 |         output(s.length)
+  |                ^ null かもしれません
+  |
+help: if x != null { ... } の中なら使えます。いったん変数に入れてから確かめてください
+
+error[K0303]: string と null には「==」を使えません
+  --> input.kururi:12:12
+   |
+12 |     output(t == null)
+   |            ^^^^^^^^^ 「==」が使えません
+   |
+help: 比べられるのは、数値どうしか、同じ型どうしです
+
+エラー 6 件

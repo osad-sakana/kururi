@@ -1,0 +1,17 @@
+error[K0301]: string? の値を string? には入れられません
+  --> input.kururi:22:26
+   |
+22 |     let found: string? = findFirstLong([name, "ab", "abcdef"])
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ この値は string? です
+   |
+help: null かもしれない値は、if x != null { ... } の中なら使えます
+
+error[K0301]: Node? の値を Node? には入れられません
+  --> input.kururi:37:15
+   |
+37 |         cur = cur.next
+   |               ^^^^^^^^ この値は Node? です
+   |
+help: null かもしれない値は、if x != null { ... } の中なら使えます
+
+エラー 2 件
