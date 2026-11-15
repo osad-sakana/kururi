@@ -10,7 +10,14 @@ button:disabled { cursor: not-allowed; }
 main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: 0; }
 section { min-width: 0; min-height: 0; }
 section + section { border-left: 1px solid #8884; }
-#editor, #python { height: 100%; }
+#editor { height: 100%; }
+.right { display: grid; grid-template-rows: 1fr auto; }
+#python { min-height: 0; }
+#console { display: flex; flex-direction: column; gap: 0.4rem; padding: 0.5rem 1rem; border-top: 1px solid #8884; height: 11rem; }
+#console label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; }
+#stdin { font: 13px ui-monospace, monospace; resize: none; }
+#output { flex: 1; margin: 0; overflow: auto; font: 13px ui-monospace, monospace; white-space: pre-wrap; }
+#output .error { color: #d33; }
 @media (max-width: 700px) {
   main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
   section + section { border-left: 0; border-top: 1px solid #8884; }

@@ -3,6 +3,8 @@ import "monaco-editor/esm/vs/basic-languages/python/python.contribution"
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker"
 import { analyze, debounce, narapyUrl } from "./analyze"
 import { LANGUAGE_ID, monarchDefinition } from "./language"
+import { mapRuntimeError } from "./runtime"
+import { createRunner } from "./runner"
 import { SAMPLE } from "./sample"
 import "./style.css"
 
@@ -59,11 +61,61 @@ const pythonView = monaco.editor.create(element("python"), {
 
 const status = element("status")
 const openButton = element<HTMLButtonElement>("open-narapy")
+const runButton = element<HTMLButtonElement>("run")
+const stopButton = element<HTMLButtonElement>("stop")
+const stdinBox = element<HTMLTextAreaElement>("stdin")
+const output = element("output")
 let currentUrl: string | null = null
+let currentAnalysis = analyze("")
+
+function appendOutput(text: string, className?: string): void {
+  const line = document.createElement("div")
+  line.textContent = text
+  if (className !== undefined) line.className = className
+  output.append(line)
+  output.scrollTop = output.scrollHeight
+}
+
+function markRuntimeError(line: number | null): void {
+  const model = editor.getModel()
+  if (model === null) return
+  const markers =
+    line === null
+      ? []
+      : [{ startLineNumber: line, startColumn: 1, endLineNumber: line, endColumn: model.getLineMaxColumn(line), message: "ここで実行時エラーが起きました", severity: monaco.MarkerSeverity.Warning, source: "実行" }]
+  monaco.editor.setModelMarkers(model, "kururi-runtime", markers)
+}
+
+const runner = createRunner({
+  onOutput: (text) => appendOutput(text),
+  onStatus: (text) => {
+    status.textContent = text
+  },
+  onError: (traceback) => {
+    const error = mapRuntimeError(traceback, currentAnalysis.lineMap)
+    markRuntimeError(error.kururiLine)
+    const where = error.kururiLine === null ? "" : `（Kururi の ${error.kururiLine} 行目）`
+    appendOutput(`実行時エラー${where}: ${error.summary}`, "error")
+  },
+  onFinish: () => {
+    runButton.disabled = currentAnalysis.errorCount > 0 || currentAnalysis.python === ""
+    stopButton.hidden = true
+  },
+})
+
+runButton.addEventListener("click", () => {
+  output.replaceChildren()
+  markRuntimeError(null)
+  runButton.disabled = true
+  stopButton.hidden = false
+  runner.run(currentAnalysis.python, stdinBox.value)
+})
+stopButton.addEventListener("click", () => runner.stop())
 
 function render(): void {
   const source = editor.getValue()
   const analysis = analyze(source)
+  currentAnalysis = analysis
   const model = editor.getModel()
   if (model !== null) {
     monaco.editor.setModelMarkers(
@@ -88,6 +140,7 @@ function render(): void {
   }
   status.classList.toggle("error", analysis.errorCount > 0)
   openButton.disabled = currentUrl === null
+  if (stopButton.hidden) runButton.disabled = analysis.errorCount > 0 || analysis.python === ""
   saveSource(source)
 }
 

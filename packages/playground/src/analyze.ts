@@ -1,5 +1,5 @@
-import { compile } from "@kururi/compiler"
-import type { Diagnostic, Position } from "@kururi/compiler"
+import { compile, diagnosticText, toEditorRange } from "@kururi/compiler"
+import type { Diagnostic, LineMapping } from "@kururi/compiler"
 import { buildProjectUrl, projectFiles } from "@kururi/narapy"
 
 /** Monaco の setModelMarkers に渡す形（行・列は 1 始まり、end は含まない）。 */
@@ -15,35 +15,19 @@ export interface EditorMarker {
 
 export interface Analysis {
   readonly python: string
+  readonly lineMap: readonly LineMapping[]
   readonly markers: readonly EditorMarker[]
   readonly errorCount: number
 }
 
-/** 診断の列は文字（コードポイント）単位。エディタは UTF-16 単位なので、その行の中で数え直す。 */
-function utf16Column(lines: readonly string[], position: Position): number {
-  const line = lines[position.line - 1] ?? ""
-  let units = 0
-  let points = 0
-  for (const char of line) {
-    if (points >= position.column - 1) break
-    units += char.length
-    points += 1
-  }
-  return units + 1
-}
-
 function toMarker(diagnostic: Diagnostic, lines: readonly string[]): EditorMarker {
-  const { start, end } = diagnostic.span
-  const startColumn = utf16Column(lines, start)
-  const endColumn = utf16Column(lines, end)
-  const message = [diagnostic.message, diagnostic.hint].filter((part) => part !== undefined && part !== "").join("\n")
+  const range = toEditorRange(diagnostic, lines)
   return {
-    startLineNumber: start.line,
-    startColumn,
-    endLineNumber: end.line,
-    // 幅のない範囲は、1 文字ぶん下線を引いて見えるようにする
-    endColumn: end.line === start.line && endColumn <= startColumn ? startColumn + 1 : endColumn,
-    message,
+    startLineNumber: range.startLine,
+    startColumn: range.startColumn,
+    endLineNumber: range.endLine,
+    endColumn: range.endColumn,
+    message: diagnosticText(diagnostic),
     severity: diagnostic.severity,
     code: diagnostic.code,
   }
@@ -51,10 +35,10 @@ function toMarker(diagnostic: Diagnostic, lines: readonly string[]): EditorMarke
 
 /** ソースを変換し、エディタに出す印と Python をまとめて返す。 */
 export function analyze(source: string): Analysis {
-  const { python, diagnostics } = compile(source)
+  const { python, diagnostics, lineMap } = compile(source)
   const lines = source.split("\n")
   const markers = diagnostics.map((diagnostic) => toMarker(diagnostic, lines))
-  return { python, markers, errorCount: diagnostics.filter((d) => d.severity === "error").length }
+  return { python, lineMap, markers, errorCount: diagnostics.filter((d) => d.severity === "error").length }
 }
 
 /** narapy で開く URL。エラーがあるときや内容が空のときは null。長すぎるときは例外。 */

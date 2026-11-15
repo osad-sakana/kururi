@@ -27,6 +27,8 @@
     "packages/narapy/src",
     "packages/narapy/test",
     "packages/playground/test",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "packages/lsp/src",
+    "packages/lsp/test"
   ]
 }
