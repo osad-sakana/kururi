@@ -264,9 +264,12 @@ export const DIAGNOSTIC_CATALOG = {
   K0313: {
     code: "K0313",
     severity: "error",
-    message: () => "配列はそのまま表示できません",
-    label: () => "配列です",
-    hint: () => "foreach で 1 つずつ output してください（例: foreach x in xs { output(x) }）",
+    message: ({ what = "配列" }) => `${what}はそのまま表示できません`,
+    label: ({ what = "配列" }) => `${what}です`,
+    hint: ({ what = "配列" }) =>
+      what === "配列"
+        ? "foreach で 1 つずつ output してください（例: foreach x in xs { output(x) }）"
+        : "表示したいフィールドを取り出して、output してください（例: output(p.name)）",
   },
   K0314: {
     code: "K0314",
@@ -294,7 +297,7 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: ({ type = "", name = "" }) => `${type} には「${name}」がありません`,
     label: () => "使えません",
-    hint: () => "配列で使えるのは length、push(x)、removeAt(i) です。文字列で使えるのは length だけです",
+    hint: ({ hint }) => hint ?? "配列で使えるのは length、push(x)、removeAt(i) です。文字列で使えるのは length だけです",
   },
   K0319: {
     code: "K0319",
@@ -331,6 +334,42 @@ export const DIAGNOSTIC_CATALOG = {
     label: () => "ここでは呼べません",
     hint: () => "初期値に使えるのは、リテラル・演算・const・組み込み関数だけです。main の中で計算してください",
   },
+  K0401: {
+    code: "K0401",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」は private なので、クラスの外からは使えません`,
+    label: () => "private です",
+    hint: () => "public を付けるか、public なメソッド経由で使ってください",
+  },
+  K0403: {
+    code: "K0403",
+    severity: "error",
+    message: ({ name = "" }) => `クラス「${name}」は、定義より前の行では使えません`,
+    label: () => "まだ定義されていません",
+    hint: ({ name = "" }) => `class ${name} を、使う場所より前に移してください`,
+  },
+  K0404: {
+    code: "K0404",
+    severity: "error",
+    message: () => "self はクラスの中でしか使えません",
+    label: () => "クラスの外です",
+    hint: () => "self は、クラスの constructor やメソッドの中で、そのオブジェクト自身を指します",
+  },
+  K0405: {
+    code: "K0405",
+    severity: "error",
+    message: ({ name = "" }) => `フィールド「${name}」に初期値がなく、constructor でも必ず代入されるわけではありません`,
+    label: () => "値が入らないことがあります",
+    hint: ({ name = "" }) =>
+      `初期値を付ける（${name}: int = 0）か、constructor の中で self.${name} = ... と代入してください`,
+  },
+  K0408: {
+    code: "K0408",
+    severity: "error",
+    message: () => "constructor に public / private は付けられません",
+    label: () => "不要です",
+    hint: () => "constructor は常に外から呼べます。public / private を消してください",
+  },
   K0307: {
     code: "K0307",
     severity: "error",
@@ -347,8 +386,9 @@ export const DIAGNOSTIC_CATALOG = {
   K0309: {
     code: "K0309",
     severity: "error",
-    message: ({ name = "" }) => `「${name}」は関数です。値としては使えません`,
-    hint: ({ name = "" }) => `呼び出すときは ${name}(...) と書きます`,
+    message: ({ name = "", what = "関数" }) => `「${name}」は${what}です。値としては使えません`,
+    hint: ({ name = "", what = "関数" }) =>
+      what === "関数" ? `呼び出すときは ${name}(...) と書きます` : `オブジェクトを作るときは new ${name}(...) と書きます`,
   },
   K0501: {
     code: "K0501",

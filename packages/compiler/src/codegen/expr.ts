@@ -1,4 +1,5 @@
 import type { Expr } from "../syntax/ast"
+import { isArray } from "../semantics/types"
 import type { Type } from "../semantics/types"
 
 /** 型検査の結果のうち、Python の生成に要るもの。 */
@@ -44,7 +45,11 @@ function emitRaw(expr: Expr, info: TypeInfo): string {
     case "index":
       return `${emitExpr(expr.target, info)}[${emitExpr(expr.index, info)}]`
     case "member":
-      return `len(${emitExpr(expr.object, info)})`
+      return isLength(expr, info) ? `len(${emitExpr(expr.object, info)})` : `${emitExpr(expr.object, info)}.${expr.name}`
+    case "self":
+      return "self"
+    case "new":
+      return `${expr.className}(${expr.args.map((a) => emitExpr(a, info)).join(", ")})`
     case "call":
       return emitCall(expr, info)
   }
@@ -56,8 +61,18 @@ function emitShown(expr: Expr, info: TypeInfo): string {
   return info.types.get(expr) === "boolean" ? showBoolean(code) : code
 }
 
+/** 配列・文字列の .length か（クラスのフィールド名が length のときは違う）。 */
+function isLength(expr: Extract<Expr, { kind: "member" }>, info: TypeInfo): boolean {
+  const type = info.types.get(expr.object)
+  return expr.name === "length" && type !== undefined && (type === "string" || isArray(type))
+}
+
 function emitMethodCall(expr: Extract<Expr, { kind: "call" }>, callee: Extract<Expr, { kind: "member" }>, info: TypeInfo): string {
   const object = emitExpr(callee.object, info)
+  const objectType = info.types.get(callee.object)
+  if (objectType === undefined || !isArray(objectType)) {
+    return `${object}.${callee.name}(${expr.args.map((a) => emitExpr(a, info)).join(", ")})`
+  }
   const [arg] = expr.args
   if (arg === undefined) return ""
   if (callee.name === "removeAt") return `${object}.pop(${emitExpr(arg, info)})`

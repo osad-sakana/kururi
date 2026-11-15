@@ -145,3 +145,26 @@ describe.skipIf(python === undefined)("E2E: 関数", () => {
     expect(out).toBe("25\n2\n")
   })
 })
+
+describe.skipIf(python === undefined)("E2E: クラス", () => {
+  it("PLAN のクラスの例", () => {
+    const out = run(
+      `class Player {\n  name: string\n  public age: int = 20\n  private nickname: string = "none"\n  constructor(name: string) {\n    self.name = name\n  }\n  public function run(): void {\n    self.draw()\n    self.age += 1\n  }\n  public function show(): string {\n    return \`\${self.name} (\${self.age}) \${self.nickname}\`\n  }\n  function draw(): void {\n    output("draw")\n  }\n}\n${main('  let pl: Player = new Player("taro")\n  pl.run()\n  output(pl.show())')}`,
+    )
+    expect(out).toBe("draw\ntaro (21) none\n")
+  })
+
+  it("配列のフィールドはインスタンスごとに別になる", () => {
+    const out = run(
+      `class Bag {\n  items: int[] = []\n  public function add(v: int): void {\n    self.items.push(v)\n  }\n  public function size(): int {\n    return self.items.length\n  }\n}\n${main("  let a: Bag = new Bag()\n  let b: Bag = new Bag()\n  a.add(1)\n  a.add(2)\n  b.add(9)\n  output(a.size())\n  output(b.size())")}`,
+    )
+    expect(out).toBe("2\n1\n")
+  })
+
+  it("クラスのリストと再帰的な型", () => {
+    const out = run(
+      `class Counter {\n  public n: int = 0\n  public function inc(): Counter {\n    self.n += 1\n    return self\n  }\n}\n${main("  let cs: Counter[] = [new Counter(), new Counter()]\n  foreach c in cs {\n    c.inc().inc()\n  }\n  output(cs[0].n + cs[1].n)")}`,
+    )
+    expect(out).toBe("4\n")
+  })
+})

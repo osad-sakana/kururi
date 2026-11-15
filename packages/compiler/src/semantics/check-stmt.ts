@@ -2,8 +2,8 @@ import type { Reporter } from "../reporter"
 import type { AssignStmt, Expr, Stmt } from "../syntax/ast"
 import type { Range } from "../syntax/tokens"
 import type { ExprChecker } from "./check-expr"
-import type { Local, Scope, Symbol } from "./scope"
-import { VALUE_TYPE_NAMES, elementType, isArray, isAssignable, typeLabel } from "./types"
+import type { ClassInfo, Local, Scope, Symbol } from "./scope"
+import { VALUE_TYPE_NAMES, elementType, isArray, isAssignable, isClassType, typeLabel } from "./types"
 import type { Type } from "./types"
 
 type Locals = ReadonlyMap<string, Local>
@@ -11,6 +11,8 @@ type Locals = ReadonlyMap<string, Local>
 /** 1 つの関数をチェックしているあいだ共有する状態。 */
 export interface FunctionContext {
   readonly globals: ReadonlyMap<string, Symbol>
+  /** 今チェックしているクラス */
+  readonly cls: ClassInfo | undefined
   readonly exprs: ExprChecker
   readonly reporter: Reporter
   /** この関数の戻り値の型 */
@@ -21,10 +23,22 @@ export interface FunctionContext {
   readonly globalWrites: Set<string>
 }
 
-export function resolveType(name: string, range: Range, reporter: Reporter, allowVoid: boolean): Type {
+/** 型の名前を型にする。クラスは、定義より前の行では使えない（本体の中は使える）。 */
+export function resolveType(
+  name: string,
+  range: Range,
+  reporter: Reporter,
+  allowVoid: boolean,
+  globals: ReadonlyMap<string, Symbol>,
+): Type {
   const base = name.replace(/(\[\])+$/, "")
-  const isVoid = allowVoid && name === "void"
-  if (VALUE_TYPE_NAMES.has(base) || isVoid) return name as Type
+  if (VALUE_TYPE_NAMES.has(base) || (allowVoid && name === "void")) return name as Type
+  const symbol = globals.get(base)
+  if (symbol?.kind === "class") {
+    if (range.start >= symbol.info.start) return name as Type
+    reporter.report("K0403", range, { name: base })
+    return "error"
+  }
   reporter.report("K0208", range, { name: base })
   return "error"
 }
@@ -38,7 +52,7 @@ export function checkBlock(stmts: readonly Stmt[], outer: Locals, loopDepth: num
 }
 
 function scopeOf(locals: Locals, ctx: FunctionContext): Scope {
-  return { globals: ctx.globals, locals, visibleBefore: undefined }
+  return { globals: ctx.globals, locals, visibleBefore: undefined, cls: ctx.cls }
 }
 
 function checkStatement(stmt: Stmt, locals: Locals, loopDepth: number, ctx: FunctionContext): Locals {
@@ -91,7 +105,7 @@ function checkStatement(stmt: Stmt, locals: Locals, loopDepth: number, ctx: Func
 }
 
 function checkVar(stmt: Extract<Stmt, { kind: "var" }>, locals: Locals, scope: Scope, ctx: FunctionContext): Locals {
-  const declared = resolveType(stmt.type.name, stmt.type.range, ctx.reporter, false)
+  const declared = resolveType(stmt.type.name, stmt.type.range, ctx.reporter, false, ctx.globals)
   ctx.exprs.checkAssignable(stmt.init, scope, declared)
   return declare(stmt.name, declared, stmt.mutable ? "let" : "const", stmt.nameRange, locals, ctx)
 }
@@ -120,6 +134,7 @@ function checkCondition(expr: Expr, what: string, expected: Type, scope: Scope, 
 /** 代入先の型。代入できない先なら診断を出して "error"。 */
 function targetType(target: Expr, scope: Scope, ctx: FunctionContext): Type {
   if (target.kind === "index") return elementTargetType(target, scope, ctx)
+  if (target.kind === "member") return fieldTargetType(target, scope, ctx)
   if (target.kind !== "ident") return "error"
   const name = target.name
   const local = scope.locals.get(name)
@@ -147,6 +162,18 @@ function elementTargetType(target: Extract<Expr, { kind: "index" }>, scope: Scop
   const base = ctx.exprs.valueType(target.target, scope)
   if (base === "string") {
     ctx.reporter.report("K0316", target.range)
+    return "error"
+  }
+  if (base === "error") return "error"
+  return ctx.exprs.typeOf(target, scope)
+}
+
+/** obj.field への代入。クラスのフィールドだけが対象で、length などには代入できない。 */
+function fieldTargetType(target: Extract<Expr, { kind: "member" }>, scope: Scope, ctx: FunctionContext): Type {
+  const base = ctx.exprs.valueType(target.object, scope)
+  if (base === "error") return "error"
+  if (!isClassType(base)) {
+    ctx.reporter.report("K0112", target.range)
     return "error"
   }
   return ctx.exprs.typeOf(target, scope)

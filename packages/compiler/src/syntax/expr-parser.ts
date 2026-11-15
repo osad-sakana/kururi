@@ -3,7 +3,7 @@ import type { Cursor } from "./cursor"
 import type { Token } from "./tokens"
 
 const COMPARE_OPS: ReadonlySet<string> = new Set(["==", "!=", "<", "<=", ">", ">="])
-const UNSUPPORTED_PRIMARY: ReadonlySet<string> = new Set(["null", "self", "new"])
+const UNSUPPORTED_PRIMARY: ReadonlySet<string> = new Set(["null"])
 
 /** 式の構文解析（優先順位は Python に準拠）。失敗したら診断を出して undefined を返す。 */
 export function parseExpr(c: Cursor): Expr | undefined {
@@ -136,7 +136,8 @@ function parseArray(c: Cursor): Expr | undefined {
   return { kind: "array", elements, range: { start: open.range.start, end: close.range.end } }
 }
 
-function parseCall(c: Cursor, callee: Expr): Expr | undefined {
+/** ( の次から ) までの引数を読む。 */
+function parseArgs(c: Cursor): { args: readonly Expr[]; end: number } | undefined {
   c.next()
   const args: Expr[] = []
   if (!c.isOp(")")) {
@@ -149,8 +150,36 @@ function parseCall(c: Cursor, callee: Expr): Expr | undefined {
     }
   }
   const close = c.expectOp(")")
-  if (close === undefined) return undefined
-  return { kind: "call", callee, args, range: { start: callee.range.start, end: close.range.end } }
+  return close === undefined ? undefined : { args, end: close.range.end }
+}
+
+function parseCall(c: Cursor, callee: Expr): Expr | undefined {
+  const parsed = parseArgs(c)
+  if (parsed === undefined) return undefined
+  return { kind: "call", callee, args: parsed.args, range: { start: callee.range.start, end: parsed.end } }
+}
+
+function parseNew(c: Cursor): Expr | undefined {
+  const keyword = c.next()
+  const name = c.peek()
+  if (name.kind !== "ident") {
+    c.expected("クラスの名前", "new のあとにクラスの名前を書きます（例: new Player(\"taro\")）")
+    return undefined
+  }
+  c.next()
+  if (!c.isOp("(")) {
+    c.expected("「(」", "new には ( ) が必要です。引数がなくても new Player() と書きます")
+    return undefined
+  }
+  const parsed = parseArgs(c)
+  if (parsed === undefined) return undefined
+  return {
+    kind: "new",
+    className: name.text,
+    classRange: name.range,
+    args: parsed.args,
+    range: { start: keyword.range.start, end: parsed.end },
+  }
 }
 
 function parsePrimary(c: Cursor): Expr | undefined {
@@ -179,6 +208,11 @@ function parseKeywordOrParen(c: Cursor, tok: Token): Expr | undefined {
     c.next()
     return { kind: "bool", value: tok.text === "true", range: tok.range }
   }
+  if (tok.kind === "keyword" && tok.text === "self") {
+    c.next()
+    return { kind: "self", range: tok.range }
+  }
+  if (tok.kind === "keyword" && tok.text === "new") return parseNew(c)
   if (tok.kind === "keyword" && UNSUPPORTED_PRIMARY.has(tok.text)) {
     c.report("K0002", tok.range, { text: tok.text })
     return undefined

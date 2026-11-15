@@ -1,5 +1,5 @@
 import type { LineMapping } from "../compile"
-import type { FunctionDecl, Program, Stmt, VarDecl } from "../syntax/ast"
+import type { ClassDecl, ConstructorDecl, FieldDecl, FunctionDecl, Param, Program, Stmt, VarDecl } from "../syntax/ast"
 import { emitExpr } from "./expr"
 import type { TypeInfo } from "./expr"
 
@@ -32,7 +32,7 @@ interface Line {
 export function emitPython(
   program: Program,
   info: TypeInfo,
-  globalWrites: ReadonlyMap<FunctionDecl, readonly string[]>,
+  globalWrites: WriteTable,
   source: string,
 ): PythonOutput {
   if (program.items.length === 0) return { python: "", lineMap: [] }
@@ -45,6 +45,8 @@ export function emitPython(
       // 続けて並んだトップレベルの変数は、空行を空けずにひとかたまりにする
       if (previousWasVar) blocks[blocks.length - 1]?.push(line)
       else blocks.push([line])
+    } else if (item.kind === "class") {
+      blocks.push(emitClass(item, info, globalWrites))
     } else {
       blocks.push(emitFunction(item, info, globalWrites.get(item) ?? []))
     }
@@ -115,12 +117,78 @@ function emitStatement(stmt: Stmt, info: TypeInfo, indent: number): Line[] {
   }
 }
 
+interface DefSpec {
+  readonly name: string
+  readonly params: readonly Param[]
+  readonly returnType: string
+  readonly body: readonly Stmt[]
+  readonly offset: number
+  readonly indent: number
+  /** メソッドと constructor なら true（最初の引数に self を付ける） */
+  readonly isMethod: boolean
+  /** 本体の先頭に出す行（フィールドの初期値） */
+  readonly prelude?: readonly Line[]
+}
+
+function emitDef(spec: DefSpec, info: TypeInfo, globalWrites: readonly string[]): Line[] {
+  const pad = " ".repeat(spec.indent)
+  const params = [
+    ...(spec.isMethod ? ["self"] : []),
+    ...spec.params.map((p) => `${p.name}: ${pyType(p.type.name)}`),
+  ].join(", ")
+  const header: Line = { text: `${pad}def ${spec.name}(${params}) -> ${spec.returnType}:`, offset: spec.offset }
+  const declaration: Line[] = globalWrites.length === 0 ? [] : [{ text: `${pad}    global ${globalWrites.join(", ")}` }]
+  const body = emitBlock(spec.body, info, spec.indent + 4)
+  const prelude = spec.prelude ?? []
+  // 本体が pass だけで、前置きがあるときは pass を出さない
+  const statements = prelude.length > 0 && spec.body.length === 0 ? [] : body
+  return [header, ...declaration, ...prelude, ...statements]
+}
+
 function emitFunction(fn: FunctionDecl, info: TypeInfo, globalWrites: readonly string[]): Line[] {
-  const params = fn.params.map((p) => `${p.name}: ${pyType(p.type.name)}`).join(", ")
-  const header: Line = { text: `def ${fn.name}(${params}) -> ${pyType(fn.returnType.name)}:`, offset: fn.range.start }
-  const declaration: Line[] = globalWrites.length === 0 ? [] : [{ text: `    global ${globalWrites.join(", ")}` }]
-  const body = emitBlock(fn.body, info, 4)
-  return [header, ...declaration, ...body]
+  return emitDef(
+    { name: fn.name, params: fn.params, returnType: pyType(fn.returnType.name), body: fn.body, offset: fn.range.start, indent: 0, isMethod: false },
+    info,
+    globalWrites,
+  )
+}
+
+type WriteTable = ReadonlyMap<FunctionDecl | ConstructorDecl, readonly string[]>
+
+/** クラスを class にする。フィールドの初期値は __init__ の先頭に出す。 */
+function emitClass(decl: ClassDecl, info: TypeInfo, writes: WriteTable): Line[] {
+  const fields = decl.members.filter((m): m is FieldDecl => m.kind === "field" && m.init !== undefined)
+  const initLines: Line[] = fields.map((f) => ({
+    text: `        self.${f.name} = ${f.init === undefined ? "" : emitExpr(f.init, info)}`,
+    offset: f.range.start,
+  }))
+  const constructor = decl.members.find((m): m is ConstructorDecl => m.kind === "constructor")
+  const parts: Line[][] = []
+  if (constructor !== undefined) {
+    parts.push(
+      emitDef(
+        { name: "__init__", params: constructor.params, returnType: "None", body: constructor.body, offset: constructor.range.start, indent: 4, isMethod: true, prelude: initLines },
+        info,
+        writes.get(constructor) ?? [],
+      ),
+    )
+  } else if (initLines.length > 0) {
+    parts.push([{ text: "    def __init__(self) -> None:" }, ...initLines])
+  }
+  for (const member of decl.members) {
+    if (member.kind !== "method") continue
+    const fn = member.fn
+    parts.push(
+      emitDef(
+        { name: fn.name, params: fn.params, returnType: pyType(fn.returnType.name), body: fn.body, offset: fn.range.start, indent: 4, isMethod: true },
+        info,
+        writes.get(fn) ?? [],
+      ),
+    )
+  }
+  const header: Line = { text: `class ${decl.name}:`, offset: decl.range.start }
+  if (parts.length === 0) return [header, { text: "    pass" }]
+  return [header, ...parts.flatMap((part, i) => (i === 0 ? part : [{ text: "" }, ...part]))]
 }
 
 function lineStarts(source: string): readonly number[] {

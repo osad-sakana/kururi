@@ -28,6 +28,8 @@ export type Expr =
   | { readonly kind: "array"; readonly elements: readonly Expr[]; readonly range: Range }
   | { readonly kind: "index"; readonly target: Expr; readonly index: Expr; readonly range: Range }
   | { readonly kind: "member"; readonly object: Expr; readonly name: string; readonly nameRange: Range; readonly range: Range }
+  | { readonly kind: "self"; readonly range: Range }
+  | { readonly kind: "new"; readonly className: string; readonly classRange: Range; readonly args: readonly Expr[]; readonly range: Range }
   | { readonly kind: "call"; readonly callee: Expr; readonly args: readonly Expr[]; readonly range: Range }
 
 export interface VarDecl {
@@ -123,7 +125,43 @@ export interface FunctionDecl {
   readonly range: Range
 }
 
-export type TopLevel = VarDecl | FunctionDecl
+export type Access = "public" | "private"
+
+export interface FieldDecl {
+  readonly kind: "field"
+  readonly access: Access
+  readonly name: string
+  readonly nameRange: Range
+  readonly type: TypeRef
+  readonly init: Expr | undefined
+  readonly range: Range
+}
+
+export interface MethodDecl {
+  readonly kind: "method"
+  readonly access: Access
+  readonly fn: FunctionDecl
+}
+
+export interface ConstructorDecl {
+  readonly kind: "constructor"
+  readonly keywordRange: Range
+  readonly params: readonly Param[]
+  readonly body: readonly Stmt[]
+  readonly range: Range
+}
+
+export type ClassMember = FieldDecl | MethodDecl | ConstructorDecl
+
+export interface ClassDecl {
+  readonly kind: "class"
+  readonly name: string
+  readonly nameRange: Range
+  readonly members: readonly ClassMember[]
+  readonly range: Range
+}
+
+export type TopLevel = VarDecl | FunctionDecl | ClassDecl
 
 export interface Program {
   readonly items: readonly TopLevel[]

@@ -3,7 +3,7 @@
  * "[]" は、型がまだ決まっていない空の配列リテラル。
  * "error" は、すでに診断を出した式の型（連鎖してエラーを出さないための印）。
  */
-export type Type = "int" | "float" | "string" | "boolean" | "void" | "error" | `${string}[]`
+export type Type = "int" | "float" | "string" | "boolean" | "void" | "error" | `${string}[]` | (string & {})
 
 export const VALUE_TYPE_NAMES: ReadonlySet<string> = new Set(["int", "float", "string", "boolean"])
 export const EMPTY_ARRAY: Type = "[]"
@@ -30,4 +30,11 @@ export function isAssignable(declared: Type, value: Type): boolean {
 /** メッセージに出す型の名前。 */
 export function typeLabel(type: Type): string {
   return type === EMPTY_ARRAY ? "空の配列" : type
+}
+
+const NON_CLASS_TYPES: ReadonlySet<string> = new Set(["int", "float", "string", "boolean", "void", "error"])
+
+/** クラスのオブジェクトの型か（配列と組み込みの型以外）。 */
+export function isClassType(type: Type): boolean {
+  return !isArray(type) && !NON_CLASS_TYPES.has(type)
 }
