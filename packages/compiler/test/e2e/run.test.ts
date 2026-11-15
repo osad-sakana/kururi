@@ -1,4 +1,6 @@
 import { execFileSync } from "node:child_process"
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 import { compile } from "../../src"
 
@@ -65,5 +67,33 @@ describe.skipIf(python === undefined)("E2E: 生成した Python を 3.12 で実�
 
   it("掛け算の連結行（行末演算子で複数行にした式）", () => {
     expect(run(main('  output("a" +\n    "b" +\n    "c")'))).toBe("abc\n")
+  })
+})
+
+describe.skipIf(python === undefined)("E2E: 制御構文", () => {
+  it("example.kururi の掛け算九九", () => {
+    const source = readFileSync(join(__dirname, "../../../../example.kururi"), "utf8")
+    const lines = run(source).split("\n")
+    expect(lines[0]).toBe("掛け算九九の表")
+    expect(lines).toHaveLength(12)
+    expect(lines[2]).toBe(" 1  2  3  4  5  6  7  8  9 ")
+    expect(lines[10]).toBe(" 9 18 27 36 45 54 63 72 81 ")
+  })
+
+  it("repeat は回数を 1 回だけ評価し、continue / break が効く", () => {
+    const out = run(
+      main(
+        "  let n: int = 3\n  repeat i: n {\n    n += 10\n    if i == 1 { continue }\n    output(i)\n  }\n  let k: int = 0\n  while true {\n    k += 1\n    if k > 2 { break }\n  }\n  output(k)",
+      ),
+    )
+    expect(out).toBe("0\n2\n3\n")
+  })
+
+  it("global 宣言でトップレベルの変数を更新できる", () => {
+    expect(run(`let total: int = 0\nfunction main(): void {\n  repeat i: 4 {\n    total += i\n  }\n  output(total)\n}\n`)).toBe("6\n")
+  })
+
+  it("float への代入は float になる", () => {
+    expect(run(main("  let f: float = 1.5\n  let n: int = 4\n  f = n\n  output(f)\n  f /= 8\n  output(f)"))).toBe("4.0\n0.5\n")
   })
 })

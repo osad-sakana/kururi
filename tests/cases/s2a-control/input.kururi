@@ -1,0 +1,16 @@
+let total: int = 0
+
+function main(): void {
+    let n: int = 0
+    while true {
+        n += 1
+        if n % 2 == 0 {
+            continue
+        } elseif n > 7 {
+            break
+        } else {
+            total += n
+        }
+    }
+    output(`合計は ${total}`)
+}

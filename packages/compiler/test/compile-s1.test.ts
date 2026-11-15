@@ -151,8 +151,7 @@ describe("compile (S1): 型・名前の診断", () => {
   })
 
   it("まだ使えない機能は K0001 / K0002", () => {
-    expect(codesOf(main("  if true {\n  }"))).toEqual(["K0001"])
-    expect(codesOf(main("  let a: int = 1\n  a = 2"))).toEqual(["K0002"])
+    expect(codesOf(main("  return"))).toEqual(["K0001"])
     expect(codesOf("function f(): void {\n}\n" + main(""))).toEqual(["K0002"])
     expect(codesOf(main("  let a: int[] = 1"))).toEqual(["K0002"])
     expect(codesOf(main("  let a: int = null"))).toEqual(["K0002"])

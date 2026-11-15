@@ -16,7 +16,7 @@ describe("compile (基本)", () => {
   })
 
   it("まだ対応していない構文は K0001 を最初の文字に付けて返す", () => {
-    const result = compile("function main(): void {\n  if true {\n  }\n}\n")
+    const result = compile("function main(): void {\n  return\n}\n")
     expect(result.diagnostics).toHaveLength(1)
     const [d] = result.diagnostics
     expect(d?.code).toBe("K0001")

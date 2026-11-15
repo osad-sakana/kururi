@@ -1,0 +1,13 @@
+function main(): void {
+    const limit: int = 3
+    let count: int = 0
+    limit = 5
+    repeat i: 3 {
+        i += 1
+        let count: int = 1
+    }
+    while count {
+        break
+    }
+    break
+}

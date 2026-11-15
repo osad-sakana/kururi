@@ -67,6 +67,7 @@ export function lex(source: string): LexResult {
         readNumber(push)
       } else if (matchAt(IDENT_START) !== undefined) {
         readIdent(push)
+        dropNewlineBeforeElse(tokens)
       } else {
         const two = source.slice(pos, pos + 2)
         if (TWO_CHAR_OPS.has(two)) {
@@ -95,6 +96,15 @@ export function lex(source: string): LexResult {
       tokens.push({ kind: "eof", text: "", range: { start: pos, end: pos } })
     }
     return tokens
+  }
+
+  /** } のあとの改行は、次が else / elseif なら捨てる（} else { と書けるように）。 */
+  function dropNewlineBeforeElse(tokens: Token[]): void {
+    const word = tokens[tokens.length - 1]
+    const isElse = word?.kind === "keyword" && (word.text === "else" || word.text === "elseif")
+    if (isElse && tokens[tokens.length - 2]?.kind === "nl" && tokens[tokens.length - 3]?.text === "}") {
+      tokens.splice(tokens.length - 2, 1)
+    }
   }
 
   /** "}" の直前に改行がなければ補う（{ return 1 } のような 1 行のブロックのため）。 */

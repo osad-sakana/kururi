@@ -43,7 +43,51 @@ export interface ExprStmt {
   readonly range: Range
 }
 
-export type Stmt = VarDecl | ExprStmt
+export type AssignOp = "=" | "+=" | "-=" | "*=" | "/=" | "%="
+
+export interface AssignStmt {
+  readonly kind: "assign"
+  readonly op: AssignOp
+  readonly target: Expr
+  readonly value: Expr
+  readonly range: Range
+}
+
+export interface IfBranch {
+  readonly condition: Expr
+  readonly body: readonly Stmt[]
+}
+
+export interface IfStmt {
+  readonly kind: "if"
+  /** if と、続く elseif の分（1 つ以上） */
+  readonly branches: readonly IfBranch[]
+  readonly otherwise: readonly Stmt[] | undefined
+  readonly range: Range
+}
+
+export interface WhileStmt {
+  readonly kind: "while"
+  readonly condition: Expr
+  readonly body: readonly Stmt[]
+  readonly range: Range
+}
+
+export interface RepeatStmt {
+  readonly kind: "repeat"
+  readonly name: string
+  readonly nameRange: Range
+  readonly count: Expr
+  readonly body: readonly Stmt[]
+  readonly range: Range
+}
+
+export interface JumpStmt {
+  readonly kind: "break" | "continue"
+  readonly range: Range
+}
+
+export type Stmt = VarDecl | ExprStmt | AssignStmt | IfStmt | WhileStmt | RepeatStmt | JumpStmt
 
 export interface Param {
   readonly name: string

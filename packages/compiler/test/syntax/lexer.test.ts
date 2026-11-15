@@ -73,6 +73,12 @@ describe("lex: 改行の規則", () => {
     expect(texts("{ }")).toEqual(["{", "}", "NL", "EOF"])
   })
 
+  it("} と else / elseif のあいだの改行は捨てる", () => {
+    expect(texts("}\nelse {")).toEqual(["}", "else", "{", "NL", "EOF"])
+    expect(texts("}\nelseif x {")).toEqual(["}", "elseif", "x", "{", "NL", "EOF"])
+    expect(texts("}\nlet")).toEqual(["}", "NL", "let", "NL", "EOF"])
+  })
+
   it("CRLF も改行として扱う", () => {
     expect(texts("a\r\nb")).toEqual(["a", "NL", "b", "NL", "EOF"])
   })

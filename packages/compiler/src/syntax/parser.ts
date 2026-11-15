@@ -1,6 +1,6 @@
 import type { Diagnostic } from "../diagnostics"
 import { Reporter } from "../reporter"
-import type { Expr, FunctionDecl, Param, Program, Stmt, TopLevel, TypeRef, VarDecl } from "./ast"
+import type { AssignOp, Expr, FunctionDecl, IfBranch, Param, Program, Stmt, TopLevel, TypeRef, VarDecl } from "./ast"
 import { Cursor } from "./cursor"
 import { parseExpr } from "./expr-parser"
 import type { Token } from "./tokens"
@@ -13,8 +13,7 @@ export interface ParseResult {
 const ASSIGN_OPS: ReadonlySet<string> = new Set(["=", "+=", "-=", "*=", "/=", "%="])
 /** 文の先頭に書けるが、まだ対応していないキーワード */
 const UNSUPPORTED_STATEMENTS: ReadonlySet<string> = new Set([
-  "if", "elseif", "else", "while", "repeat", "foreach", "return", "break", "continue",
-  "class", "public", "private", "function", "constructor",
+  "foreach", "return", "class", "public", "private", "function", "constructor",
 ])
 
 export function parse(tokens: readonly Token[], source: string): ParseResult {
@@ -163,36 +162,131 @@ function parseBlock(c: Cursor): { statements: readonly Stmt[]; end: number } | u
 }
 
 function parseStatement(c: Cursor): Stmt | undefined {
-  const tok = c.peek()
-  if (tok.kind === "keyword" && (tok.text === "let" || tok.text === "const")) return parseVarDecl(c)
-  if (tok.kind === "keyword" && tok.text === "for") {
-    c.report("K0503", tok.range)
-    c.recover()
-    return undefined
-  }
-  if (tok.kind === "keyword" && UNSUPPORTED_STATEMENTS.has(tok.text)) {
-    c.report("K0001", tok.range, { text: tok.text })
-    c.recover()
-    return undefined
-  }
-  return parseExprStatement(c)
+  const stmt = parseStatementBody(c)
+  if (stmt === undefined) c.recover()
+  return stmt
 }
 
-function parseExprStatement(c: Cursor): Stmt | undefined {
-  const expr: Expr | undefined = parseExpr(c)
-  if (expr === undefined) {
-    c.recover()
-    return undefined
+/** 失敗したら診断を出して undefined を返す（読み飛ばしは呼び出し側）。 */
+function parseStatementBody(c: Cursor): Stmt | undefined {
+  const tok = c.peek()
+  if (tok.kind !== "keyword") return parseSimpleStatement(c)
+  switch (tok.text) {
+    case "let":
+    case "const":
+      return parseVarDeclBody(c)
+    case "if":
+      return parseIf(c)
+    case "while":
+      return parseWhile(c)
+    case "repeat":
+      return parseRepeat(c)
+    case "break":
+    case "continue":
+      c.next()
+      return c.expectNewline() ? { kind: tok.text, range: tok.range } : undefined
+    case "for":
+      c.report("K0503", tok.range)
+      return undefined
+    case "elseif":
+    case "else":
+      c.expected("文", `${tok.text} は、if のブロックを閉じた直後にだけ書けます`)
+      return undefined
+    default:
+      if (UNSUPPORTED_STATEMENTS.has(tok.text)) c.report("K0001", tok.range, { text: tok.text })
+      else return parseSimpleStatement(c)
+      return undefined
   }
+}
+
+function parseVarDeclBody(c: Cursor): VarDecl | undefined {
+  const keyword = c.next()
+  const nameTok = c.peek()
+  if (!c.checkDeclName(nameTok)) return undefined
+  c.next()
+  return parseVarRest(c, keyword, nameTok)
+}
+
+/** 条件の式。if x = 1 { のように = が来たら、専用のメッセージを出す。 */
+function parseCondition(c: Cursor): Expr | undefined {
+  const expr = parseExpr(c)
+  if (expr === undefined) return undefined
   const next = c.peek()
   if (next.kind === "op" && ASSIGN_OPS.has(next.text)) {
-    c.report("K0002", next.range, { text: next.text })
-    c.recover()
+    c.report("K0111", next.range)
     return undefined
   }
-  if (!c.expectNewline()) {
-    c.recover()
-    return undefined
+  return expr
+}
+
+function parseIf(c: Cursor): Stmt | undefined {
+  const keyword = c.next()
+  const branches: IfBranch[] = []
+  let otherwise: readonly Stmt[] | undefined
+  let end = keyword.range.end
+  for (let first = true; first || c.isKeyword("elseif"); first = false) {
+    if (!first) c.next()
+    const condition = parseCondition(c)
+    const body = condition === undefined ? undefined : parseBlock(c)
+    if (condition === undefined || body === undefined) return undefined
+    branches.push({ condition, body: body.statements })
+    end = body.end
   }
+  if (c.isKeyword("else")) {
+    c.next()
+    const body = parseBlock(c)
+    if (body === undefined) return undefined
+    otherwise = body.statements
+    end = body.end
+  }
+  if (!c.expectNewline()) return undefined
+  return { kind: "if", branches, otherwise, range: { start: keyword.range.start, end } }
+}
+
+function parseWhile(c: Cursor): Stmt | undefined {
+  const keyword = c.next()
+  const condition = parseCondition(c)
+  const body = condition === undefined ? undefined : parseBlock(c)
+  if (condition === undefined || body === undefined) return undefined
+  if (!c.expectNewline()) return undefined
+  return { kind: "while", condition, body: body.statements, range: { start: keyword.range.start, end: body.end } }
+}
+
+function parseRepeat(c: Cursor): Stmt | undefined {
+  const keyword = c.next()
+  const nameTok = c.peek()
+  if (!c.checkDeclName(nameTok)) return undefined
+  c.next()
+  if (c.expectOp(":", "回数を書いてください（例: repeat i: 10 { ... }）") === undefined) return undefined
+  const count = parseExpr(c)
+  const body = count === undefined ? undefined : parseBlock(c)
+  if (count === undefined || body === undefined) return undefined
+  if (!c.expectNewline()) return undefined
+  return {
+    kind: "repeat",
+    name: nameTok.text,
+    nameRange: nameTok.range,
+    count,
+    body: body.statements,
+    range: { start: keyword.range.start, end: body.end },
+  }
+}
+
+/** 式の文、または代入。 */
+function parseSimpleStatement(c: Cursor): Stmt | undefined {
+  const expr = parseExpr(c)
+  if (expr === undefined) return undefined
+  const next = c.peek()
+  if (next.kind === "op" && ASSIGN_OPS.has(next.text)) {
+    if (expr.kind !== "ident") {
+      c.report("K0112", expr.range)
+      return undefined
+    }
+    c.next()
+    const value = parseExpr(c)
+    if (value === undefined || !c.expectNewline()) return undefined
+    return { kind: "assign", op: next.text as AssignOp, target: expr, value, range: { start: expr.range.start, end: value.range.end } }
+  }
+  if (!c.expectNewline()) return undefined
   return { kind: "exprStmt", expr, range: expr.range }
 }

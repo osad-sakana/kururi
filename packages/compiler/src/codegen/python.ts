@@ -1,6 +1,7 @@
 import type { LineMapping } from "../compile"
 import type { FunctionDecl, Program, Stmt, VarDecl } from "../syntax/ast"
-import { emitExpr } from "./expr"
+import type { Type } from "../semantics/types"
+import { emitCoerced, emitExpr } from "./expr"
 import type { TypeTable } from "./expr"
 
 export interface PythonOutput {
@@ -23,7 +24,12 @@ interface Line {
 }
 
 /** 型検査を通ったプログラムを Python にする。 */
-export function emitPython(program: Program, types: TypeTable, source: string): PythonOutput {
+export function emitPython(
+  program: Program,
+  types: TypeTable,
+  globalWrites: ReadonlyMap<FunctionDecl, readonly string[]>,
+  source: string,
+): PythonOutput {
   if (program.items.length === 0) return { python: "", lineMap: [] }
 
   const blocks: Line[][] = [[{ text: "from __future__ import annotations" }]]
@@ -35,7 +41,7 @@ export function emitPython(program: Program, types: TypeTable, source: string): 
       if (previousWasVar) blocks[blocks.length - 1]?.push(line)
       else blocks.push([line])
     } else {
-      blocks.push(emitFunction(item, types))
+      blocks.push(emitFunction(item, types, globalWrites.get(item) ?? []))
     }
     previousWasVar = item.kind === "var"
   }
@@ -56,30 +62,55 @@ export function emitPython(program: Program, types: TypeTable, source: string): 
   return { python: `${lines.map((line) => line.text).join("\n")}\n`, lineMap }
 }
 
-/** int の値を float の場所に入れるとき、Python では自動で float にならないので変換を足す。 */
-function emitInit(decl: VarDecl, types: TypeTable): string {
-  const code = emitExpr(decl.init, types)
-  if (decl.type.name !== "float" || types.get(decl.init) !== "int") return code
-  return decl.init.kind === "int" ? `${code}.0` : `float(${code})`
-}
-
 function emitVar(decl: VarDecl, types: TypeTable, indent: number): Line {
   const type = PYTHON_TYPES[decl.type.name] ?? decl.type.name
-  return {
-    text: `${" ".repeat(indent)}${decl.name}: ${type} = ${emitInit(decl, types)}`,
-    offset: decl.range.start,
+  const init = emitCoerced(decl.init, decl.type.name as Type, types)
+  return { text: `${" ".repeat(indent)}${decl.name}: ${type} = ${init}`, offset: decl.range.start }
+}
+
+function emitBlock(stmts: readonly Stmt[], types: TypeTable, indent: number): Line[] {
+  const lines = stmts.flatMap((stmt) => emitStatement(stmt, types, indent))
+  return lines.length === 0 ? [{ text: `${" ".repeat(indent)}pass` }] : lines
+}
+
+function emitStatement(stmt: Stmt, types: TypeTable, indent: number): Line[] {
+  const pad = " ".repeat(indent)
+  const at = (text: string, offset: number): Line => ({ text: `${pad}${text}`, offset })
+  switch (stmt.kind) {
+    case "var":
+      return [emitVar(stmt, types, indent)]
+    case "exprStmt":
+      return [at(emitExpr(stmt.expr, types), stmt.range.start)]
+    case "assign": {
+      const value = stmt.op === "=" ? emitCoerced(stmt.value, types.get(stmt.target), types) : emitExpr(stmt.value, types)
+      return [at(`${emitExpr(stmt.target, types)} ${stmt.op} ${value}`, stmt.range.start)]
+    }
+    case "if":
+      return [
+        ...stmt.branches.flatMap((branch, i) => [
+          at(`${i === 0 ? "if" : "elif"} ${emitExpr(branch.condition, types)}:`, branch.condition.range.start),
+          ...emitBlock(branch.body, types, indent + 4),
+        ]),
+        ...(stmt.otherwise === undefined ? [] : [{ text: `${pad}else:` }, ...emitBlock(stmt.otherwise, types, indent + 4)]),
+      ]
+    case "while":
+      return [at(`while ${emitExpr(stmt.condition, types)}:`, stmt.range.start), ...emitBlock(stmt.body, types, indent + 4)]
+    case "repeat":
+      return [
+        at(`for ${stmt.name} in range(${emitExpr(stmt.count, types)}):`, stmt.range.start),
+        ...emitBlock(stmt.body, types, indent + 4),
+      ]
+    case "break":
+    case "continue":
+      return [at(stmt.kind, stmt.range.start)]
   }
 }
 
-function emitStatement(stmt: Stmt, types: TypeTable, indent: number): Line {
-  if (stmt.kind === "var") return emitVar(stmt, types, indent)
-  return { text: `${" ".repeat(indent)}${emitExpr(stmt.expr, types)}`, offset: stmt.range.start }
-}
-
-function emitFunction(fn: FunctionDecl, types: TypeTable): Line[] {
+function emitFunction(fn: FunctionDecl, types: TypeTable, globalWrites: readonly string[]): Line[] {
   const header: Line = { text: `def ${fn.name}() -> None:`, offset: fn.range.start }
-  const body = fn.body.map((stmt) => emitStatement(stmt, types, 4))
-  return [header, ...(body.length === 0 ? [{ text: "    pass" }] : body)]
+  const declaration: Line[] = globalWrites.length === 0 ? [] : [{ text: `    global ${globalWrites.join(", ")}` }]
+  const body = emitBlock(fn.body, types, 4)
+  return [header, ...declaration, ...body]
 }
 
 function lineStarts(source: string): readonly number[] {

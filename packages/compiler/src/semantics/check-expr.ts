@@ -1,5 +1,6 @@
 import type { Reporter } from "../reporter"
 import type { Expr } from "../syntax/ast"
+import type { Range } from "../syntax/tokens"
 import type { Scope } from "./scope"
 import { PLANNED_BUILTINS } from "./scope"
 import { isNumeric } from "./types"
@@ -59,7 +60,7 @@ export class ExprChecker {
 
   private identType(name: string, expr: Expr, scope: Scope): Type {
     const local = scope.locals.get(name)
-    if (local !== undefined) return local
+    if (local !== undefined) return local.type
     const global = scope.globals.get(name)
     if (global?.kind === "variable") {
       if (scope.visibleBefore !== undefined && global.order >= scope.visibleBefore) {
@@ -92,17 +93,22 @@ export class ExprChecker {
   private binaryType(expr: Extract<Expr, { kind: "binary" }>, scope: Scope): Type {
     const left = this.valueType(expr.left, scope)
     const right = this.valueType(expr.right, scope)
+    return this.combine(expr.op, left, right, expr.left, expr.right, expr.range)
+  }
+
+  /** 二項演算（複合代入の展開後も含む）の型。使えない組み合わせなら診断を出して "error"。 */
+  combine(op: string, left: Type, right: Type, leftExpr: Expr, rightExpr: Expr, range: Range): Type {
     if (left === "error" || right === "error") return "error"
-    const result = binaryResult(expr.op, left, right)
+    const result = binaryResult(op, left, right)
     if (result !== undefined) return result
-    if (expr.op === "+" && (left === "string") !== (right === "string")) {
-      const [number, numberType] = left === "string" ? [expr.right, right] : [expr.left, left]
+    if (op === "+" && (left === "string") !== (right === "string")) {
+      const [number, numberType] = left === "string" ? [rightExpr, right] : [leftExpr, left]
       if (isNumeric(numberType)) {
         this.reporter.report("K0302", number.range, { actual: numberType })
         return "error"
       }
     }
-    this.reporter.report("K0303", expr.range, { op: expr.op, left, right })
+    this.reporter.report("K0303", range, { op, left, right })
     return "error"
   }
 

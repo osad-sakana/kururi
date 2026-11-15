@@ -33,6 +33,13 @@ export function emitExpr(expr: Expr, types: TypeTable): string {
   }
 }
 
+/** 値を target の型の場所に入れるコード。int を float に入れるときは、Python では自動で変わらないので変換する。 */
+export function emitCoerced(expr: Expr, target: Type | undefined, types: TypeTable): string {
+  const code = emitExpr(expr, types)
+  if (target !== "float" || types.get(expr) !== "int") return code
+  return expr.kind === "int" ? `${code}.0` : `float(${code})`
+}
+
 /** 文字列として表示するときの Python コード（括弧なし）。 */
 function emitShown(expr: Expr, types: TypeTable): string {
   const code = emitExpr(expr, types)

@@ -110,6 +110,20 @@ export const DIAGNOSTIC_CATALOG = {
     label: () => "ここで比較が続いています",
     hint: () => "a < b and b < c のように、and でつないで書いてください",
   },
+  K0111: {
+    code: "K0111",
+    severity: "error",
+    message: () => "条件の中に = は書けません",
+    label: () => "= は代入です",
+    hint: () => "比べるときは == と書きます（例: if x == 1）",
+  },
+  K0112: {
+    code: "K0112",
+    severity: "error",
+    message: () => "代入できるのは変数だけです",
+    label: () => "ここには代入できません",
+    hint: () => "左側には変数の名前を書いてください（例: x = 1）。比べるときは == です",
+  },
   K0110: {
     code: "K0110",
     severity: "error",
@@ -156,6 +170,33 @@ export const DIAGNOSTIC_CATALOG = {
     message: ({ name = "" }) => `「${name}」は let の変数なので、トップレベルの初期値には使えません`,
     label: () => "let の変数です",
     hint: () => "トップレベルの初期値に使えるのは、const で宣言した変数だけです。const にするか、main の中で使ってください",
+  },
+  K0210: {
+    code: "K0210",
+    severity: "error",
+    message: ({ name = "" }) => `${name} はループ（while か repeat）の中でしか使えません`,
+    label: () => "ループの外です",
+  },
+  K0211: {
+    code: "K0211",
+    severity: "error",
+    message: ({ name = "", other = "" }) => `「${name}」は別の場所で ${other} として宣言されています`,
+    label: ({ actual = "" }) => `ここでは ${actual} です`,
+    hint: () => "同じ名前を使うなら、同じ型にしてください。別の名前にしてもかまいません",
+  },
+  K0212: {
+    code: "K0212",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」は const なので、代入し直せません`,
+    label: () => "ここで代入しています",
+    hint: ({ name = "" }) => `値を変えたいときは、宣言を let ${name} に変えてください`,
+  },
+  K0213: {
+    code: "K0213",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」は repeat が数える変数なので、代入できません`,
+    label: () => "ここで代入しています",
+    hint: () => "別の変数に入れて使ってください。条件で回したいときは while を使います",
   },
   K0207: {
     code: "K0207",
@@ -208,6 +249,14 @@ export const DIAGNOSTIC_CATALOG = {
     message: ({ name = "", expected = "", actual = "" }) =>
       `${name} には引数が ${expected} 個必要ですが、${actual} 個書かれています`,
     label: ({ expected = "" }) => `引数は ${expected} 個です`,
+  },
+  K0306: {
+    code: "K0306",
+    severity: "error",
+    message: ({ what = "", expected = "", actual = "" }) => `${what}には ${expected} が必要ですが、${actual} です`,
+    label: ({ actual = "" }) => `この値は ${actual} です`,
+    hint: ({ what = "" }) =>
+      what === "条件" ? "比べるときは == や < を使います（例: if x == 1）" : "整数になる式を書いてください",
   },
   K0307: {
     code: "K0307",
