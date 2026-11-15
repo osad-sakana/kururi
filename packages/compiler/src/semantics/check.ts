@@ -50,7 +50,7 @@ function registerTopLevel(program: Program, reporter: Reporter): ReadonlyMap<str
     globals.set(
       item.name,
       item.kind === "var"
-        ? { kind: "variable", type: resolveType(item.type, reporter, false), order }
+        ? { kind: "variable", type: resolveType(item.type, reporter, false), order, mutable: item.mutable }
         : { kind: "function", name: item.name },
     )
   })

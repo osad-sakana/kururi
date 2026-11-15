@@ -150,6 +150,13 @@ export const DIAGNOSTIC_CATALOG = {
     label: () => "ここで main を呼んでいます",
     hint: () => "main はプログラムの入り口で、自動で呼ばれます",
   },
+  K0206: {
+    code: "K0206",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」は let の変数なので、トップレベルの初期値には使えません`,
+    label: () => "let の変数です",
+    hint: () => "トップレベルの初期値に使えるのは、const で宣言した変数だけです。const にするか、main の中で使ってください",
+  },
   K0207: {
     code: "K0207",
     severity: "error",

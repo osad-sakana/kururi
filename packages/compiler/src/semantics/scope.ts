@@ -1,7 +1,7 @@
 import type { Type } from "./types"
 
 export type Symbol =
-  | { readonly kind: "variable"; readonly type: Type; readonly order: number }
+  | { readonly kind: "variable"; readonly type: Type; readonly order: number; readonly mutable: boolean }
   | { readonly kind: "function"; readonly name: string }
 
 /** 名前の表。トップレベルの名前と、今チェックしている関数のローカル変数を持つ。 */

@@ -66,6 +66,10 @@ export class ExprChecker {
         this.reporter.report("K0203", expr.range, { name })
         return "error"
       }
+      if (scope.visibleBefore !== undefined && global.mutable) {
+        this.reporter.report("K0206", expr.range, { name })
+        return "error"
+      }
       return global.type
     }
     if (global?.kind === "function" || isBuiltin(name)) {

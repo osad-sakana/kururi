@@ -134,6 +134,11 @@ describe("compile (S1): 型・名前の診断", () => {
     expect(codesOf(`let a: int = b\nlet b: int = 1\n${main("")}`)).toEqual(["K0203"])
   })
 
+  it("トップレベルの初期値で let の変数を使うと K0206、const は使える", () => {
+    expect(codesOf(`let a: int = 1\nlet b: int = a\n${main("")}`)).toEqual(["K0206"])
+    expect(codesOf(`const a: int = 1\nlet b: int = a + 1\n${main("")}`)).toEqual([])
+  })
+
   it("main がない・形が違う・呼んだ場合", () => {
     expect(codesOf("let a: int = 1\n")).toEqual(["K0204"])
     expect(codesOf(main("  main()"))).toEqual(["K0205"])
