@@ -10,11 +10,11 @@ const pyOf = (source: string): string => {
 }
 
 describe("compile (S5): T? と null の生成", () => {
-  it("T? の型注釈は T | None になる", () => {
+  it("T? の変数は None で始まる（型ヒントは出さない）", () => {
     const py = pyOf(main('  let a: string? = null\n  let b: int?[] = [1, null]\n  let c: string[]? = null\n  a = "x"'))
-    expect(py).toContain("a: str | None = None")
-    expect(py).toContain("b: list[int | None] = [1, None]")
-    expect(py).toContain("c: list[str] | None = None")
+    expect(py).toContain("a = None")
+    expect(py).toContain("b = [1, None]")
+    expect(py).toContain("c = None")
     expect(py).toContain('a = "x"')
   })
 
@@ -26,7 +26,7 @@ describe("compile (S5): T? と null の生成", () => {
 
   it("T? と boolean の表示には補助関数を使い、必要なときだけ出す", () => {
     const py = pyOf(main("  let a: int? = null\n  output(a)\n  output(toString(a))\n  output(`${a}`)"))
-    expect(py).toContain("def __kururi_show(value: object) -> str:")
+    expect(py).toContain("def __kururi_show(value):")
     expect(py).toContain("print(__kururi_show(a))")
     expect(compile(main('  output("x")')).python).not.toContain("__kururi_show")
   })
@@ -44,10 +44,10 @@ describe("compile (S5): T? と null の生成", () => {
 describe("compile (S5): 組み込み関数", () => {
   it("input / toInt / toFloat / div / random", () => {
     const py = pyOf(main('  let s: string = input()\n  let n: int = toInt(s)\n  let f: float = toFloat("1.5")\n  output(div(n, 2) * 3)\n  output(div(n + 1, 2 + n))\n  output(random(1, 6))\n  output(toInt(2.5))'))
-    expect(py).toContain("from __future__ import annotations\nimport random\n")
-    expect(py).toContain("s: str = input()")
-    expect(py).toContain("n: int = int(s)")
-    expect(py).toContain('f: float = float("1.5")')
+    expect(py).toContain("import random\n")
+    expect(py).toContain("s = input()")
+    expect(py).toContain("n = int(s)")
+    expect(py).toContain('f = float("1.5")')
     expect(py).toContain("print((n // 2) * 3)")
     expect(py).toContain("print(((n + 1) // (2 + n)))")
     expect(py).toContain("print(random.randint(1, 6))")

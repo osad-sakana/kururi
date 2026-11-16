@@ -40,7 +40,7 @@ describe("compile (S2a): 生成", () => {
 
   it("関数の中で書き換えるトップレベルの let に global を付ける", () => {
     const { python } = compile(`let count: int = 0\nlet other: int = 1\nfunction main(): void {\n  count += 1\n  output(other)\n}\n`)
-    expect(python).toContain("def main() -> None:\n    global count\n    count += 1")
+    expect(python).toContain("def main():\n    global count\n    count += 1")
     expect(python).not.toContain("global count, other")
   })
 

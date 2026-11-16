@@ -1,17 +1,14 @@
-from __future__ import annotations
+calls = 0
 
 
-calls: int = 0
-
-
-def main() -> None:
+def main():
     print(fact(5))
     print(average([80, 65, 91]))
     print(sign(-3))
     print(calls)
 
 
-def fact(n: int) -> int:
+def fact(n):
     global calls
     calls += 1
     if n <= 1:
@@ -19,14 +16,14 @@ def fact(n: int) -> int:
     return n * fact(n - 1)
 
 
-def average(scores: list[int]) -> float:
-    sum: int = 0
+def average(scores):
+    sum = 0
     for s in scores:
         sum += s
     return sum / len(scores)
 
 
-def sign(n: int) -> int:
+def sign(n):
     if n < 0:
         return -1
     elif n == 0:

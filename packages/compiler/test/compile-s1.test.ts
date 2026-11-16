@@ -13,10 +13,7 @@ describe("compile (S1): 生成", () => {
     expect(diagnostics).toEqual([])
     expect(python).toBe(
       [
-        "from __future__ import annotations",
-        "",
-        "",
-        "def main() -> None:",
+        "def main():",
         '    print("hello")',
         "",
         "",
@@ -33,26 +30,26 @@ describe("compile (S1): 生成", () => {
 
   it("let と const は型注釈つきの代入になる", () => {
     const { python } = compile(main("  let a: int = 1\n  const b: float = 2\n  let c: boolean = true"))
-    expect(python).toContain("    a: int = 1")
-    expect(python).toContain("    b: float = 2.0")
-    expect(python).toContain("    c: bool = True")
+    expect(python).toContain("    a = 1")
+    expect(python).toContain("    b = 2.0")
+    expect(python).toContain("    c = True")
   })
 
   it("int を float に入れるときは float に変換する", () => {
     const { python } = compile(main("  let a: int = 1\n  let b: float = a + 1\n  let c: float = 1.5"))
-    expect(python).toContain("b: float = float(a + 1)")
-    expect(python).toContain("c: float = 1.5")
+    expect(python).toContain("b = float(a + 1)")
+    expect(python).toContain("c = 1.5")
   })
 
   it("トップレベルの変数を出力する", () => {
     const { python } = compile(`const rate: float = 0.5\n${main("  output(toString(rate))")}`)
-    expect(python).toContain("rate: float = 0.5\n\n\ndef main()")
+    expect(python).toContain("rate = 0.5\n\n\ndef main()")
     expect(python).toContain("print(str(rate))")
   })
 
   it("括弧と演算子の順序を保つ", () => {
     const { python } = compile(main("  let a: int = (1 + 2) * 3 - -4 % 5"))
-    expect(python).toContain("a: int = (1 + 2) * 3 - -4 % 5")
+    expect(python).toContain("a = (1 + 2) * 3 - -4 % 5")
   })
 
   it("boolean は true / false と表示する", () => {
@@ -73,9 +70,9 @@ describe("compile (S1): 生成", () => {
   it("行の対応表を作る", () => {
     const { lineMap } = compile(main('  output("a")\n  output("b")'))
     expect(lineMap).toEqual([
-      { kururiLine: 1, pythonLine: 4 },
-      { kururiLine: 2, pythonLine: 5 },
-      { kururiLine: 3, pythonLine: 6 },
+      { kururiLine: 1, pythonLine: 1 },
+      { kururiLine: 2, pythonLine: 2 },
+      { kururiLine: 3, pythonLine: 3 },
     ])
   })
 })

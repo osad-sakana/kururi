@@ -31,17 +31,17 @@ describe("compile (S4): 生成", () => {
     const { python, diagnostics } = compile(withMain(PLAYER, '  let p: Player = new Player("taro")\n  p.run()\n  output(p.getName())\n  output(p.age)'))
     expect(diagnostics).toEqual([])
     expect(python).toContain(
-      "class Player:\n    def __init__(self, name: str) -> None:\n        self.age = 20\n        self.score = 0\n        self.name = name\n",
+      "class Player:\n    def __init__(self, name):\n        self.age = 20\n        self.score = 0\n        self.name = name\n",
     )
-    expect(python).toContain("    def run(self) -> None:\n        self.draw()\n        self.score += 1")
-    expect(python).toContain('p: Player = Player("taro")')
+    expect(python).toContain("    def run(self):\n        self.draw()\n        self.score += 1")
+    expect(python).toContain('p = Player("taro")')
     expect(python).toContain("p.run()")
     expect(python).toContain("print(p.getName())")
   })
 
   it("constructor がなければ、初期値だけの __init__ を作る", () => {
     const { python } = compile(withMain("class Box {\n  items: int[] = []\n  public function size(): int {\n    return self.items.length\n  }\n}", "  let b: Box = new Box()\n  output(b.size())"))
-    expect(python).toContain("class Box:\n    def __init__(self) -> None:\n        self.items = []\n")
+    expect(python).toContain("class Box:\n    def __init__(self):\n        self.items = []\n")
     expect(python).toContain("return len(self.items)")
   })
 
@@ -61,7 +61,7 @@ describe("compile (S4): 生成", () => {
   it("float のフィールド・引数に int を渡すと変換する", () => {
     const { python } = compile(withMain("class P {\n  public x: float = 0\n  constructor(x: float) {\n    self.x = x\n  }\n}", "  let p: P = new P(1)"))
     expect(python).toContain("self.x = 0.0")
-    expect(python).toContain("p: P = P(1.0)")
+    expect(python).toContain("p = P(1.0)")
   })
 
   it("クラスの自分自身の名前は本体の中で使える", () => {
@@ -70,7 +70,7 @@ describe("compile (S4): 生成", () => {
 
   it("メソッドも関数と同様に global を付ける", () => {
     const { python } = compile(withMain("let n: int = 0\nclass C {\n  public function bump(): void {\n    n += 1\n  }\n}"))
-    expect(python).toContain("def bump(self) -> None:\n        global n\n        n += 1")
+    expect(python).toContain("def bump(self):\n        global n\n        n += 1")
   })
 })
 

@@ -1,30 +1,27 @@
-from __future__ import annotations
-
-
 class Player:
-    def __init__(self, name: str) -> None:
+    def __init__(self, name):
         self.age = 20
         self.nickname = "none"
         self.items = []
         self.name = name
 
-    def run(self) -> None:
+    def run(self):
         self.draw()
         self.update()
 
-    def describe(self) -> str:
+    def describe(self):
         return f"{self.name}（{self.age}歳）"
 
-    def draw(self) -> None:
+    def draw(self):
         print("draw")
 
-    def update(self) -> None:
+    def update(self):
         self.age += 1
         self.items.append(self.nickname)
 
 
-def main() -> None:
-    pl: Player = Player("taro")
+def main():
+    pl = Player("taro")
     pl.run()
     print(pl.describe())
     print(pl.age)

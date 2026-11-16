@@ -1,7 +1,4 @@
-from __future__ import annotations
-
-
-def main() -> None:
+def main():
     print("こんにちは、Kururi")
 
 

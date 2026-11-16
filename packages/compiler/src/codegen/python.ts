@@ -8,21 +8,6 @@ export interface PythonOutput {
   readonly lineMap: readonly LineMapping[]
 }
 
-/** Kururi の型の名前を Python の型注釈にする（int[] → list[int]）。 */
-function pyType(name: string): string {
-  if (name.endsWith("?")) return `${pyType(name.slice(0, -1))} | None`
-  if (name.endsWith("[]")) return `list[${pyType(name.slice(0, -2))}]`
-  return PYTHON_TYPES[name] ?? name
-}
-
-const PYTHON_TYPES: Readonly<Record<string, string>> = {
-  int: "int",
-  float: "float",
-  string: "str",
-  boolean: "bool",
-  void: "None",
-}
-
 interface Line {
   readonly text: string
   /** 元の Kururi のソースの位置（行の対応づけ用）。 */
@@ -31,7 +16,7 @@ interface Line {
 
 /** boolean と T? を true / false / null と表示するための補助関数。使うときだけ出力する。 */
 const SHOW_HELPER: readonly string[] = [
-  "def __kururi_show(value: object) -> str:",
+  "def __kururi_show(value):",
   "    if value is None:",
   '        return "null"',
   "    if value is True:",
@@ -50,7 +35,7 @@ export function emitPython(
 ): PythonOutput {
   if (program.items.length === 0) return { python: "", lineMap: [] }
 
-  const blocks: Line[][] = [[{ text: "from __future__ import annotations" }]]
+  const blocks: Line[][] = []
   let previousWasVar = false
   for (const item of program.items) {
     if (item.kind === "var") {
@@ -70,8 +55,10 @@ export function emitPython(
   }
 
   const body = blocks.flat().map((line) => line.text).join("\n")
-  if (body.includes("random.randint(")) blocks[0]?.push({ text: "import random" })
-  if (body.includes("__kururi_show(")) blocks.splice(1, 0, SHOW_HELPER.map((text) => ({ text })))
+  const preamble: Line[][] = []
+  if (body.includes("random.randint(")) preamble.push([{ text: "import random" }])
+  if (body.includes("__kururi_show(")) preamble.push(SHOW_HELPER.map((text) => ({ text })))
+  blocks.unshift(...preamble)
 
   const lines: Line[] = []
   blocks.forEach((block, index) => {
@@ -87,9 +74,8 @@ export function emitPython(
 }
 
 function emitVar(decl: VarDecl, info: TypeInfo, indent: number): Line {
-  const type = pyType(decl.type.name)
   const init = emitExpr(decl.init, info)
-  return { text: `${" ".repeat(indent)}${decl.name}: ${type} = ${init}`, offset: decl.range.start }
+  return { text: `${" ".repeat(indent)}${decl.name} = ${init}`, offset: decl.range.start }
 }
 
 function emitBlock(stmts: readonly Stmt[], info: TypeInfo, indent: number): Line[] {
@@ -137,7 +123,6 @@ function emitStatement(stmt: Stmt, info: TypeInfo, indent: number): Line[] {
 interface DefSpec {
   readonly name: string
   readonly params: readonly Param[]
-  readonly returnType: string
   readonly body: readonly Stmt[]
   readonly offset: number
   readonly indent: number
@@ -151,9 +136,9 @@ function emitDef(spec: DefSpec, info: TypeInfo, globalWrites: readonly string[])
   const pad = " ".repeat(spec.indent)
   const params = [
     ...(spec.isMethod ? ["self"] : []),
-    ...spec.params.map((p) => `${p.name}: ${pyType(p.type.name)}`),
+    ...spec.params.map((p) => p.name),
   ].join(", ")
-  const header: Line = { text: `${pad}def ${spec.name}(${params}) -> ${spec.returnType}:`, offset: spec.offset }
+  const header: Line = { text: `${pad}def ${spec.name}(${params}):`, offset: spec.offset }
   const declaration: Line[] = globalWrites.length === 0 ? [] : [{ text: `${pad}    global ${globalWrites.join(", ")}` }]
   const body = emitBlock(spec.body, info, spec.indent + 4)
   const prelude = spec.prelude ?? []
@@ -164,7 +149,7 @@ function emitDef(spec: DefSpec, info: TypeInfo, globalWrites: readonly string[])
 
 function emitFunction(fn: FunctionDecl, info: TypeInfo, globalWrites: readonly string[]): Line[] {
   return emitDef(
-    { name: fn.name, params: fn.params, returnType: pyType(fn.returnType.name), body: fn.body, offset: fn.range.start, indent: 0, isMethod: false },
+    { name: fn.name, params: fn.params, body: fn.body, offset: fn.range.start, indent: 0, isMethod: false },
     info,
     globalWrites,
   )
@@ -187,20 +172,20 @@ function emitClass(decl: ClassDecl, info: TypeInfo, writes: WriteTable): Line[] 
   if (constructor !== undefined) {
     parts.push(
       emitDef(
-        { name: "__init__", params: constructor.params, returnType: "None", body: constructor.body, offset: constructor.range.start, indent: 4, isMethod: true, prelude: initLines },
+        { name: "__init__", params: constructor.params, body: constructor.body, offset: constructor.range.start, indent: 4, isMethod: true, prelude: initLines },
         info,
         writes.get(constructor) ?? [],
       ),
     )
   } else if (initLines.length > 0) {
-    parts.push([{ text: "    def __init__(self) -> None:" }, ...initLines])
+    parts.push([{ text: "    def __init__(self):" }, ...initLines])
   }
   for (const member of decl.members) {
     if (member.kind !== "method") continue
     const fn = member.fn
     parts.push(
       emitDef(
-        { name: fn.name, params: fn.params, returnType: pyType(fn.returnType.name), body: fn.body, offset: fn.range.start, indent: 4, isMethod: true },
+        { name: fn.name, params: fn.params, body: fn.body, offset: fn.range.start, indent: 4, isMethod: true },
         info,
         writes.get(fn) ?? [],
       ),

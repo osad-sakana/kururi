@@ -1,12 +1,9 @@
-from __future__ import annotations
+total = 0
 
 
-total: int = 0
-
-
-def main() -> None:
+def main():
     global total
-    n: int = 0
+    n = 0
     while True:
         n += 1
         if n % 2 == 0:

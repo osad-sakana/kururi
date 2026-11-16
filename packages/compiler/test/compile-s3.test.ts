@@ -13,8 +13,8 @@ describe("compile (S3): 生成", () => {
       ),
     )
     expect(diagnostics).toEqual([])
-    expect(python).toContain("def add(a: int, b: int) -> int:\n    return a + b")
-    expect(python).toContain("def greet(names: list[str], flag: bool) -> None:\n    return")
+    expect(python).toContain("def add(a, b):\n    return a + b")
+    expect(python).toContain("def greet(names, flag):\n    return")
     expect(python).toContain("print(add(1, 2))")
   })
 
@@ -28,7 +28,7 @@ describe("compile (S3): 生成", () => {
     expect(python).toContain("return 1.0")
     expect(python).toContain("print(half(2.0))")
     expect(python).toContain("print(half(float(n)))")
-    expect(python).toContain("xs: list[float] = [1.0, 2.0]")
+    expect(python).toContain("xs = [1.0, 2.0]")
     expect(python).toContain("xs.append(float(n))")
   })
 
@@ -47,8 +47,8 @@ describe("compile (S3): 生成", () => {
     const { python } = compile(
       withMain("let c: int = 0\nlet d: int = 0\nfunction bump(): void {\n  c += 1\n}\nfunction read(): int {\n  return d\n}", "  bump()"),
     )
-    expect(python).toContain("def bump() -> None:\n    global c\n    c += 1")
-    expect(python).toContain("def read() -> int:\n    return d")
+    expect(python).toContain("def bump():\n    global c\n    c += 1")
+    expect(python).toContain("def read():\n    return d")
   })
 
   it("全ての分岐が return すれば return 抜けではない", () => {

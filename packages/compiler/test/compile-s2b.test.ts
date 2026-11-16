@@ -14,25 +14,25 @@ describe("compile (S2b): 生成", () => {
     const py = pyOf(
       '  let fruits: string[] = ["apple", "banana"]\n  fruits[1] = "melon"\n  fruits.push("grape")\n  fruits.removeAt(0)\n  let n: int = fruits.length\n  output(fruits[0])\n  fruits[0] += "!"',
     )
-    expect(py).toContain('fruits: list[str] = ["apple", "banana"]')
+    expect(py).toContain('fruits = ["apple", "banana"]')
     expect(py).toContain('fruits[1] = "melon"')
     expect(py).toContain('fruits.append("grape")')
     expect(py).toContain("fruits.pop(0)")
-    expect(py).toContain("n: int = len(fruits)")
+    expect(py).toContain("n = len(fruits)")
     expect(py).toContain("print(fruits[0])")
     expect(py).toContain('fruits[0] += "!"')
   })
 
   it("入れ子の配列と空の配列", () => {
     const py = pyOf("  let grid: int[][] = [[1, 2], [3]]\n  let e: string[] = []\n  grid[0][1] = 5\n  output(grid[1][0])")
-    expect(py).toContain("grid: list[list[int]] = [[1, 2], [3]]")
-    expect(py).toContain("e: list[str] = []")
+    expect(py).toContain("grid = [[1, 2], [3]]")
+    expect(py).toContain("e = []")
     expect(py).toContain("grid[0][1] = 5")
   })
 
   it("float の配列には int を float にして入れる", () => {
     const py = pyOf("  let a: float[] = [1, 2.5]\n  a.push(3)\n  a[0] = 4\n  let n: int = 2\n  a.push(n)")
-    expect(py).toContain("a: list[float] = [1.0, 2.5]")
+    expect(py).toContain("a = [1.0, 2.5]")
     expect(py).toContain("a.append(3.0)")
     expect(py).toContain("a[0] = 4.0")
     expect(py).toContain("a.append(float(n))")

@@ -1,18 +1,15 @@
-from __future__ import annotations
+names = ["apple", "banana"]
 
 
-names: list[str] = ["apple", "banana"]
-
-
-def main() -> None:
-    fruits: list[str] = ["apple", "banana"]
+def main():
+    fruits = ["apple", "banana"]
     fruits[1] = "melon"
     fruits.append("grape")
     fruits.pop(0)
-    count: int = len(fruits)
-    weights: list[float] = [1.0, 2.5]
-    grid: list[list[int]] = [[1, 2], [3, 4]]
-    empty: list[int] = []
+    count = len(fruits)
+    weights = [1.0, 2.5]
+    grid = [[1, 2], [3, 4]]
+    empty = []
     print(f"{count} 個")
     for fruit in fruits:
         print(fruit)

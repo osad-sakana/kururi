@@ -26,7 +26,7 @@ KururiはPythonを学ぶ前にテキストコーディングを最も簡単な�
 
 1. **型を明示させる**：「値には種類がある」という概念を先に身につけさせる。
 2. **コンパイル時の丁寧なエラー**：書きながら間違いに気づける。
-3. **Pythonへの橋渡し**：変換後のPython（型注釈つき）を並べて見せ、「このKururiはこのPythonになる」と対応で学べるようにする。生成するPythonは、教材として読めることを重視する。
+3. **Pythonへの橋渡し**：変換後のPython（型ヒントなし）を並べて見せ、「このKururiはこのPythonになる」と対応で学べるようにする。生成するPythonは、教材として読めることを重視する。
 
 ### 仕様を判断する基準
 
@@ -233,14 +233,14 @@ Kururi に書いた見た目のとおりに表示する。
 
 | Kururi | Python |
 |---|---|
-| ファイルの先頭 | `from __future__ import annotations`（後で定義するクラスや `T \| None` を注釈に書けるようにする）。`random` を使うときは続けて `import random` |
-| `let x: int = 1` / `const` | `x: int = 1`（`const` の制約は消える） |
+| ファイルの先頭 | 何も出さない（初学者が混乱しないよう、`from __future__` も型ヒントも出さない）。`random` を使うときだけ `import random` |
+| `let x: int = 1` / `const` | `x = 1`（型と `const` の制約は消える） |
 | `elseif` | `elif` |
 | `true` / `false` / `null` | `True` / `False` / `None` |
 | `repeat i: n { }` | `for i in range(n):` |
 | `` `a ${x}` `` | `f"a {x}"`（文字としての `{` `}` は `{{` `}}` にする） |
 | `foreach x in xs { }` | `for x in xs:` |
-| `function f(a: int): int` | `def f(a: int) -> int:` |
+| `function f(a: int): int` | `def f(a):`（型は消える） |
 | `constructor(...)` | `def __init__(self, ...):`（フィールドの初期値を先頭に出す） |
 | `new Player("taro")` | `Player("taro")` |
 | 空の本体 `{ }` | `pass` |
@@ -345,7 +345,7 @@ kururi/
 | スライス | 内容 | 完了の目安 |
 |---|---|---|
 | S0 | 土台：リポジトリ、診断の仕組み、エラーコードの体系、ゴールデンテストの枠 | `kururi check` が空ファイルで動く |
-| S1 | `output`、`let`/`const`、`int`/`float`/`string`/`boolean`、四則演算、`toString`、文字列補間、**引数なしの `function main(): void`**、`from __future__` と `if __name__`、`kururi run`（最小） | `output("hello")` と簡単な計算が実行できる |
+| S1 | `output`、`let`/`const`、`int`/`float`/`string`/`boolean`、四則演算、`toString`、文字列補間、**引数なしの `function main(): void`**、`if __name__`、`kururi run`（最小） | `output("hello")` と簡単な計算が実行できる |
 | S2a | `if`/`elseif`/`else`、`while`、`repeat`、`break`/`continue`、複合代入 | **example.kururi が正しい出力で動く** |
 | S2b | 配列、`foreach`、`push`/`removeAt`/`length`、文字列の添字 | 配列を使う例が動く |
 | S3 | 関数（引数・戻り値）、型検査、`return` 抜けの検出、シャドーイング禁止、トップレベル変数と `global` | 再帰（階乗など）が動く |
