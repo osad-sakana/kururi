@@ -1,4 +1,4 @@
-error[K0114]: 「let」は Kururi では使いません
+error[K0114]: 「let」は新しい書き方に変わりました
  --> input.kururi:2:1
   |
 2 | let z: int = 0
@@ -6,7 +6,7 @@ error[K0114]: 「let」は Kururi では使いません
   |
 help: 変数は var と書きます（例: var a: int = 1）
 
-error[K0114]: 「let」は Kururi では使いません
+error[K0114]: 「let」は新しい書き方に変わりました
  --> input.kururi:4:5
   |
 4 |     let b: int = 2
@@ -14,7 +14,7 @@ error[K0114]: 「let」は Kururi では使いません
   |
 help: 変数は var と書きます（例: var a: int = 1）
 
-error[K0114]: 「repeat」は Kururi では使いません
+error[K0114]: 「repeat」は新しい書き方に変わりました
  --> input.kururi:5:5
   |
 5 |     repeat i: 3 {
@@ -22,7 +22,7 @@ error[K0114]: 「repeat」は Kururi では使いません
   |
 help: 回数で回すときは for i in 0..10 { ... } と書きます
 
-error[K0114]: 「foreach」は Kururi では使いません
+error[K0114]: 「foreach」は新しい書き方に変わりました
  --> input.kururi:8:5
   |
 8 |     foreach x in [1, 2] {
@@ -30,7 +30,7 @@ error[K0114]: 「foreach」は Kururi では使いません
   |
 help: 配列を 1 つずつ取り出すときは for x in xs { ... } と書きます
 
-error[K0114]: 「elseif」は Kururi では使いません
+error[K0114]: 「elseif」は新しい書き方に変わりました
   --> input.kururi:12:7
    |
 12 |     } elseif a == 2 {

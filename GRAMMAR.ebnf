@@ -56,7 +56,7 @@ templateEscape = "\" ( "`" | "$" | "\" | "n" | "t" ) ;   (* \` と \${ で文字
 (* コメント：  // 行末まで    /* 次の */ まで（入れ子なし） *)
 
 (* 予約語（IDENT にできない）
-   const var function return class public private new constructor self
+   const var function method return class public private new constructor self
    if else while for in break continue
    （古い書き方の案内用に let repeat foreach elseif も予約語のまま残す）
    true false null and or not
@@ -95,12 +95,15 @@ functionDecl = "function" IDENT "=" "(" [ params ] ")" [ "->" returnType ] block
 params       = param { "," param } ;
 param        = IDENT ":" type ;
 
-classDecl    = "class" IDENT "=" "{" { NL } { member { NL } } "}" ;
-member       = fieldDecl | constructorDecl | methodDecl ;
+classDecl    = "class" IDENT "=" "{" { NL } [ fieldsDecl ] { member { NL } } "}" ;
+                (* fields は 1 回だけ、constructor と method より前に書く *)
+fieldsDecl   = "fields" "=" "{" { NL } { fieldDecl { NL } } "}" NL ;
+                (* fields は予約語ではない（クラスの直下でだけ特別な意味を持つ） *)
+member       = constructorDecl | methodDecl ;
 access       = "public" | "private" ;                 (* 省略すると private *)
 fieldDecl    = [ access ] IDENT ":" type [ "=" expr ] NL ;
 constructorDecl = "constructor" "=" "(" [ params ] ")" block ;      (* 常に外から呼べる。access は付けられない *)
-methodDecl   = [ access ] functionDecl ;
+methodDecl   = [ access ] "method" IDENT "=" "(" [ params ] ")" [ "->" returnType ] block ;
 
 
 (* ------------------------------------------------------------

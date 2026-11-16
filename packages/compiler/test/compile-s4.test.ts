@@ -5,24 +5,26 @@ const codesOf = (source: string): string[] => compile(source).diagnostics.map((d
 const withMain = (defs: string, body = ""): string => `${defs}\nfunction main = () {\n${body}\n}\n`
 
 const PLAYER = `class Player = {
-  name: string
-  public age: int = 20
-  private score: int = 0
+  fields = {
+    name: string
+    public age: int = 20
+    private score: int = 0
+  }
 
   constructor = (name: string) {
     self.name = name
   }
 
-  public function run = () {
+  public method run = () {
     self.draw()
     self.score += 1
   }
 
-  public function getName = () -> string {
+  public method getName = () -> string {
     return self.name
   }
 
-  function draw = () {
+  method draw = () {
   }
 }`
 
@@ -40,7 +42,7 @@ describe("compile (S4): 生成", () => {
   })
 
   it("constructor がなければ、初期値だけの __init__ を作る", () => {
-    const { python } = compile(withMain("class Box = {\n  items: int[] = []\n  public function size = () -> int {\n    return self.items.length\n  }\n}", "  var b: Box = new Box()\n  output(b.size())"))
+    const { python } = compile(withMain("class Box = {\n  fields = {\n    items: int[] = []\n  }\n  public method size = () -> int {\n    return self.items.length\n  }\n}", "  var b: Box = new Box()\n  output(b.size())"))
     expect(python).toContain("class Box:\n    def __init__(self):\n        self.items = []\n")
     expect(python).toContain("return len(self.items)")
   })
@@ -51,7 +53,7 @@ describe("compile (S4): 生成", () => {
 
   it("オブジェクトの配列と、他のオブジェクトのフィールド", () => {
     const src = withMain(
-      "class Node = {\n  public value: int\n  constructor = (value: int) {\n    self.value = value\n  }\n  public function same = (other: Node) -> boolean {\n    return self.value == other.value\n  }\n}",
+      "class Node = {\n  fields = {\n    public value: int\n  }\n  constructor = (value: int) {\n    self.value = value\n  }\n  public method same = (other: Node) -> boolean {\n    return self.value == other.value\n  }\n}",
       "  var nodes: Node[] = [new Node(1), new Node(2)]\n  nodes.push(new Node(3))\n  nodes[0].value = 5\n  nodes[1].value += 1\n  output(nodes[0].same(nodes[1]))",
     )
     expect(codesOf(src)).toEqual([])
@@ -59,17 +61,17 @@ describe("compile (S4): 生成", () => {
   })
 
   it("float のフィールド・引数に int を渡すと変換する", () => {
-    const { python } = compile(withMain("class P = {\n  public x: float = 0\n  constructor = (x: float) {\n    self.x = x\n  }\n}", "  var p: P = new P(1)"))
+    const { python } = compile(withMain("class P = {\n  fields = {\n    public x: float = 0\n  }\n  constructor = (x: float) {\n    self.x = x\n  }\n}", "  var p: P = new P(1)"))
     expect(python).toContain("self.x = 0.0")
     expect(python).toContain("p = P(1.0)")
   })
 
   it("クラスの自分自身の名前は本体の中で使える", () => {
-    expect(codesOf(withMain("class Chain = {\n  public function copy = (other: Chain) -> Chain {\n    return other\n  }\n}"))).toEqual([])
+    expect(codesOf(withMain("class Chain = {\n  public method copy = (other: Chain) -> Chain {\n    return other\n  }\n}"))).toEqual([])
   })
 
   it("メソッドも関数と同様に global を付ける", () => {
-    const { python } = compile(withMain("var n: int = 0\nclass C = {\n  public function bump = () {\n    n += 1\n  }\n}"))
+    const { python } = compile(withMain("var n: int = 0\nclass C = {\n  public method bump = () {\n    n += 1\n  }\n}"))
     expect(python).toContain("def bump(self):\n        global n\n        n += 1")
   })
 })
@@ -83,18 +85,18 @@ describe("compile (S4): 診断", () => {
 
   it("同じクラスの中なら、他のインスタンスの private も使える", () => {
     expect(
-      codesOf(withMain("class A = {\n  v: int = 1\n  public function eq = (o: A) -> boolean {\n    return self.v == o.v\n  }\n}")),
+      codesOf(withMain("class A = {\n  fields = {\n    v: int = 1\n  }\n  public method eq = (o: A) -> boolean {\n    return self.v == o.v\n  }\n}")),
     ).toEqual([])
   })
 
   it("初期値のないフィールドを constructor が代入しないと K0405", () => {
-    expect(codesOf(withMain("class A = {\n  x: int\n}"))).toEqual(["K0405"])
-    expect(codesOf(withMain("class A = {\n  x: int\n  constructor = () {\n  }\n}"))).toEqual(["K0405"])
-    expect(codesOf(withMain("class A = {\n  x: int\n  constructor = (f: boolean) {\n    if f {\n      self.x = 1\n    }\n  }\n}"))).toEqual(["K0405"])
+    expect(codesOf(withMain("class A = {\n  fields = {\n    x: int\n  }\n}"))).toEqual(["K0405"])
+    expect(codesOf(withMain("class A = {\n  fields = {\n    x: int\n  }\n  constructor = () {\n  }\n}"))).toEqual(["K0405"])
+    expect(codesOf(withMain("class A = {\n  fields = {\n    x: int\n  }\n  constructor = (f: boolean) {\n    if f {\n      self.x = 1\n    }\n  }\n}"))).toEqual(["K0405"])
   })
 
   it("if / else の両方で代入していればよい", () => {
-    expect(codesOf(withMain("class A = {\n  x: int\n  constructor = (f: boolean) {\n    if f {\n      self.x = 1\n    } else {\n      self.x = 2\n    }\n  }\n}"))).toEqual([])
+    expect(codesOf(withMain("class A = {\n  fields = {\n    x: int\n  }\n  constructor = (f: boolean) {\n    if f {\n      self.x = 1\n    } else {\n      self.x = 2\n    }\n  }\n}"))).toEqual([])
   })
 
   it("self をクラスの外で使うと K0404", () => {
@@ -124,8 +126,8 @@ describe("compile (S4): 診断", () => {
   })
 
   it("クラスの宣言の誤り", () => {
-    expect(codesOf(withMain("class A = {\n  x: int = 1\n  function x = () {\n  }\n}"))).toEqual(["K0202"])
-    expect(codesOf(withMain("class A = {\n  x: int = 1\n  x: int = 2\n}"))).toEqual(["K0202"])
+    expect(codesOf(withMain("class A = {\n  fields = {\n    x: int = 1\n  }\n  method x = () {\n  }\n}"))).toEqual(["K0202"])
+    expect(codesOf(withMain("class A = {\n  fields = {\n    x: int = 1\n    x: int = 2\n  }\n}"))).toEqual(["K0202"])
     expect(codesOf(withMain("class A = {\n  public constructor = () {\n  }\n}"))).toEqual(["K0408"])
     expect(codesOf(withMain("class A = {\n  constructor = () {\n  }\n  constructor = () {\n  }\n}"))).toEqual(["K0202"])
     expect(codesOf(withMain("class A = {\n}\nclass A = {\n}"))).toEqual(["K0202"])
@@ -133,9 +135,9 @@ describe("compile (S4): 診断", () => {
   })
 
   it("メソッドの return 抜け・フィールドの型の誤り", () => {
-    expect(codesOf(withMain("class A = {\n  function f = () -> int {\n  }\n}"))).toEqual(["K0322"])
-    expect(codesOf(withMain("class A = {\n  x: Foo\n}"))).toEqual(["K0208"])
-    expect(codesOf(withMain("class A = {\n  x: int = \"s\"\n}"))).toEqual(["K0301"])
+    expect(codesOf(withMain("class A = {\n  method f = () -> int {\n  }\n}"))).toEqual(["K0322"])
+    expect(codesOf(withMain("class A = {\n  fields = {\n    x: Foo\n  }\n}"))).toEqual(["K0208"])
+    expect(codesOf(withMain("class A = {\n  fields = {\n    x: int = \"s\"\n  }\n}"))).toEqual(["K0301"])
   })
 
   it("トップレベルの初期値で new は使えない（K0323）", () => {

@@ -7,11 +7,13 @@ function add = (a: int, b: int) -> int {
 }
 
 class Counter = {
-    private count: int = 0
+    fields = {
+      private count: int = 0
+    }
     constructor = (start: int) {
         self.count = start
     }
-    public function next = () -> int {
+    public method next = () -> int {
         self.count += 1
         return self.count
     }

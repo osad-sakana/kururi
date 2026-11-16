@@ -1,13 +1,15 @@
 class Player = {
-    name: string
-    count: int
-    private secret: int = 1
+    fields = {
+      name: string
+      count: int
+      private secret: int = 1
+    }
 
     constructor = () {
         self.count = 0
     }
 
-    function hidden = () {
+    method hidden = () {
     }
 }
 

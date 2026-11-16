@@ -1,6 +1,8 @@
 class Node = {
-    public value: int
-    public next: Node? = null
+    fields = {
+      public value: int
+      public next: Node? = null
+    }
 
     constructor = (value: int) {
         self.value = value

@@ -100,9 +100,11 @@ function greet = (name: string) -> string {
 
 // クラス宣言（フィールド・メソッドともデフォルト private。外から使うものに public を付ける。private と明示してもよい）
 class Player = {
-  name: string
-  public age: int = 20
-  private nickname: string? = null     // T? で初期値がなければ null
+  fields = {
+    name: string
+    public age: int = 20
+    private nickname: string? = null     // T? で初期値がなければ null
+  }
 
   // コンストラクタ（Python の __init__ に相当）
   // new Player("taro") と書くと自動で呼ばれる。省略すると引数なしの new Player() が使える
@@ -111,13 +113,13 @@ class Player = {
   }
 
   // 外から呼びたいメソッドだけ public
-  public function run = () {
+  public method run = () {
     self.draw()
     self.update()
   }
 
-  function draw = ()   { /* private */ }
-  function update = () { /* private */ }
+  method draw = ()   { /* private */ }
+  method update = () { /* private */ }
 }
 
 // エントリポイントは必ず main()
@@ -256,7 +258,7 @@ Kururi に書いた見た目のとおりに表示する。
 
 ### Kururiの予約語
 
-`const var function return class public private new constructor self if else while for in break continue true false null and or not int float string boolean void` と組み込み名（`output input toString toInt toFloat div random`）。
+`const var function method return class public private new constructor self if else while for in break continue true false null and or not int float string boolean void` と組み込み名（`output input toString toInt toFloat div random`）。
 
 古い書き方（`let` `repeat` `foreach` `elseif`）は、予約語として残して「新しい書き方はこうです」と案内する（K0114）。
 
@@ -403,3 +405,4 @@ kururi/
 - ループ：`for i in 0..10`（範囲）と `for x in xs`（配列）の 2 つに統一。`repeat` / `foreach` はやめた。
 - 分岐：`else if`（`elseif` をやめた）。
 - 古い書き方は K0114 で「新しい書き方はこうです」と案内する。
+- クラスの中は `fields = { ... }`（データ）、`constructor = (...) { }`（作り方）、`method 名前 = (...) { }`（動き）の 3 部構成。`fields` は 1 回だけ、constructor と method より前（K0115）。クラスの直下にフィールドを書いたり、クラスの中で `function` と書いたりすると K0114 で案内する。

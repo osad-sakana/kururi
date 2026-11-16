@@ -151,9 +151,16 @@ export const DIAGNOSTIC_CATALOG = {
   K0114: {
     code: "K0114",
     severity: "error",
-    message: ({ old = "" }) => `「${old}」は Kururi では使いません`,
+    message: ({ old = "" }) => `「${old}」は新しい書き方に変わりました`,
     label: () => "書き方が変わっています",
     hint: ({ hint }) => hint,
+  },
+  K0115: {
+    code: "K0115",
+    severity: "error",
+    message: () => "fields は 1 つのクラスに 1 回だけ、constructor と method より前に書きます",
+    label: () => "ここには書けません",
+    hint: () => "フィールドを fields = { ... } の 1 か所にまとめて、クラスの先頭に置いてください",
   },
   K0110: {
     code: "K0110",

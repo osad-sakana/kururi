@@ -1,27 +1,29 @@
 class Player = {
-    name: string
-    public age: int = 20
-    private nickname: string = "none"
-    items: string[] = []
+    fields = {
+      name: string
+      public age: int = 20
+      private nickname: string = "none"
+      items: string[] = []
+    }
 
     constructor = (name: string) {
         self.name = name
     }
 
-    public function run = () {
+    public method run = () {
         self.draw()
         self.update()
     }
 
-    public function describe = () -> string {
+    public method describe = () -> string {
         return `${self.name}（${self.age}歳）`
     }
 
-    function draw = () {
+    method draw = () {
         output("draw")
     }
 
-    function update = () {
+    method update = () {
         self.age += 1
         self.items.push(self.nickname)
     }

@@ -32,12 +32,12 @@ describe("compile (S5): T? と null の生成", () => {
   })
 
   it("T? のフィールドは初期値がなければ None になる", () => {
-    const py = pyOf("class A = {\n  next: A?\n  public v: int = 1\n}\n" + main(""))
+    const py = pyOf("class A = {\n  fields = {\n    next: A?\n    public v: int = 1\n  }\n}\n" + main(""))
     expect(py).toContain("self.next = None\n        self.v = 1")
   })
 
   it("連結リストのような自分自身の型", () => {
-    expect(codesOf("class Node = {\n  public next: Node? = null\n  public v: int = 0\n}\n" + main("  var n: Node = new Node()\n  n.next = new Node()\n  n.next = null"))).toEqual([])
+    expect(codesOf("class Node = {\n  fields = {\n    public next: Node? = null\n    public v: int = 0\n  }\n}\n" + main("  var n: Node = new Node()\n  n.next = new Node()\n  n.next = null"))).toEqual([])
   })
 })
 
@@ -132,7 +132,7 @@ describe("compile (S5): 絞り込み", () => {
   it("引数も絞り込める。フィールドとトップレベルの変数は絞り込まない", () => {
     expect(codesOf("function f = (s: string?) -> int {\n  if s != null {\n    return s.length\n  }\n  return 0\n}\n" + main(""))).toEqual([])
     expect(
-      codesOf("class A = {\n  public s: string? = null\n  public function f = () {\n    if self.s != null {\n      output(self.s.length)\n    }\n  }\n}\n" + main("")),
+      codesOf("class A = {\n  fields = {\n    public s: string? = null\n  }\n  public method f = () {\n    if self.s != null {\n      output(self.s.length)\n    }\n  }\n}\n" + main("")),
     ).toEqual(["K0330"])
     expect(codesOf('var g: string? = null\n' + main("  if g != null {\n    output(g.length)\n  }"))).toEqual(["K0330"])
   })

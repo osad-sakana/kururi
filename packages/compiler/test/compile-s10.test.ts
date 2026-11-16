@@ -42,6 +42,25 @@ describe("compile (S10): 新しい書き方", () => {
     expect(python).toContain("def __init__(self, x):")
   })
 
+  it("fields の中のフィールドは __init__ の先頭に出る。method は def になる", () => {
+    const { python, diagnostics } = compile(
+      "class D = {\n  fields = {\n    private name: string\n    public age: int = 0\n  }\n  constructor = (name: string) {\n    self.name = name\n  }\n  public method bark = () {\n  }\n}\n" + main(""),
+    )
+    expect(diagnostics).toEqual([])
+    expect(python).toContain("self.age = 0\n        self.name = name")
+    expect(python).toContain("def bark(self):")
+  })
+
+  it("fields は省ける。フィールドがなくてもよい", () => {
+    expect(codesOf("class A = {\n  method f = () {\n  }\n}\n" + main(""))).toEqual([])
+  })
+
+  it("fields は 1 回だけ、constructor と method より前（K0115）", () => {
+    const fields = "  fields = {\n    x: int = 1\n  }\n"
+    expect(codesOf("class A = {\n" + fields + fields.replace("x:", "y:") + "}\n" + main(""))).toEqual(["K0115"])
+    expect(codesOf("class A = {\n  method f = () {\n  }\n" + fields + "}\n" + main(""))).toEqual(["K0115"])
+  })
+
   it("継承の書き方はまだ使えない（K0002）", () => {
     expect(codesOf("class A = {\n}\nclass B = (A) {\n}\n" + main(""))).toEqual(["K0002"])
   })
@@ -67,6 +86,11 @@ describe("compile (S10): 古い書き方への案内（K0114）", () => {
 
   it("C 言語風の for には案内を出す", () => {
     expect(codesOf(main("  for (var i: int = 0; i < 3; i += 1) {\n  }")).includes("K0114")).toBe(true)
+  })
+
+  it("クラスの直下のフィールドと、クラスの中の function は案内を出しつつ読み進める", () => {
+    expect(codesOf("class A = {\n  x: int = 1\n}\n" + main(""))).toEqual(["K0114"])
+    expect(codesOf("class A = {\n  public function f = () {\n  }\n}\n" + main(""))).toEqual(["K0114"])
   })
 
   it("関数・constructor・クラスの古い書き方は = が必要と案内する", () => {

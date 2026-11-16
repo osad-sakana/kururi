@@ -62,14 +62,14 @@ function parseClass(c: Cursor): ClassDecl | undefined {
     return undefined
   }
   const members: ClassMember[] = []
+  const state: ClassState = { fieldsSeen: false, behaviorSeen: false }
   c.skipNewlines()
   while (!c.isOp("}")) {
     if (c.atEof()) {
       c.expected("「}」", "クラスを閉じる } が足りません")
       return undefined
     }
-    const member = parseMember(c)
-    if (member !== undefined) members.push(member)
+    members.push(...parseMembers(c, state))
     c.skipNewlines()
   }
   const close = c.next()
@@ -83,18 +83,77 @@ function parseClass(c: Cursor): ClassDecl | undefined {
   }
 }
 
-/** クラスの中身（フィールド・constructor・メソッド）を 1 つ読む。失敗したら次の行まで読み飛ばす。 */
-function parseMember(c: Cursor): ClassMember | undefined {
+interface ClassState {
+  fieldsSeen: boolean
+  /** constructor か method を読んだあとは、fields を書けない */
+  behaviorSeen: boolean
+}
+
+/** fields = { ... } を読む。フィールドを 1 つずつ並べる。 */
+function parseFieldsBlock(c: Cursor, state: ClassState): ClassMember[] {
+  const keyword = c.next()
+  if (state.fieldsSeen || state.behaviorSeen) c.report("K0115", keyword.range)
+  state.fieldsSeen = true
+  c.next() // =
+  if (c.expectOp("{", "フィールドは fields = { ... } の中に書きます") === undefined) {
+    c.recover()
+    return []
+  }
+  const fields: ClassMember[] = []
+  c.skipNewlines()
+  while (!c.isOp("}")) {
+    if (c.atEof()) {
+      c.expected("「}」", "fields を閉じる } が足りません")
+      return fields
+    }
+    const field = parseField(c)
+    if (field !== undefined) fields.push(field)
+    c.skipNewlines()
+  }
+  c.next()
+  if (!c.atEof()) c.expectNewline()
+  return fields
+}
+
+/** クラスの直下の中身を読む。fields は複数のフィールドを返す。失敗したら次の行まで読み飛ばす。 */
+function parseMembers(c: Cursor, state: ClassState): ClassMember[] {
+  const tok = c.peek()
+  if (tok.kind === "ident" && tok.text === "fields" && c.peek(1).kind === "op" && c.peek(1).text === "=") {
+    return parseFieldsBlock(c, state)
+  }
   const accessTok = c.isKeyword("public") || c.isKeyword("private") ? c.next() : undefined
   const access: Access = accessTok?.text === "public" ? "public" : "private"
-  if (c.isKeyword("constructor")) return parseConstructor(c, accessTok)
-  if (c.isKeyword("function")) {
-    const fn = parseFunction(c)
-    return fn === undefined ? undefined : { kind: "method", access, fn }
+  if (c.isKeyword("constructor")) {
+    state.behaviorSeen = true
+    const ctor = parseConstructor(c, accessTok)
+    return ctor === undefined ? [] : [ctor]
   }
+  if (c.isKeyword("method") || c.isKeyword("function")) {
+    state.behaviorSeen = true
+    if (c.isKeyword("function")) {
+      c.report("K0114", c.peek().range, { old: "function", hint: "クラスの中の関数は method と書きます（例: public method run = () { ... }）" })
+    }
+    const fn = parseFunction(c)
+    return fn === undefined ? [] : [{ kind: "method", access, fn }]
+  }
+  // クラスの直下のフィールドは、fields の外なので案内を出す（読み進めて、続きのエラーを増やさない）
+  if (tok.kind === "ident" || accessTok !== undefined) {
+    c.report("K0114", accessTok?.range ?? tok.range, { old: "クラスの直下のフィールド", hint: "フィールドは fields = { ... } の中に書きます" })
+  }
+  const field = parseFieldAfterAccess(c, accessTok, access)
+  return field === undefined ? [] : [field]
+}
+
+/** fields の中の 1 行（public / private は省略できる）。 */
+function parseField(c: Cursor): ClassMember | undefined {
+  const accessTok = c.isKeyword("public") || c.isKeyword("private") ? c.next() : undefined
+  return parseFieldAfterAccess(c, accessTok, accessTok?.text === "public" ? "public" : "private")
+}
+
+function parseFieldAfterAccess(c: Cursor, accessTok: Token | undefined, access: Access): ClassMember | undefined {
   const nameTok = c.peek()
   if (nameTok.kind !== "ident" || !c.checkDeclName(nameTok)) {
-    if (nameTok.kind !== "ident" && nameTok.kind !== "keyword") c.expected("フィールドかメソッド")
+    if (nameTok.kind !== "ident" && nameTok.kind !== "keyword") c.expected("フィールドか method")
     c.recover()
     return undefined
   }
