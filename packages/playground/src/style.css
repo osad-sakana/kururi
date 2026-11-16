@@ -101,7 +101,15 @@ section + section { border-left: 1px solid var(--color-line); }
 #output .prompt-line input:focus { border-bottom-color: var(--color-accent); }
 /* Python 欄は自動で作られるので、書き込めないことが見て分かるようにする */
 #python .cursors-layer { display: none !important; }
+/* 狭い画面（スマホ）：ヘッダーは折り返し、Kururi 欄と Python 欄を縦に並べて、全体を縦にスクロールする */
 @media (max-width: 700px) {
-  main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  header { flex-wrap: wrap; gap: 0.5rem; padding: 0.5rem 0.75rem; }
+  #status { order: 10; flex-basis: 100%; min-height: 1em; }
+  header .controls { margin-left: auto; }
+  button.primary { font-size: 13px; padding: 0.4rem 0.8rem; }
+  main { display: block; overflow-y: auto; }
   section + section { border-left: 0; border-top: 1px solid var(--color-line); }
+  section:first-child { height: 60dvh; min-height: 16rem; }
+  .right { height: 32rem; }
+  #console { height: 9rem; }
 }
