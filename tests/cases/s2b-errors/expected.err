@@ -4,7 +4,7 @@ error[K0313]: 配列はそのまま表示できません
 3 |     output(xs)
   |            ^^ 配列です
   |
-help: foreach で 1 つずつ output してください（例: foreach x in xs { output(x) }）
+help: for で 1 つずつ output してください（例: for x in xs { output(x) }）
 
 error[K0315]: 添字に負の数は書けません
  --> input.kururi:4:15
@@ -52,6 +52,6 @@ error[K0314]: 空の配列 [] は、型が決まる場所でしか書けませ�
 10 |     output([])
    |            ^^ 何の配列か分かりません
    |
-help: let a: int[] = [] のように、型を書いた変数に入れてください
+help: var a: int[] = [] のように、型を書いた変数に入れてください
 
 エラー 7 件

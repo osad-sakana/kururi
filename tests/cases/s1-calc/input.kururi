@@ -1,12 +1,12 @@
 const taxRate: float = 0.1
-let 合計: int = 0
+var 合計: int = 0
 
-function main(): void {
-    let price: int = 1200
-    let count: int = 3
-    let total: int = price * count
-    let withTax: float = total * (1 + taxRate)
-    let big: boolean = total > 3000 and not (count == 0)
+function main = () {
+    var price: int = 1200
+    var count: int = 3
+    var total: int = price * count
+    var withTax: float = total * (1 + taxRate)
+    var big: boolean = total > 3000 and not (count == 0)
 
     output("小計: " + toString(total))
     output(`税込: ${withTax} 円（個数 ${count}、{そのまま}）`)

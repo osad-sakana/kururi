@@ -1,20 +1,20 @@
 const names: string[] = ["apple", "banana"]
 
-function main(): void {
-    let fruits: string[] = ["apple", "banana"]
+function main = () {
+    var fruits: string[] = ["apple", "banana"]
     fruits[1] = "melon"
     fruits.push("grape")
     fruits.removeAt(0)
-    let count: int = fruits.length
-    let weights: float[] = [1, 2.5]
-    let grid: int[][] = [[1, 2], [3, 4]]
-    let empty: int[] = []
+    var count: int = fruits.length
+    var weights: float[] = [1, 2.5]
+    var grid: int[][] = [[1, 2], [3, 4]]
+    var empty: int[] = []
     output(`${count} 個`)
-    foreach fruit in fruits {
+    for fruit in fruits {
         output(fruit)
     }
-    foreach row in grid {
-        foreach v in row {
+    for row in grid {
+        for v in row {
             weights.push(v)
         }
     }

@@ -1,8 +1,8 @@
-function main(): void {
-    let a: int = "x"
-    let b: string = a + 1
+function main = () {
+    var a: int = "x"
+    var b: string = a + 1
     output(c)
     output(1, 2)
-    let a: int = 3
+    var a: int = 3
     1 + 2
 }

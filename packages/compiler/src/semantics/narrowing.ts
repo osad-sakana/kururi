@@ -61,7 +61,7 @@ export function assignedNames(stmts: readonly Stmt[]): ReadonlySet<string> {
       else if (stmt.kind === "if") {
         stmt.branches.forEach((branch) => visit(branch.body))
         if (stmt.otherwise !== undefined) visit(stmt.otherwise)
-      } else if (stmt.kind === "while" || stmt.kind === "repeat" || stmt.kind === "foreach") visit(stmt.body)
+      } else if (stmt.kind === "while" || stmt.kind === "range" || stmt.kind === "foreach") visit(stmt.body)
     }
   }
   visit(stmts)

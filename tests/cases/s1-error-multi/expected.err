@@ -1,7 +1,7 @@
 error[K0301]: string の値を int には入れられません
  --> input.kururi:2:18
   |
-2 |     let a: int = "x"
+2 |     var a: int = "x"
   |                  ^^^ この値は string です
   |
 help: int の値を書くか、型を string に変えてください
@@ -9,7 +9,7 @@ help: int の値を書くか、型を string に変えてください
 error[K0301]: int の値を string には入れられません
  --> input.kururi:3:21
   |
-3 |     let b: string = a + 1
+3 |     var b: string = a + 1
   |                     ^^^^^ この値は int です
   |
 help: string の値を書くか、型を int に変えてください
@@ -20,7 +20,7 @@ error[K0201]: 「c」という名前は宣言されていません
 4 |     output(c)
   |            ^ この名前は見つかりません
   |
-help: 先に let か const で宣言してください。綴りも見直してください
+help: 先に var か const で宣言してください。綴りも見直してください
 
 error[K0305]: output には引数が 1 個必要ですが、2 個書かれています
  --> input.kururi:5:5
@@ -31,7 +31,7 @@ error[K0305]: output には引数が 1 個必要ですが、2 個書かれてい
 error[K0202]: 「a」はすでに宣言されています
  --> input.kururi:6:9
   |
-6 |     let a: int = 3
+6 |     var a: int = 3
   |         ^ 同じ名前をもう一度宣言しています
   |
 help: 別の名前にしてください（関数の中では、外の変数と同じ名前も使えません）

@@ -5,14 +5,14 @@ import { SAMPLE } from "../src/sample"
 
 describe("analyze", () => {
   it("エラーがなければ Python を返し、印は空", () => {
-    const result = analyze('function main(): void {\n    output("こんにちは")\n}\n')
+    const result = analyze('function main = () {\n    output("こんにちは")\n}\n')
     expect(result.errorCount).toBe(0)
     expect(result.markers).toEqual([])
     expect(result.python).toContain("print")
   })
 
   it("エラーは行・列つきの印になる", () => {
-    const result = analyze("function main(): void {\n    let x: int = 1\n    let x: int = 2\n}\n")
+    const result = analyze("function main = () {\n    var x: int = 1\n    var x: int = 2\n}\n")
     expect(result.errorCount).toBeGreaterThan(0)
     const [marker] = result.markers
     expect(marker?.startLineNumber).toBe(3)
@@ -22,18 +22,18 @@ describe("analyze", () => {
   })
 
   it("全角文字・絵文字のあとでも列が UTF-16 でずれない", () => {
-    const result = analyze('function main(): void {\n    let 😀a: int = 1\n}\n')
+    const result = analyze('function main = () {\n    var 😀a: int = 1\n}\n')
     const marker = result.markers[0]
     expect(marker).toBeDefined()
     expect(marker!.endColumn).toBeGreaterThan(marker!.startColumn)
-    expect(marker!.endColumn).toBeLessThanOrEqual('    let 😀a: int = 1'.length + 2)
+    expect(marker!.endColumn).toBeLessThanOrEqual('    var 😀a: int = 1'.length + 2)
   })
 
   it("変換できないときは、Python 欄に出すエラーの文章を返す", () => {
-    const bad = analyze("function main(): void {\n    print(1)\n}\n")
+    const bad = analyze("function main = () {\n    print(1)\n}\n")
     expect(bad.errorText).toContain("K0201")
     expect(bad.errorText).toContain("main.kururi")
-    expect(analyze("function main(): void {\n}\n").errorText).toBe("")
+    expect(analyze("function main = () {\n}\n").errorText).toBe("")
   })
 
   it("同梱のサンプルはエラーなく変換できる", () => {
@@ -43,12 +43,12 @@ describe("analyze", () => {
 
 describe("narapyUrl", () => {
   it("正常なら narapy の URL", () => {
-    const source = 'function main(): void {\n    output("hi")\n}\n'
+    const source = 'function main = () {\n    output("hi")\n}\n'
     expect(narapyUrl(source, analyze(source))).toMatch(/#project=/)
   })
 
   it("エラー中・空のときは null", () => {
-    const bad = "function main(): void {\n    let x: int = \n}\n"
+    const bad = "function main = () {\n    var x: int = \n}\n"
     expect(narapyUrl(bad, analyze(bad))).toBeNull()
     expect(narapyUrl("", analyze(""))).toBeNull()
   })

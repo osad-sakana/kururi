@@ -20,7 +20,7 @@ KururiはPythonを学ぶ前にテキストコーディングを最も簡単な�
 
 ### 扱わないもの
 
-ラムダ・クロージャ・関数を値として扱う機能（関数は `function 名前(...): 型 { }` の宣言形式のみ）、ジェネリクス、非同期、ライブラリ、性能、継承・ポリモーフィズム（入口としてはカプセル化まで。必要になったら後の段階で検討）。実用言語になることは目指さない。
+ラムダ・クロージャ・関数を値として扱う機能（関数は `function 名前 = (...) -> 型 { }` の宣言形式のみ）、ジェネリクス、非同期、ライブラリ、性能、継承・ポリモーフィズム（入口としてはカプセル化まで。必要になったら後の段階で検討）。実用言語になることは目指さない。
 
 ### 強み
 
@@ -45,12 +45,12 @@ KururiはPythonを学ぶ前にテキストコーディングを最も簡単な�
 ```kururi
 // 変数宣言（型必須・セミコロン不要）
 const test: string = "Hello World"
-let   price: int = 123
-let   rate: float = 0.5
+var   price: int = 123
+var   rate: float = 0.5
 
 // 配列（T[] 形式・リテラルは []）
-let fruits: string[] = ["apple", "banana", "cherry"]
-let matrix: int[][] = [
+var fruits: string[] = ["apple", "banana", "cherry"]
+var matrix: int[][] = [
   [1, 2, 3],
   [4, 5, 6],
 ]
@@ -60,15 +60,15 @@ output(fruits[0])                // 要素アクセス
 fruits[1] = "melon"              // 要素更新
 fruits.push("grape")             // 末尾に追加
 fruits.removeAt(0)               // 位置を指定して削除
-let count: int = fruits.length   // 長さ取得
-foreach fruit in fruits {
+var count: int = fruits.length   // 長さ取得
+for fruit in fruits {
   output(fruit)
 }
 
 // 条件分岐（論理演算は and / or / not、比較は ==）
 if price < 300 and price != 0 {
   output("hoge")
-} elseif price < 600 {
+} else if price < 600 {
   output("fuga")
 } else {
   output("hohe")
@@ -79,50 +79,50 @@ while true {
   break
 }
 
-// repeat ループ（回数で回す。i は 0 から始まり、1 周ごとに 1 ずつ増える）
-repeat i: 10 {
+// 回数で回す（i は 0 から 9 まで。終わりの 10 は含まない）
+for i in 0..10 {
   output(toString(i))     // 0, 1, ..., 9
 }
 
 // 文字列補間（バッククォートと ${ }）
-let message: string = `${fruits[0]} は ${price} 円です`
+var message: string = `${fruits[0]} は ${price} 円です`
 
 // null（値がない）。T? と書いた型だけ null を入れられる
-let nickname: string? = null
+var nickname: string? = null
 if nickname != null {
   output(nickname)
 }
 
 // 関数宣言（TypeScript 風の戻り値型注釈）
-function greet(name: string): string {
+function greet = (name: string) -> string {
   return "こんにちは、" + name
 }
 
 // クラス宣言（フィールド・メソッドともデフォルト private。外から使うものに public を付ける。private と明示してもよい）
-class Player {
+class Player = {
   name: string
   public age: int = 20
   private nickname: string? = null     // T? で初期値がなければ null
 
   // コンストラクタ（Python の __init__ に相当）
   // new Player("taro") と書くと自動で呼ばれる。省略すると引数なしの new Player() が使える
-  constructor(name: string) {
+  constructor = (name: string) {
     self.name = name
   }
 
   // 外から呼びたいメソッドだけ public
-  public function run(): void {
+  public function run = () {
     self.draw()
     self.update()
   }
 
-  function draw(): void   { /* private */ }
-  function update(): void { /* private */ }
+  function draw = ()   { /* private */ }
+  function update = () { /* private */ }
 }
 
 // エントリポイントは必ず main()
-function main(): void {
-  let pl: Player = new Player("taro")
+function main = () {
+  var pl: Player = new Player("taro")
   pl.run()
 }
 ```
@@ -165,8 +165,8 @@ function main(): void {
 - **優先順位は Python に準拠**（高い順に `* / %` → `+ -` → 比較 → `not` → `and` → `or`）。
 - 比較の連鎖（`a < b < c`）はコンパイルエラーにし、`a < b and b < c` と書くよう案内する。
 - `if x = 1 {` のように条件に `=` を書いたときは、「`==` と書くと比べられます」と専用のメッセージを出す。
-- `if / elseif / else`、`while`、`repeat`、`foreach ... in`、`break`、`continue`
-- `repeat i: n { }`：
+- `if / else if / else`、`while`、`for i in a..b`、`for x in xs`、`break`、`continue`
+- `for i in 0..n { }`：
   - `i` はこのループで作る新しい `int` 変数で、`0` から `n - 1` まで 1 ずつ増える。
   - `n` は `int` の式で、ループに入るときに **1 回だけ評価する**。`n` が 0 以下なら 1 回も回らない。
   - `i` は読み取り専用（代入はコンパイルエラー）で、ループの外では使えない。
@@ -178,9 +178,9 @@ function main(): void {
 ## 名前とスコープ
 
 - **関数の中ではシャドーイング禁止**：引数、ローカル変数、トップレベルの変数と同じ名前を、入れ子の中や関数の中で宣言できない。兄弟のブロック（別々の `if` の中など）で同じ名前を宣言するのは、型が同じ場合に限り許す（Python では同じ変数になるため）。
-- **トップレベル**には `function`、`class`、`let`、`const` を書ける。
+- **トップレベル**には `function`、`class`、`var`、`const` を書ける。
   - トップレベルの変数の初期値には、リテラル・演算・他のトップレベルの `const`・組み込み関数だけを書ける（自作の関数やクラスは呼べない）。
-  - 関数の中でトップレベルの `let` に代入するときは、コンパイラが自動で `global` 宣言を出力する（読むだけなら不要）。
+  - 関数の中でトップレベルの `var` に代入するときは、コンパイラが自動で `global` 宣言を出力する（読むだけなら不要）。
 - **クラスは先に定義してから使う**：型としても `new` でも、定義より前の行では使えない。クラス自身の本体の中では自分の名前を使える（`next: Node?` など）。関数は順序を問わず呼べる（`main` を先頭に書いてよい）。
 - `self` はクラスの中（constructor とメソッド）でだけ使える。
 - `main()` はエントリポイントなので、自分で呼べない。
@@ -220,7 +220,7 @@ Kururi に書いた見た目のとおりに表示する。
 | `int` / `float` | Python と同じ（`3`、`3.5`） | `str(x)` または f 文字列 |
 | `boolean` | `true` / `false` | `__kururi_show(x)` |
 | `T?` | `null` または `T` の表示 | `__kururi_show(x)` |
-| 配列・オブジェクト | **v0.1 ではコンパイルエラー**（「配列はそのまま表示できません。`foreach` で 1 つずつ出力してください」） | — |
+| 配列・オブジェクト | **v0.1 ではコンパイルエラー**（「配列はそのまま表示できません。`for` で 1 つずつ出力してください」） | — |
 
 - `__kururi_show` は小さな補助関数で、`boolean` または `T?` を表示するプログラムの先頭にだけ出力する（`True` → `"true"`、`False` → `"false"`、`None` → `"null"`、それ以外は `str(x)`）。
 - 変数だけを表示する場合など、式が単純なときは `("true" if x else "false")` のように補助関数なしで出してよい。
@@ -234,17 +234,17 @@ Kururi に書いた見た目のとおりに表示する。
 | Kururi | Python |
 |---|---|
 | ファイルの先頭 | 何も出さない（初学者が混乱しないよう、`from __future__` も型ヒントも出さない）。`random` を使うときだけ `import random` |
-| `let x: int = 1` / `const` | `x = 1`（型と `const` の制約は消える） |
-| `elseif` | `elif` |
+| `var x: int = 1` / `const` | `x = 1`（型と `const` の制約は消える） |
+| `else if` | `elif` |
 | `true` / `false` / `null` | `True` / `False` / `None` |
-| `repeat i: n { }` | `for i in range(n):` |
+| `for i in 0..n { }` | `for i in range(n):` |
 | `` `a ${x}` `` | `f"a {x}"`（文字としての `{` `}` は `{{` `}}` にする） |
-| `foreach x in xs { }` | `for x in xs:` |
+| `for x in xs { }` | `for x in xs:` |
 | `function f(a: int): int` | `def f(a):`（型は消える） |
-| `constructor(...)` | `def __init__(self, ...):`（フィールドの初期値を先頭に出す） |
+| `constructor = (...)` | `def __init__(self, ...):`（フィールドの初期値を先頭に出す） |
 | `new Player("taro")` | `Player("taro")` |
 | 空の本体 `{ }` | `pass` |
-| 関数内でのトップレベル `let` への代入 | 関数の先頭に `global x` |
+| 関数内でのトップレベル `var` への代入 | 関数の先頭に `global x` |
 | `main()` の定義 | 末尾に `if __name__ == "__main__": main()` を出力 |
 
 - 変換先の Python は **3.12**（narapy の Pyodide 0.27 に合わせる）。テストも 3.12 に固定する。
@@ -256,9 +256,9 @@ Kururi に書いた見た目のとおりに表示する。
 
 ### Kururiの予約語
 
-`const let function return class public private new constructor self if elseif else while repeat foreach in break continue for true false null and or not int float string boolean void` と組み込み名（`output input toString toInt toFloat div random`）。
+`const var function return class public private new constructor self if else while for in break continue true false null and or not int float string boolean void` と組み込み名（`output input toString toInt toFloat div random`）。
 
-`for` は使わないが、他言語やPythonの経験者が書きがちなので予約語として残し、「Kururiでは `for` ではなく `repeat` を使います」と案内する。
+古い書き方（`let` `repeat` `foreach` `elseif`）は、予約語として残して「新しい書き方はこうです」と案内する（K0114）。
 
 ### Pythonの予約語（Kururiでは使えるはずが、変換後に衝突するもの）
 
@@ -345,9 +345,9 @@ kururi/
 | スライス | 内容 | 完了の目安 |
 |---|---|---|
 | S0 | 土台：リポジトリ、診断の仕組み、エラーコードの体系、ゴールデンテストの枠 | `kururi check` が空ファイルで動く |
-| S1 | `output`、`let`/`const`、`int`/`float`/`string`/`boolean`、四則演算、`toString`、文字列補間、**引数なしの `function main(): void`**、`if __name__`、`kururi run`（最小） | `output("hello")` と簡単な計算が実行できる |
-| S2a | `if`/`elseif`/`else`、`while`、`repeat`、`break`/`continue`、複合代入 | **example.kururi が正しい出力で動く** |
-| S2b | 配列、`foreach`、`push`/`removeAt`/`length`、文字列の添字 | 配列を使う例が動く |
+| S1 | `output`、`var`/`const`、`int`/`float`/`string`/`boolean`、四則演算、`toString`、文字列補間、**引数なしの `function main = () { }`**、`if __name__`、`kururi run`（最小） | `output("hello")` と簡単な計算が実行できる |
+| S2a | `if`/`else if`/`else`、`while`、`for i in a..b`、`break`/`continue`、複合代入 | **example.kururi が正しい出力で動く** |
+| S2b | 配列、`for`、`push`/`removeAt`/`length`、文字列の添字 | 配列を使う例が動く |
 | S3 | 関数（引数・戻り値）、型検査、`return` 抜けの検出、シャドーイング禁止、トップレベル変数と `global` | 再帰（階乗など）が動く |
 | S4 | クラス、`constructor`、`self`、`new`、フィールド初期値、`public`/`private` 検査 | 簡単なクラスの例が動く |
 | S5 | `T?` と `null`、絞り込み（最小）、`input`/`toInt`/`toFloat`/`div`、`boolean` と `T?` の表示 | 入力を受けて計算する例が動く |
@@ -392,3 +392,14 @@ kururi/
 - `input()`：出力欄の中にインラインで入力欄を出し、Enter で確定する（narapy と同じく SharedArrayBuffer と Atomics.wait で待つ。公開先でも動くよう `coi-serviceworker.js` を同梱）。
 - Python 欄：編集不可。変換できない間は、エラーの文章を出し続ける。
 - LSP：`packages/lsp`（`pnpm kururi-lsp` 相当は `tsx packages/lsp/src/bin.ts --stdio`）。診断のみ（全文同期）。エディタ側の拡張機能は含まない。
+
+### S10：構文の統一
+
+目的は「障壁なく学ぶ」こと。宣言を「種類 名前 = 中身」の形にそろえ、Python と違う書き方を減らした。
+
+- 変数 `var`（`let` をやめた）。型は `名前: 型` で変数・引数・フィールドに共通。
+- 関数 `function f = (a: int) -> int { }`。戻り値がなければ `->` を省く。
+- クラス `class C = { }`、`constructor = (...) { }`。継承 `class D = (C) { }` は予約のみ（K0002）。
+- ループ：`for i in 0..10`（範囲）と `for x in xs`（配列）の 2 つに統一。`repeat` / `foreach` はやめた。
+- 分岐：`else if`（`elseif` をやめた）。
+- 古い書き方は K0114 で「新しい書き方はこうです」と案内する。

@@ -1,5 +1,5 @@
-function main(): void {
-    let a: boolean = true
+function main = () {
+    var a: boolean = true
     if a && false || !a {
         output("x")
     }

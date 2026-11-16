@@ -4,9 +4,9 @@ error[K0212]: 「limit」は const なので、代入し直せません
 4 |     limit = 5
   |     ^^^^^ ここで代入しています
   |
-help: 値を変えたいときは、宣言を let limit に変えてください
+help: 値を変えたいときは、宣言を var limit に変えてください
 
-error[K0213]: 「i」はループ（repeat / foreach）の変数なので、代入できません
+error[K0213]: 「i」はループ（for）の変数なので、代入できません
  --> input.kururi:6:9
   |
 6 |         i += 1
@@ -17,7 +17,7 @@ help: 別の変数に入れて使ってください。条件で回したいと�
 error[K0202]: 「count」はすでに宣言されています
  --> input.kururi:7:13
   |
-7 |         let count: int = 1
+7 |         var count: int = 1
   |             ^^^^^ 同じ名前をもう一度宣言しています
   |
 help: 別の名前にしてください（関数の中では、外の変数と同じ名前も使えません）
@@ -30,7 +30,7 @@ error[K0306]: 条件には boolean が必要ですが、int です
   |
 help: 比べるときは == や < を使います（例: if x == 1）
 
-error[K0210]: break はループ（while か repeat）の中でしか使えません
+error[K0210]: break はループ（while か for）の中でしか使えません
   --> input.kururi:12:5
    |
 12 |     break

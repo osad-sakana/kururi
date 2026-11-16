@@ -79,11 +79,13 @@ export interface WhileStmt {
   readonly range: Range
 }
 
-export interface RepeatStmt {
-  readonly kind: "repeat"
+/** for i in a..b { }（a 以上 b 未満） */
+export interface RangeStmt {
+  readonly kind: "range"
   readonly name: string
   readonly nameRange: Range
-  readonly count: Expr
+  readonly start: Expr
+  readonly end: Expr
   readonly body: readonly Stmt[]
   readonly range: Range
 }
@@ -108,7 +110,7 @@ export interface JumpStmt {
   readonly range: Range
 }
 
-export type Stmt = VarDecl | ExprStmt | AssignStmt | IfStmt | WhileStmt | RepeatStmt | ForeachStmt | ReturnStmt | JumpStmt
+export type Stmt = VarDecl | ExprStmt | AssignStmt | IfStmt | WhileStmt | RangeStmt | ForeachStmt | ReturnStmt | JumpStmt
 
 export interface Param {
   readonly name: string

@@ -1,0 +1,40 @@
+// 新しい書き方（var・function 名前 = (…) -> 型・for..in・else if）
+const LIMIT: int = 5
+var total: int = 0
+
+function add = (a: int, b: int) -> int {
+    return a + b
+}
+
+class Counter = {
+    private count: int = 0
+    constructor = (start: int) {
+        self.count = start
+    }
+    public function next = () -> int {
+        self.count += 1
+        return self.count
+    }
+}
+
+function main = () {
+    for i in 0..LIMIT {
+        total = add(total, i)
+    }
+    for j in 2..LIMIT {
+        if j % 2 == 0 {
+            output(j)
+        } else if j == 3 {
+            output("three")
+        } else {
+            output("other")
+        }
+    }
+    var names: string[] = ["a", "b"]
+    for name in names {
+        output(name)
+    }
+    var c: Counter = new Counter(10)
+    output(c.next())
+    output(total)
+}

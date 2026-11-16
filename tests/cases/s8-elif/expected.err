@@ -4,6 +4,6 @@ error[K0101]: ここには改行が必要ですが、「elif」がありまし�
 5 |     } elif a == 2 {
   |       ^^^^ 改行が必要です
   |
-help: Kururi では elif ではなく elseif と書きます
+help: Kururi では elif ではなく else if と書きます
 
 エラー 1 件

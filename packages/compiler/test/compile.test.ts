@@ -16,17 +16,17 @@ describe("compile (基本)", () => {
   })
 
   it("まだ対応していない構文は K0001 を最初の文字に付けて返す", () => {
-    const result = compile("function main(): void {\n  class\n}\n")
+    const result = compile("function main = () {\n  class\n}\n")
     expect(result.diagnostics).toHaveLength(1)
     const [d] = result.diagnostics
     expect(d?.code).toBe("K0001")
     expect(d?.severity).toBe("error")
-    expect(d?.span.start).toEqual({ offset: 26, line: 2, column: 3 })
+    expect(d?.span.start).toEqual({ offset: 23, line: 2, column: 3 })
     expect(result.python).toBe("")
   })
 
   it("結果は凍結されている（不変）", () => {
-    const result = compile("function main(): void {\n}\n")
+    const result = compile("function main = () {\n}\n")
     expect(Object.isFrozen(result)).toBe(true)
     expect(Object.isFrozen(result.diagnostics)).toBe(true)
   })

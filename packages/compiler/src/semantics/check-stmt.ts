@@ -97,7 +97,7 @@ function checkStatement(
         checkBlock(branch.body, locals, loopDepth, ctx, union(narrowed, whenTrue(branch.condition)))
       }
       if (stmt.otherwise !== undefined) {
-        // if x == null { ... } else { ... } の else の中だけ（elseif があるときは絞り込まない）
+        // if x == null { ... } else { ... } の else の中だけ（else if があるときは絞り込まない）
         const [only] = stmt.branches
         const known = stmt.branches.length === 1 && only !== undefined ? whenFalse(only.condition) : new Set<string>()
         checkBlock(stmt.otherwise, locals, loopDepth, ctx, union(narrowed, known))
@@ -108,8 +108,9 @@ function checkStatement(
       // while x != null { ... } の本体では、毎回条件を確かめ直すので x は null でない
       checkBlock(stmt.body, locals, loopDepth + 1, ctx, union(loopNarrowing(narrowed, stmt.body), whenTrue(stmt.condition)))
       return locals
-    case "repeat": {
-      checkCondition(stmt.count, "repeat の回数", "int", scope, ctx)
+    case "range": {
+      checkCondition(stmt.start, "for の始まり", "int", scope, ctx)
+      checkCondition(stmt.end, "for の終わり", "int", scope, ctx)
       const inner = declare(stmt.name, "int", "loop", stmt.nameRange, locals, ctx)
       checkBlock(stmt.body, inner, loopDepth + 1, ctx, loopNarrowing(narrowed, stmt.body))
       return locals
@@ -117,7 +118,7 @@ function checkStatement(
     case "foreach": {
       const iterable = ctx.exprs.nonNullType(stmt.iterable, ctx.exprs.valueType(stmt.iterable, scope))
       if (iterable !== "error" && !isArray(iterable)) {
-        ctx.reporter.report("K0306", stmt.iterable.range, { what: "foreach の対象", expected: "配列", actual: iterable })
+        ctx.reporter.report("K0306", stmt.iterable.range, { what: "for の対象", expected: "配列", actual: iterable })
       }
       const element = isArray(iterable) ? elementType(iterable) : "error"
       const inner = declare(stmt.name, element, "loop", stmt.nameRange, locals, ctx)

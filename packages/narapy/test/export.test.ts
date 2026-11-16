@@ -32,7 +32,7 @@ describe("buildNarapyArchive", () => {
 })
 
 describe("buildProjectUrl", () => {
-  const files = { "main.py": 'print("こんにちは")\n', "main.kururi.txt": "function main(): void {}\n" }
+  const files = { "main.py": 'print("こんにちは")\n', "main.kururi.txt": "function main = () {}\n" }
 
   it("#project= に zlib + base64url（パディングなし）で載せる", () => {
     const url = buildProjectUrl(files)

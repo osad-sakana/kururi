@@ -1,7 +1,7 @@
 error[K0302]: 文字列と数値は + でつなげません
  --> input.kururi:3:34
   |
-3 |     let row: string = "" + " " + result
+3 |     var row: string = "" + " " + result
   |                                  ^^^^^^ この値は int です
   |
 help: toString(値) で文字列にするか、文字列補間 `${値}` を使ってください

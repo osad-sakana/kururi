@@ -1,5 +1,5 @@
 (* ============================================================
-   Kururi 文法 草案 v0.2
+   Kururi 文法 草案 v0.3（S10: 宣言を「種類 名前 = 中身」の形にそろえた）
 
    記法
      =        定義          |      または
@@ -26,7 +26,7 @@
      2. 深さが 0 のとき、直前のトークンが次のどれかなら NL を捨てる（次の行へ続く）。
           二項演算子（行末の "-" は常に二項演算子として扱う）/ 代入演算子 / "," / "."
           ※ "{" の直後の NL は捨てない（文法の { NL } が受ける）。
-     3. 直前のトークンが "}" で、次のトークンが "else" / "elseif" のとき、NL を捨てる。
+     3. 直前のトークンが "}" で、次のトークンが "else" のとき、NL を捨てる（else if は "else" "if" の 2 語）。
      4. "}" の直前に NL がなければ補う（{ return 1 } のような 1 行ブロックのため）。
           ※ 文字列補間の ${ ... } を閉じる "}" は対象外。
      5. 連続する NL は 1 つにまとめる。
@@ -39,7 +39,7 @@ IDENT     = idStart { idContinue } ;
                    NFKC 正規化で形が変わる文字（全角英数字・半角カナなど）はエラー *)
 
 INT       = "0" | nonZeroDigit { digit } ;               (* 007 は書けない *)
-FLOAT     = INT "." digit { digit } ;
+FLOAT     = INT "." digit { digit } ;               (* 0..10 の ".." は範囲の記号で、小数点ではない *)
 digit     = "0" … "9" ;
 nonZeroDigit = "1" … "9" ;
 
@@ -56,8 +56,9 @@ templateEscape = "\" ( "`" | "$" | "\" | "n" | "t" ) ;   (* \` と \${ で文字
 (* コメント：  // 行末まで    /* 次の */ まで（入れ子なし） *)
 
 (* 予約語（IDENT にできない）
-   const let function return class public private new constructor self
-   if elseif else while repeat foreach in break continue for
+   const var function return class public private new constructor self
+   if else while for in break continue
+   （古い書き方の案内用に let repeat foreach elseif も予約語のまま残す）
    true false null and or not
    int float string boolean void
    組み込み名: output input toString toInt toFloat div random *)
@@ -69,7 +70,7 @@ templateEscape = "\" ( "`" | "$" | "\" | "n" | "t" ) ;   (* \` と \${ で文字
 
 program      = { NL } { topLevel { NL } } EOF ;
 topLevel     = functionDecl | classDecl | varDecl ;
-                (* main の存在と形 function main(): void は意味検査で確認 *)
+                (* main の存在と形 function main = () { } は意味検査で確認 *)
 
 
 (* ------------------------------------------------------------
@@ -87,17 +88,18 @@ returnType   = "void" | type ;                        (* void は戻り値の型
    4. 宣言
    ------------------------------------------------------------ *)
 
-varDecl      = ( "let" | "const" ) IDENT ":" type "=" expr NL ;
+varDecl      = ( "var" | "const" ) IDENT ":" type "=" expr NL ;
 
-functionDecl = "function" IDENT "(" [ params ] ")" ":" returnType block ;
+functionDecl = "function" IDENT "=" "(" [ params ] ")" [ "->" returnType ] block ;
+                (* "->" を省くと戻り値なし（void）。"-> void" と書いてもよい *)
 params       = param { "," param } ;
 param        = IDENT ":" type ;
 
-classDecl    = "class" IDENT "{" { NL } { member { NL } } "}" ;
+classDecl    = "class" IDENT "=" "{" { NL } { member { NL } } "}" ;
 member       = fieldDecl | constructorDecl | methodDecl ;
 access       = "public" | "private" ;                 (* 省略すると private *)
 fieldDecl    = [ access ] IDENT ":" type [ "=" expr ] NL ;
-constructorDecl = "constructor" "(" [ params ] ")" block ;      (* 常に外から呼べる。access は付けられない *)
+constructorDecl = "constructor" "=" "(" [ params ] ")" block ;      (* 常に外から呼べる。access は付けられない *)
 methodDecl   = [ access ] functionDecl ;
 
 
@@ -111,8 +113,7 @@ statement    = varDecl
              | simpleStmt NL
              | ifStmt
              | whileStmt
-             | repeatStmt
-             | foreachStmt
+             | forStmt
              | returnStmt NL
              | "break" NL
              | "continue" NL ;
@@ -131,13 +132,14 @@ returnStmt   = "return" [ expr ] ;
 
 (* 条件の位置に assignOp が来たとき（if x = 1 { ）は、構文エラーとして
    「条件には == を使います。= は代入です」と案内する。 *)
-ifStmt       = "if" expr block { "elseif" expr block } [ "else" block ] ;
+ifStmt       = "if" expr block { "else" "if" expr block } [ "else" block ] ;
 whileStmt    = "while" expr block ;
 
-(* 回数で回す。IDENT は新しい int 変数（0 から n-1。読み取り専用で、ループの外では使えない）。
-   expr は int で、ループに入るときに 1 回だけ評価する（Python の for i in range(n) に対応）。 *)
-repeatStmt   = "repeat" IDENT ":" expr block ;
-foreachStmt  = "foreach" IDENT "in" expr block ;   (* IDENT の型は要素の型から決まる *)
+(* for は 2 通り。IDENT は新しい変数で、読み取り専用。ループの外では使えない。
+   範囲: for i in 0..n { }   i は int で、始まり以上・終わり未満。両端は int で、ループに入るとき 1 回だけ評価する
+                              （Python の for i in range(a, b) に対応）。
+   配列: for x in xs { }     x の型は要素の型から決まる。 *)
+forStmt      = "for" IDENT "in" ( expr ".." expr | expr ) block ;
 
 
 (* ------------------------------------------------------------
@@ -187,19 +189,19 @@ arrayLiteral   = "[" [ expr { "," expr } [ "," ] ] "]" ;   (* 末尾カンマ可
    - 添字に負の整数リテラル（a[-1]）
    - T? の絞り込み範囲の外で T として使った（絞り込みはローカル変数・引数のみ）
    - void 以外の関数で return が抜けている
-   - repeat の回数が int でない
+   - for の範囲の端が int でない
    名前・スコープ
-   - const の再代入禁止 / repeat の変数への代入禁止
+   - const の再代入禁止 / for の変数への代入禁止
    - 関数内でのシャドーイング（引数・ローカル・トップレベルと同名の宣言）
        兄弟のブロックでの再宣言は、型が同じ場合のみ可
    - 変数のスコープ外の使用
    - クラスを定義より前の行で型や new に使った（自分自身の本体の中は可）
    - トップレベルの変数の初期値に自作の関数・クラスを使った
-   - main の有無と形 (function main(): void) / main を呼び出した
+   - main の有無と形 (function main = () { }) / main を呼び出した
    - self をクラスの外で使った
    予約語・識別子
    - 予約語 / Python予約語を識別子に使った
-   - for を使った（「repeat を使います」と案内）
+   - 古い書き方（let / repeat / foreach / elseif）の案内（K0114）。for (…; …; …) も同様
    - NFKC 正規化で形が変わる識別子（全角英数字・半角カナなど）、"__" で始まる識別子
    - 同じクラスでフィールドとメソッドが同名
    クラス

@@ -1,15 +1,15 @@
-error[K0503]: Kururi には for がありません
- --> input.kururi:2:5
+error[K0114]: 「for (…; …; …)」は Kururi では使いません
+ --> input.kururi:2:9
   |
-2 |     for (let i: int = 0; i < 3; i += 1) {
-  |     ^^^ for は使えません
+2 |     for (var i: int = 0; i < 3; i += 1) {
+  |         ^ 書き方が変わっています
   |
-help: 回数で回すときは repeat i: 10 { ... } と書きます
+help: 回数で回すときは for i in 0..10 { ... }、配列を 1 つずつ取り出すときは for x in xs { ... } と書きます
 
 error[K0103]: 「;」は Kururi では使えない文字です
  --> input.kururi:2:24
   |
-2 |     for (let i: int = 0; i < 3; i += 1) {
+2 |     for (var i: int = 0; i < 3; i += 1) {
   |                        ^
   |
 help: Kururi では文の終わりに ; は要りません。改行で文が終わります

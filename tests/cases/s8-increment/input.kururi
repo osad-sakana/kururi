@@ -1,4 +1,4 @@
-function main(): void {
-    let count: int = 0
+function main = () {
+    var count: int = 0
     count++
 }

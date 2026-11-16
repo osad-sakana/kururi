@@ -1,7 +1,7 @@
 error[K0301]: string? の値を int には入れられません
  --> input.kururi:3:18
   |
-3 |     let n: int = s
+3 |     var n: int = s
   |                  ^ この値は string? です
   |
 help: null かもしれない値は、if x != null { ... } の中なら使えます
@@ -9,7 +9,7 @@ help: null かもしれない値は、if x != null { ... } の中なら使えま
 error[K0301]: null の値を int には入れられません
  --> input.kururi:4:18
   |
-4 |     let m: int = null
+4 |     var m: int = null
   |                  ^^^^ この値は null です
   |
 help: null を入れたいときは、型の後ろに ? を付けてください（例: int?）

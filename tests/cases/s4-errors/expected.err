@@ -49,7 +49,7 @@ help: self は、クラスの constructor やメソッドの中で、そのオ�
 error[K0208]: 「Missing」という型はありません
   --> input.kururi:21:12
    |
-21 |     let q: Missing = new Missing()
+21 |     var q: Missing = new Missing()
    |            ^^^^^^^ 知らない型です
    |
 help: 使える型は int、float、string、boolean です
@@ -57,9 +57,9 @@ help: 使える型は int、float、string、boolean です
 error[K0201]: 「Missing」という名前は宣言されていません
   --> input.kururi:21:26
    |
-21 |     let q: Missing = new Missing()
+21 |     var q: Missing = new Missing()
    |                          ^^^^^^^ この名前は見つかりません
    |
-help: 先に let か const で宣言してください。綴りも見直してください
+help: 先に var か const で宣言してください。綴りも見直してください
 
 エラー 8 件

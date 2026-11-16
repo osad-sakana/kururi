@@ -83,7 +83,7 @@ export class Cursor {
     const found = this.peek()
     const hint =
       found.kind === "ident" && found.text === "elif"
-        ? "Kururi では elif ではなく elseif と書きます"
+        ? "Kururi では elif ではなく else if と書きます"
         : "1 行に書く文は 1 つだけです。続きは次の行に書いてください"
     this.expected("改行", hint)
     return false
@@ -111,8 +111,7 @@ export class Cursor {
   /** 宣言する名前として使えるか調べる（予約語など）。使えなければ診断を出す。 */
   checkDeclName(tok: Token): boolean {
     if (tok.kind === "keyword") {
-      if (tok.text === "for") this.report("K0503", tok.range)
-      else this.report("K0501", tok.range, { name: tok.text })
+      this.report("K0501", tok.range, { name: tok.text })
       return false
     }
     if (tok.kind !== "ident") {

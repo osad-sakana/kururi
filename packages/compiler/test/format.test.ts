@@ -36,7 +36,7 @@ describe("displayWidth", () => {
 
 describe("formatDiagnostic", () => {
   it("位置・抜粋・下線・ヒントを整形する", () => {
-    const src = "let a: int = 1\nrow = row + result\n"
+    const src = "var a: int = 1\nrow = row + result\n"
     const start = src.indexOf("result")
     const d = diag(src, start, start + "result".length, {
       label: "この値は int です",

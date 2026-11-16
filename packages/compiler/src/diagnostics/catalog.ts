@@ -65,12 +65,12 @@ const OTHER_LANGUAGE_NAMES: Readonly<Record<string, string>> = {
   str: "文字列にするときは toString(x) と書きます",
   parseInt: "整数にするときは toInt(x) と書きます",
   parseFloat: "小数にするときは toFloat(x) と書きます",
-  range: "回数で回すときは repeat i: 10 { ... } と書きます",
+  range: "回数で回すときは for i in 0..10 { ... } と書きます",
   append: "配列に足すときは list.push(x) と書きます",
 }
 
 function undeclaredHint(name: string): string {
-  return OTHER_LANGUAGE_NAMES[name] ?? "先に let か const で宣言してください。綴りも見直してください"
+  return OTHER_LANGUAGE_NAMES[name] ?? "先に var か const で宣言してください。綴りも見直してください"
 }
 
 /** 診断の文言はここに集める。文言の見直しはこのファイルだけで済むようにする。 */
@@ -148,6 +148,13 @@ export const DIAGNOSTIC_CATALOG = {
     label: () => "1 ずつ増やす・減らす書き方はありません",
     hint: ({ op = "" }) => `x ${op}= 1 と書きます（例: ${op === "+" ? "count += 1" : "count -= 1"}）`,
   },
+  K0114: {
+    code: "K0114",
+    severity: "error",
+    message: ({ old = "" }) => `「${old}」は Kururi では使いません`,
+    label: () => "書き方が変わっています",
+    hint: ({ hint }) => hint,
+  },
   K0110: {
     code: "K0110",
     severity: "error",
@@ -179,7 +186,7 @@ export const DIAGNOSTIC_CATALOG = {
     code: "K0204",
     severity: "error",
     message: () => "main 関数がありません",
-    hint: () => "function main(): void { ... } を書いてください。プログラムはここから始まります",
+    hint: () => "function main = () { ... } を書いてください。プログラムはここから始まります",
   },
   K0205: {
     code: "K0205",
@@ -191,14 +198,14 @@ export const DIAGNOSTIC_CATALOG = {
   K0206: {
     code: "K0206",
     severity: "error",
-    message: ({ name = "" }) => `「${name}」は let の変数なので、トップレベルの初期値には使えません`,
-    label: () => "let の変数です",
+    message: ({ name = "" }) => `「${name}」は var の変数なので、トップレベルの初期値には使えません`,
+    label: () => "var の変数です",
     hint: () => "トップレベルの初期値に使えるのは、const で宣言した変数だけです。const にするか、main の中で使ってください",
   },
   K0210: {
     code: "K0210",
     severity: "error",
-    message: ({ name = "" }) => `${name} はループ（while か repeat）の中でしか使えません`,
+    message: ({ name = "" }) => `${name} はループ（while か for）の中でしか使えません`,
     label: () => "ループの外です",
   },
   K0211: {
@@ -213,19 +220,19 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: ({ name = "" }) => `「${name}」は const なので、代入し直せません`,
     label: () => "ここで代入しています",
-    hint: ({ name = "" }) => `値を変えたいときは、宣言を let ${name} に変えてください`,
+    hint: ({ name = "" }) => `値を変えたいときは、宣言を var ${name} に変えてください`,
   },
   K0213: {
     code: "K0213",
     severity: "error",
-    message: ({ name = "" }) => `「${name}」はループ（repeat / foreach）の変数なので、代入できません`,
+    message: ({ name = "" }) => `「${name}」はループ（for）の変数なので、代入できません`,
     label: () => "ここで代入しています",
     hint: () => "別の変数に入れて使ってください。条件で回したいときは while を使います",
   },
   K0207: {
     code: "K0207",
     severity: "error",
-    message: () => "main は「function main(): void」と書きます",
+    message: () => "main は「function main = () { ... }」と書きます",
     label: () => "ここが違います",
     hint: () => "main には引数を付けられず、戻り値の型は void にします",
   },
@@ -285,7 +292,7 @@ export const DIAGNOSTIC_CATALOG = {
     label: ({ actual = "" }) => `この値は ${actual} です`,
     hint: ({ what = "" }) => {
       if (what === "条件") return "比べるときは == や < を使います（例: if x == 1）"
-      if (what.startsWith("foreach")) return "foreach の後ろには配列を書きます（例: foreach x in xs { ... }）"
+      if (what.startsWith("for の対象")) return "for x in の後ろには配列を書きます（例: for x in xs { ... }）"
       return "整数になる式を書いてください"
     },
   },
@@ -296,7 +303,7 @@ export const DIAGNOSTIC_CATALOG = {
     label: ({ what = "配列" }) => `${what}です`,
     hint: ({ what = "配列" }) =>
       what === "配列"
-        ? "foreach で 1 つずつ output してください（例: foreach x in xs { output(x) }）"
+        ? "for で 1 つずつ output してください（例: for x in xs { output(x) }）"
         : "表示したいフィールドを取り出して、output してください（例: output(p.name)）",
   },
   K0314: {
@@ -304,7 +311,7 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: () => "空の配列 [] は、型が決まる場所でしか書けません",
     label: () => "何の配列か分かりません",
-    hint: () => "let a: int[] = [] のように、型を書いた変数に入れてください",
+    hint: () => "var a: int[] = [] のように、型を書いた変数に入れてください",
   },
   K0315: {
     code: "K0315",
@@ -442,13 +449,6 @@ export const DIAGNOSTIC_CATALOG = {
       `「${name}」は Kururi では予約語ではありませんが、Python の予約語です。変換後の Python で動かなくなるため使えません`,
     label: () => "Python の予約語です",
     hint: () => "別の名前にしてください",
-  },
-  K0503: {
-    code: "K0503",
-    severity: "error",
-    message: () => "Kururi には for がありません",
-    label: () => "for は使えません",
-    hint: () => "回数で回すときは repeat i: 10 { ... } と書きます",
   },
   K0504: {
     code: "K0504",

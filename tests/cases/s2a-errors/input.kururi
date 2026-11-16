@@ -1,10 +1,10 @@
-function main(): void {
+function main = () {
     const limit: int = 3
-    let count: int = 0
+    var count: int = 0
     limit = 5
-    repeat i: 3 {
+    for i in 0..3 {
         i += 1
-        let count: int = 1
+        var count: int = 1
     }
     while count {
         break

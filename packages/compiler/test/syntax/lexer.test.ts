@@ -11,7 +11,7 @@ function codes(source: string): string[] {
 
 describe("lex: 基本のトークン", () => {
   it("宣言を分解する", () => {
-    expect(texts("let a: int = 1")).toEqual(["let", "a", ":", "int", "=", "1", "NL", "EOF"])
+    expect(texts("var a: int = 1")).toEqual(["var", "a", ":", "int", "=", "1", "NL", "EOF"])
   })
 
   it("空のソースは EOF だけ", () => {
@@ -31,7 +31,7 @@ describe("lex: 基本のトークン", () => {
   })
 
   it("日本語の識別子を使える", () => {
-    const result = lex("let 合計: int = 1")
+    const result = lex("var 合計: int = 1")
     expect(result.diagnostics).toEqual([])
     expect(result.tokens[1]?.kind).toBe("ident")
     expect(result.tokens[1]?.text).toBe("合計")
@@ -73,9 +73,9 @@ describe("lex: 改行の規則", () => {
     expect(texts("{ }")).toEqual(["{", "}", "NL", "EOF"])
   })
 
-  it("} と else / elseif のあいだの改行は捨てる", () => {
+  it("} と else / else if のあいだの改行は捨てる", () => {
     expect(texts("}\nelse {")).toEqual(["}", "else", "{", "NL", "EOF"])
-    expect(texts("}\nelseif x {")).toEqual(["}", "elseif", "x", "{", "NL", "EOF"])
+    expect(texts("}\nelse if x {")).toEqual(["}", "else", "if", "x", "{", "NL", "EOF"])
     expect(texts("}\nlet")).toEqual(["}", "NL", "let", "NL", "EOF"])
   })
 

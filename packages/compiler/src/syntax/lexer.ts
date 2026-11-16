@@ -8,7 +8,7 @@ export interface LexResult {
   readonly diagnostics: readonly Diagnostic[]
 }
 
-const TWO_CHAR_OPS: ReadonlySet<string> = new Set(["==", "!=", "<=", ">=", "+=", "-=", "*=", "/=", "%="])
+const TWO_CHAR_OPS: ReadonlySet<string> = new Set(["==", "!=", "<=", ">=", "+=", "-=", "*=", "/=", "%=", "..", "->"])
 const ONE_CHAR_OPS: ReadonlySet<string> = new Set("+-*/%=<>()[]{},.:?".split(""))
 const STRING_ESCAPES: Readonly<Record<string, string>> = { '"': '"', "\\": "\\", n: "\n", t: "\t" }
 const TEMPLATE_ESCAPES: Readonly<Record<string, string>> = { "`": "`", $: "$", "\\": "\\", n: "\n", t: "\t" }

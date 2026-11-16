@@ -1,14 +1,14 @@
-class Node {
+class Node = {
     public value: int
     public next: Node? = null
 
-    constructor(value: int) {
+    constructor = (value: int) {
         self.value = value
     }
 }
 
-function findFirstLong(words: string[]): string? {
-    foreach w in words {
+function findFirstLong = (words: string[]) -> string? {
+    for w in words {
         if w.length > 3 {
             return w
         }
@@ -16,10 +16,10 @@ function findFirstLong(words: string[]): string? {
     return null
 }
 
-function main(): void {
-    let name: string = input()
-    let age: int = toInt(input())
-    let found: string? = findFirstLong([name, "ab", "abcdef"])
+function main = () {
+    var name: string = input()
+    var age: int = toInt(input())
+    var found: string? = findFirstLong([name, "ab", "abcdef"])
     if found != null {
         output(`長い名前: ${found}（${found.length} 文字）`)
     } else {
@@ -28,10 +28,10 @@ function main(): void {
     output(found)
     output(age > 18)
 
-    let head: Node = new Node(1)
+    var head: Node = new Node(1)
     head.next = new Node(2)
-    let cur: Node? = head
-    let sum: int = 0
+    var cur: Node? = head
+    var sum: int = 0
     while cur != null {
         sum += cur.value
         cur = cur.next

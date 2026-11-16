@@ -1,5 +1,5 @@
-function main(): void {
-    let result: int = 12
-    let row: string = "" + " " + result
+function main = () {
+    var result: int = 12
+    var row: string = "" + " " + result
     output(row)
 }

@@ -1,5 +1,5 @@
-function main(): void {
-    let count: int = 0
+function main = () {
+    var count: int = 0
     if count = 0 {
         output("zero")
     }
