@@ -24,7 +24,7 @@
   --color-code-func: #d8b349;
 }
 @media (prefers-color-scheme: light) {
-  :root {
+  :root:not([data-theme]) {
     --color-canvas: #f6f6f7;
     --color-panel: #ffffff;
     --color-line: #e3e3e6;
@@ -46,6 +46,29 @@
     --color-code-func: #734e00;
   }
 }
+:root[data-theme="light"] {
+  --color-canvas: #f6f6f7;
+  --color-panel: #ffffff;
+  --color-line: #e3e3e6;
+  --color-ink: #202124;
+  --color-muted: #75767d;
+  --color-hover: #eef0f2;
+  --color-accent: #4d7c0f;
+  --color-accent-ink: #ffffff;
+  --color-danger: #be222a;
+  --color-success: #00722e;
+  --color-warn: #9a3e00;
+  --color-editor: #fbfbfc;
+  --color-code: #2a2b2f;
+  --color-code-keyword: #6d41a9;
+  --color-code-string: #045e17;
+  --color-code-number: #9a3e00;
+  --color-code-comment: #9a9ba1;
+  --color-code-builtin: #3f6212;
+  --color-code-func: #734e00;
+}
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; }
 
 html, body { height: 100%; margin: 0; }
 body { display: flex; flex-direction: column; background: var(--color-canvas); color: var(--color-ink); font-family: var(--font-sans); overflow: hidden; }
@@ -53,6 +76,9 @@ header { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1rem; 
 .brand { display: flex; flex-direction: column; line-height: 1; }
 h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
 h1 svg { display: block; height: 30px; width: auto; }
+.controls { display: flex; align-items: center; gap: 0.25rem; border: 1px solid var(--color-line); border-radius: 8px; overflow: hidden; }
+.controls button { border: 0; border-radius: 0; padding: 0.4rem 0.6rem; }
+#font-size { min-width: 2.2rem; text-align: center; font: 12px var(--font-mono); color: var(--color-muted); user-select: none; }
 #status { flex: 1; font-size: 12px; font-family: var(--font-mono); color: var(--color-muted); }
 #status.error { color: var(--color-danger); }
 button { font: inherit; font-size: 12px; padding: 0.4rem 0.75rem; border-radius: 8px; border: 1px solid var(--color-line); background: transparent; color: var(--color-muted); cursor: pointer; transition: color 0.15s, background 0.15s; }
@@ -68,7 +94,7 @@ section + section { border-left: 1px solid var(--color-line); }
 .right { display: grid; grid-template-rows: auto 1fr auto auto; }
 #python { min-height: 0; }
 #console { display: flex; flex-direction: column; padding: 0.5rem 1rem; height: 11rem; background: var(--color-editor); }
-#output { flex: 1; margin: 0; overflow: auto; font: 13px var(--font-mono); color: var(--color-code); white-space: pre-wrap; }
+#output { flex: 1; margin: 0; overflow: auto; font: var(--code-size, 13px) var(--font-mono); color: var(--color-code); white-space: pre-wrap; }
 #output .error { color: var(--color-danger); }
 #output .prompt-line { display: flex; }
 #output .prompt-line input { flex: 1; min-width: 0; border: 0; border-bottom: 1px solid var(--color-line); background: transparent; color: inherit; font: inherit; padding: 0; outline: none; }

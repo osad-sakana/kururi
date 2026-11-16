@@ -9,7 +9,8 @@ import { classifyLines } from "./line-icons"
 import { mapRuntimeError } from "./runtime"
 import { createRunner } from "./runner"
 import { SAMPLE } from "./sample"
-import { installThemes } from "./theme"
+import { FONT_SIZE, clampFontSize, loadFontSize, loadThemePreference, nextThemePreference, saveFontSize, saveThemePreference } from "./preferences"
+import { applyTheme, defineThemes, onSystemThemeChange } from "./theme"
 import "./style.css"
 
 applyBrand()
@@ -55,12 +56,16 @@ monaco.languages.setLanguageConfiguration(LANGUAGE_ID, {
   ],
 })
 
-installThemes()
+defineThemes()
+let themePreference = loadThemePreference()
+applyTheme(themePreference)
+onSystemThemeChange(() => applyTheme(themePreference))
+let fontSize = loadFontSize()
 // narapy のエディタと同じ設定（書体、折り返し、細いスクロールバー など）
 const editorOptions = {
   automaticLayout: true,
   minimap: { enabled: false },
-  fontSize: 13,
+  fontSize,
   fontFamily: '"0xProto", "Fira Code", "Cascadia Code", monospace',
   fontLigatures: true,
   scrollBeyondLastLine: false,
@@ -107,6 +112,38 @@ const output = element("output")
 let currentUrl: string | null = null
 let currentAnalysis = analyze("")
 let pendingInput: { readonly row: HTMLElement; readonly cancel: () => void } | null = null
+
+const THEME_LABELS = { system: "見た目：自動", light: "見た目：ライト", dark: "見た目：ダーク" } as const
+const themeButton = element<HTMLButtonElement>("theme")
+const fontLabel = element("font-size")
+const fontDown = element<HTMLButtonElement>("font-down")
+const fontUp = element<HTMLButtonElement>("font-up")
+
+function showPreferences(): void {
+  themeButton.textContent = THEME_LABELS[themePreference]
+  fontLabel.textContent = String(fontSize)
+  fontDown.disabled = fontSize <= FONT_SIZE.min
+  fontUp.disabled = fontSize >= FONT_SIZE.max
+  document.documentElement.style.setProperty("--code-size", `${fontSize}px`)
+  editor.updateOptions({ fontSize })
+  pythonView.updateOptions({ fontSize })
+}
+
+function changeFontSize(next: number): void {
+  fontSize = clampFontSize(next)
+  saveFontSize(fontSize)
+  showPreferences()
+}
+
+fontDown.addEventListener("click", () => changeFontSize(fontSize - FONT_SIZE.step))
+fontUp.addEventListener("click", () => changeFontSize(fontSize + FONT_SIZE.step))
+themeButton.addEventListener("click", () => {
+  themePreference = nextThemePreference(themePreference)
+  saveThemePreference(themePreference)
+  applyTheme(themePreference)
+  showPreferences()
+})
+showPreferences()
 
 function appendOutput(text: string, className?: string): void {
   const line = document.createElement("div")

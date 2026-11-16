@@ -1,5 +1,6 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api"
 import { PALETTES, bareHex, type Palette, type ResolvedTheme } from "./palette"
+import { resolveTheme, type ThemePreference } from "./preferences"
 
 const THEME_NAMES: Readonly<Record<ResolvedTheme, string>> = { dark: "kururi-dark", light: "kururi-light" }
 const DARK_QUERY = "(prefers-color-scheme: dark)"
@@ -42,15 +43,21 @@ function themeData(theme: ResolvedTheme, c: Palette): monaco.editor.IStandaloneT
   }
 }
 
-export function currentTheme(): ResolvedTheme {
-  return window.matchMedia(DARK_QUERY).matches ? "dark" : "light"
-}
+const systemIsDark = (): boolean => window.matchMedia(DARK_QUERY).matches
 
-/** 両方のテーマを登録し、OS の明暗に合わせて切り替える。 */
-export function installThemes(): void {
+/** 両方のテーマを登録する。 */
+export function defineThemes(): void {
   for (const theme of ["dark", "light"] as const) monaco.editor.defineTheme(THEME_NAMES[theme], themeData(theme, PALETTES[theme]))
-  const apply = () => monaco.editor.setTheme(THEME_NAMES[currentTheme()])
-  apply()
-  window.matchMedia(DARK_QUERY).addEventListener("change", apply)
 }
 
+/** 選んだ見た目を、ページ（data-theme）と Monaco に反映する。自動のときは data-theme を外し、OS に従う。 */
+export function applyTheme(preference: ThemePreference): void {
+  if (preference === "system") delete document.documentElement.dataset.theme
+  else document.documentElement.dataset.theme = preference
+  monaco.editor.setTheme(THEME_NAMES[resolveTheme(preference, systemIsDark())])
+}
+
+/** OS の明暗が変わったときに呼ぶ（自動のときだけ見た目が変わる）。 */
+export function onSystemThemeChange(listener: () => void): void {
+  window.matchMedia(DARK_QUERY).addEventListener("change", listener)
+}
