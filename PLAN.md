@@ -389,5 +389,6 @@ kururi/
 ### S9 の実装メモ
 
 - 実行：Pyodide 0.27.0（narapy と同じ）を Web Worker で動かす。画面を固めず、10 秒を超えたらワーカーごと止める（「止める」ボタンもある）。
-- `input()`：画面の入力欄に書いた行を 1 行ずつ渡す。足りなければ `EOFError`。
+- `input()`：出力欄の中にインラインで入力欄を出し、Enter で確定する（narapy と同じく SharedArrayBuffer と Atomics.wait で待つ。公開先でも動くよう `coi-serviceworker.js` を同梱）。
+- Python 欄：編集不可。変換できない間は、エラーの文章を出し続ける。
 - LSP：`packages/lsp`（`pnpm kururi-lsp` 相当は `tsx packages/lsp/src/bin.ts --stdio`）。診断のみ（全文同期）。エディタ側の拡張機能は含まない。

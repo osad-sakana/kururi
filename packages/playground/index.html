@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kururi Playground</title>
     <link rel="stylesheet" href="/src/style.css" />
+    <!-- input() の入力待ちに SharedArrayBuffer を使う。公開先でも動くよう、必要なヘッダーをサービスワーカーで付ける（MIT） -->
+    <script src="%BASE_URL%coi-serviceworker.js"></script>
   </head>
   <body>
     <header>
@@ -19,9 +21,8 @@
         <div id="editor"></div>
       </section>
       <section aria-label="Python と実行結果" class="right">
-        <div id="python"></div>
+        <div id="python" aria-label="Python（編集できません）"></div>
         <div id="console">
-          <label>入力（input() が読む行を、1 行ずつ書く）<textarea id="stdin" rows="2"></textarea></label>
           <pre id="output" aria-label="実行結果" aria-live="polite"></pre>
         </div>
       </section>

@@ -29,6 +29,13 @@ describe("analyze", () => {
     expect(marker!.endColumn).toBeLessThanOrEqual('    let 😀a: int = 1'.length + 2)
   })
 
+  it("変換できないときは、Python 欄に出すエラーの文章を返す", () => {
+    const bad = analyze("function main(): void {\n    print(1)\n}\n")
+    expect(bad.errorText).toContain("K0201")
+    expect(bad.errorText).toContain("main.kururi")
+    expect(analyze("function main(): void {\n}\n").errorText).toBe("")
+  })
+
   it("同梱のサンプルはエラーなく変換できる", () => {
     expect(analyze(SAMPLE).errorCount).toBe(0)
   })

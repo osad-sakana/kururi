@@ -13,11 +13,15 @@ section + section { border-left: 1px solid #8884; }
 #editor { height: 100%; }
 .right { display: grid; grid-template-rows: 1fr auto; }
 #python { min-height: 0; }
-#console { display: flex; flex-direction: column; gap: 0.4rem; padding: 0.5rem 1rem; border-top: 1px solid #8884; height: 11rem; }
-#console label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; }
-#stdin { font: 13px ui-monospace, monospace; resize: none; }
+#console { display: flex; flex-direction: column; padding: 0.5rem 1rem; border-top: 1px solid #8884; height: 12rem; }
 #output { flex: 1; margin: 0; overflow: auto; font: 13px ui-monospace, monospace; white-space: pre-wrap; }
 #output .error { color: #d33; }
+#output .prompt-line { display: flex; }
+#output .prompt-line input { flex: 1; min-width: 0; border: 0; border-bottom: 1px solid #8886; background: transparent; color: inherit; font: inherit; padding: 0; outline: none; }
+#output .prompt-line input:focus { border-bottom-color: #36c; }
+/* Python 欄は自動で作られるので、書き込めないことが見て分かるようにする */
+#python .cursors-layer { display: none !important; }
+#python { background: #8881; }
 @media (max-width: 700px) {
   main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
   section + section { border-left: 0; border-top: 1px solid #8884; }

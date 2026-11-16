@@ -57,16 +57,19 @@ const pythonView = monaco.editor.create(element("python"), {
   language: "python",
   readOnly: true,
   domReadOnly: true,
+  readOnlyMessage: { value: "Python は Kururi から自動で作られます。左の Kururi を直してください" },
+  renderLineHighlight: "none",
+  wordWrap: "on",
 })
 
 const status = element("status")
 const openButton = element<HTMLButtonElement>("open-narapy")
 const runButton = element<HTMLButtonElement>("run")
 const stopButton = element<HTMLButtonElement>("stop")
-const stdinBox = element<HTMLTextAreaElement>("stdin")
 const output = element("output")
 let currentUrl: string | null = null
 let currentAnalysis = analyze("")
+let pendingInput: { readonly row: HTMLElement; readonly cancel: () => void } | null = null
 
 function appendOutput(text: string, className?: string): void {
   const line = document.createElement("div")
@@ -74,6 +77,37 @@ function appendOutput(text: string, className?: string): void {
   if (className !== undefined) line.className = className
   output.append(line)
   output.scrollTop = output.scrollHeight
+}
+
+/** input() の入力欄を、出力の流れの中（その行の続き）に出す。Enter で確定すると、入力した値が出力に残る。 */
+function askInline(prompt: string): Promise<string | null> {
+  return new Promise((resolve) => {
+    const row = document.createElement("div")
+    row.className = "prompt-line"
+    const label = document.createElement("span")
+    label.textContent = prompt
+    const field = document.createElement("input")
+    field.type = "text"
+    field.setAttribute("aria-label", prompt === "" ? "入力" : prompt)
+    row.append(label, field)
+    output.append(row)
+    field.focus()
+    output.scrollTop = output.scrollHeight
+    pendingInput = { row, cancel: () => resolve(null) }
+    field.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || event.isComposing) return
+      pendingInput = null
+      const value = field.value
+      row.replaceChildren(`${prompt}${value}`)
+      resolve(value)
+    })
+  })
+}
+
+function cancelInput(): void {
+  pendingInput?.row.remove()
+  pendingInput?.cancel()
+  pendingInput = null
 }
 
 function markRuntimeError(line: number | null): void {
@@ -87,6 +121,7 @@ function markRuntimeError(line: number | null): void {
 }
 
 const runner = createRunner({
+  onInput: askInline,
   onOutput: (text) => appendOutput(text),
   onStatus: (text) => {
     status.textContent = text
@@ -98,6 +133,7 @@ const runner = createRunner({
     appendOutput(`実行時エラー${where}: ${error.summary}`, "error")
   },
   onFinish: () => {
+    cancelInput()
     runButton.disabled = currentAnalysis.errorCount > 0 || currentAnalysis.python === ""
     stopButton.hidden = true
   },
@@ -108,7 +144,7 @@ runButton.addEventListener("click", () => {
   markRuntimeError(null)
   runButton.disabled = true
   stopButton.hidden = false
-  runner.run(currentAnalysis.python, stdinBox.value)
+  runner.run(currentAnalysis.python)
 })
 stopButton.addEventListener("click", () => runner.stop())
 
@@ -128,8 +164,10 @@ function render(): void {
       })),
     )
   }
-  // エラー中は直前の Python を残す（書きかけで右側がちらつかないように）
-  if (analysis.errorCount === 0) pythonView.setValue(analysis.python)
+  // Python にできない間は、Python 欄にエラーを出し続ける
+  const pythonModel = pythonView.getModel()
+  if (pythonModel !== null) monaco.editor.setModelLanguage(pythonModel, analysis.errorCount > 0 ? "plaintext" : "python")
+  pythonView.setValue(analysis.errorCount > 0 ? analysis.errorText : analysis.python)
 
   try {
     currentUrl = narapyUrl(source, analysis)

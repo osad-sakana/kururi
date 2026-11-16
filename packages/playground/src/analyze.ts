@@ -1,4 +1,4 @@
-import { compile, diagnosticText, toEditorRange } from "@kururi/compiler"
+import { compile, diagnosticText, formatDiagnostics, toEditorRange } from "@kururi/compiler"
 import type { Diagnostic, LineMapping } from "@kururi/compiler"
 import { buildProjectUrl, projectFiles } from "@kururi/narapy"
 
@@ -16,6 +16,8 @@ export interface EditorMarker {
 export interface Analysis {
   readonly python: string
   readonly lineMap: readonly LineMapping[]
+  /** 変換できないときに Python 欄へ出す、エラーの文章 */
+  readonly errorText: string
   readonly markers: readonly EditorMarker[]
   readonly errorCount: number
 }
@@ -38,7 +40,8 @@ export function analyze(source: string): Analysis {
   const { python, diagnostics, lineMap } = compile(source)
   const lines = source.split("\n")
   const markers = diagnostics.map((diagnostic) => toMarker(diagnostic, lines))
-  return { python, lineMap, markers, errorCount: diagnostics.filter((d) => d.severity === "error").length }
+  const errorText = diagnostics.length === 0 ? "" : formatDiagnostics(diagnostics, { source, fileName: "main.kururi" })
+  return { python, lineMap, errorText, markers, errorCount: diagnostics.filter((d) => d.severity === "error").length }
 }
 
 /** narapy で開く URL。エラーがあるときや内容が空のときは null。長すぎるときは例外。 */
