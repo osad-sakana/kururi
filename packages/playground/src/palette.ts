@@ -31,7 +31,7 @@ export const DARK_PALETTE: Palette = {
   ink: "#e6e6ea",
   muted: "#8c8d94",
   hover: "#232329",
-  accent: "#f0609a",
+  accent: "#a3e635",
   accentInk: "#0d1117",
   danger: "#ed5350",
   success: "#45b164",
@@ -42,7 +42,7 @@ export const DARK_PALETTE: Palette = {
   codeString: "#6dba70",
   codeNumber: "#f1944f",
   codeComment: "#6b6c73",
-  codeBuiltin: "#f27fb0",
+  codeBuiltin: "#b5e655",
   codeFunc: "#d8b349",
 }
 
@@ -53,7 +53,7 @@ export const LIGHT_PALETTE: Palette = {
   ink: "#202124",
   muted: "#75767d",
   hover: "#eef0f2",
-  accent: "#c2185b",
+  accent: "#4d7c0f",
   accentInk: "#ffffff",
   danger: "#be222a",
   success: "#00722e",
@@ -64,7 +64,7 @@ export const LIGHT_PALETTE: Palette = {
   codeString: "#045e17",
   codeNumber: "#9a3e00",
   codeComment: "#9a9ba1",
-  codeBuiltin: "#a3174f",
+  codeBuiltin: "#3f6212",
   codeFunc: "#734e00",
 }
 
