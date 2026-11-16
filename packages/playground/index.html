@@ -4,24 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kururi Playground</title>
+    <!-- narapy と同じ書体: BIZ UDPGothic（画面）と 0xProto（コード） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=0xProto:ital,wght@0,400;0,700;1,400&family=BIZ+UDPGothic:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/src/style.css" />
     <!-- input() の入力待ちに SharedArrayBuffer を使う。公開先でも動くよう、必要なヘッダーをサービスワーカーで付ける（MIT） -->
     <script src="%BASE_URL%coi-serviceworker.js"></script>
   </head>
   <body>
     <header>
-      <h1>Kururi</h1>
+      <div class="brand"><h1>Kururi</h1><small>くるり</small></div>
       <span id="status" role="status"></span>
-      <button id="run" type="button" disabled>実行</button>
+      <button id="run" class="primary" type="button" disabled>実行</button>
       <button id="stop" type="button" hidden>止める</button>
       <button id="open-narapy" type="button" disabled>narapy で開く</button>
     </header>
     <main>
       <section aria-label="Kururi">
+        <div class="pane-title">KURURI</div>
         <div id="editor"></div>
       </section>
       <section aria-label="Python と実行結果" class="right">
+        <div class="pane-title">PYTHON（編集できません）</div>
         <div id="python" aria-label="Python（編集できません）"></div>
+        <div class="pane-title">実行結果</div>
         <div id="console">
           <pre id="output" aria-label="実行結果" aria-live="polite"></pre>
         </div>

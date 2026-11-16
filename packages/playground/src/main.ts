@@ -8,6 +8,7 @@ import { classifyLines } from "./line-icons"
 import { mapRuntimeError } from "./runtime"
 import { createRunner } from "./runner"
 import { SAMPLE } from "./sample"
+import { installThemes } from "./theme"
 import "./style.css"
 
 self.MonacoEnvironment = { getWorker: () => new editorWorker() }
@@ -51,7 +52,24 @@ monaco.languages.setLanguageConfiguration(LANGUAGE_ID, {
   ],
 })
 
-const editorOptions = { automaticLayout: true, minimap: { enabled: false }, fontSize: 14 } as const
+installThemes()
+// narapy のエディタと同じ設定（書体、折り返し、細いスクロールバー など）
+const editorOptions = {
+  automaticLayout: true,
+  minimap: { enabled: false },
+  fontSize: 13,
+  fontFamily: '"0xProto", "Fira Code", "Cascadia Code", monospace',
+  fontLigatures: true,
+  scrollBeyondLastLine: false,
+  tabSize: 4,
+  insertSpaces: true,
+  renderWhitespace: "boundary",
+  bracketPairColorization: { enabled: true },
+  overviewRulerLanes: 0,
+  hideCursorInOverviewRuler: true,
+  overviewRulerBorder: false,
+  scrollbar: { verticalScrollbarSize: 6, horizontalScrollbarSize: 6 },
+} as const
 const editor = monaco.editor.create(element("editor"), { ...editorOptions, lineDecorationsWidth: 24, value: loadSource(), language: LANGUAGE_ID })
 const iconStyle = document.createElement("style")
 iconStyle.textContent = iconCss()
