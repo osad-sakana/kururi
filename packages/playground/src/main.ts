@@ -1,6 +1,7 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api"
 import "monaco-editor/esm/vs/basic-languages/python/python.contribution"
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker"
+import { applyBrand } from "./brand"
 import { analyze, debounce, narapyUrl } from "./analyze"
 import { iconCss } from "./icon-css"
 import { LANGUAGE_ID, monarchDefinition } from "./language"
@@ -10,6 +11,8 @@ import { createRunner } from "./runner"
 import { SAMPLE } from "./sample"
 import { installThemes } from "./theme"
 import "./style.css"
+
+applyBrand()
 
 self.MonacoEnvironment = { getWorker: () => new editorWorker() }
 

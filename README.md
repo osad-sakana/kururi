@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo/kururi-wordmark-on-dark.svg">
+    <img src="assets/logo/kururi-wordmark-on-light.svg" alt="Kururi" width="240">
+  </picture>
+</p>
+
 # 「Kururi」は学習用プログラミング言語！
 
 **Scratch の次、Python の前**にある、テキストで書く最初のプログラミング言語です。書いたコードは Python に変換できます。以下では「Kururi」と呼びます。
