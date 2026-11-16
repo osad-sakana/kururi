@@ -29,9 +29,9 @@ describe("compile (S1): 生成", () => {
   })
 
   it("var と const は型注釈つきの代入になる", () => {
-    const { python } = compile(main("  var a: int = 1\n  const b: float = 2\n  var c: boolean = true"))
+    const { python } = compile(main("  var a: int = 1\n  const B: float = 2\n  var c: boolean = true"))
     expect(python).toContain("    a = 1")
-    expect(python).toContain("    b = 2.0")
+    expect(python).toContain("    B = 2.0")
     expect(python).toContain("    c = True")
   })
 
@@ -42,9 +42,9 @@ describe("compile (S1): 生成", () => {
   })
 
   it("トップレベルの変数を出力する", () => {
-    const { python } = compile(`const rate: float = 0.5\n${main("  output(toString(rate))")}`)
-    expect(python).toContain("rate = 0.5\n\n\ndef main()")
-    expect(python).toContain("print(str(rate))")
+    const { python } = compile(`const RATE: float = 0.5\n${main("  output(to_string(RATE))")}`)
+    expect(python).toContain("RATE = 0.5\n\n\ndef main()")
+    expect(python).toContain("print(str(RATE))")
   })
 
   it("括弧と演算子の順序を保つ", () => {
@@ -53,7 +53,7 @@ describe("compile (S1): 生成", () => {
   })
 
   it("boolean は true / false と表示する", () => {
-    const { python } = compile(main("  var a: boolean = 1 < 2 and not false\n  output(a)\n  output(toString(a))"))
+    const { python } = compile(main("  var a: boolean = 1 < 2 and not false\n  output(a)\n  output(to_string(a))"))
     expect(python).toContain('print("true" if a else "false")')
     expect(python).toContain('print(("true" if a else "false"))')
   })
@@ -114,7 +114,7 @@ describe("compile (S1): 型・名前の診断", () => {
 
   it("関数でないものを呼ぶと K0308、関数を値にすると K0309", () => {
     expect(codesOf(main("  var a: int = 1\n  a()"))).toEqual(["K0308"])
-    expect(codesOf(main("  var a: int = toString"))).toEqual(["K0309"])
+    expect(codesOf(main("  var a: int = to_string"))).toEqual(["K0309"])
   })
 
   it("宣言していない名前は K0201", () => {
@@ -133,7 +133,7 @@ describe("compile (S1): 型・名前の診断", () => {
 
   it("トップレベルの初期値で var の変数を使うと K0206、const は使える", () => {
     expect(codesOf(`var a: int = 1\nvar b: int = a\n${main("")}`)).toEqual(["K0206"])
-    expect(codesOf(`const a: int = 1\nvar b: int = a + 1\n${main("")}`)).toEqual([])
+    expect(codesOf(`const A: int = 1\nvar b: int = A + 1\n${main("")}`)).toEqual([])
   })
 
   it("main がない・形が違う・呼んだ場合", () => {

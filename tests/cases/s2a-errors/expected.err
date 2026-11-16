@@ -1,10 +1,10 @@
-error[K0212]: 「limit」は const なので、代入し直せません
+error[K0212]: 「LIMIT」は const なので、代入し直せません
  --> input.kururi:4:5
   |
-4 |     limit = 5
+4 |     LIMIT = 5
   |     ^^^^^ ここで代入しています
   |
-help: 値を変えたいときは、宣言を var limit に変えてください
+help: 値を変えたいときは、宣言を var LIMIT に変えてください
 
 error[K0213]: 「i」はループ（for）の変数なので、代入できません
  --> input.kururi:6:9

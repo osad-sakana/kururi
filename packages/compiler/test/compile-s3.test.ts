@@ -98,7 +98,7 @@ describe("compile (S3): 診断", () => {
   })
 
   it("トップレベルの初期値で自作の関数は呼べない（K0323）", () => {
-    expect(codesOf(withMain("function f = () -> int {\n  return 1\n}\nconst a: int = f()"))).toEqual(["K0323"])
+    expect(codesOf(withMain("function f = () -> int {\n  return 1\n}\nconst A: int = f()"))).toEqual(["K0323"])
   })
 
   it("main は引数なし・void、呼べない", () => {

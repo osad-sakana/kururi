@@ -3,7 +3,7 @@ function main = () {
     var n: int = s
     var m: int = null
     output(s.length)
-    output(1 + toInt())
+    output(1 + to_int())
     if s != null {
         s = null
         output(s.length)

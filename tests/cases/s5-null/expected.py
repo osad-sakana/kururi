@@ -17,7 +17,7 @@ class Node:
         self.value = value
 
 
-def findFirstLong(words):
+def find_first_long(words):
     for w in words:
         if len(w) > 3:
             return w
@@ -27,7 +27,7 @@ def findFirstLong(words):
 def main():
     name = input()
     age = int(input())
-    found = findFirstLong([name, "ab", "abcdef"])
+    found = find_first_long([name, "ab", "abcdef"])
     if found is not None:
         print(f"長い名前: {found}（{len(found)} 文字）")
     else:

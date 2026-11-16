@@ -44,7 +44,7 @@ KururiはPythonを学ぶ前にテキストコーディングを最も簡単な�
 
 ```kururi
 // 変数宣言（型必須・セミコロン不要）
-const test: string = "Hello World"
+const TEST: string = "Hello World"
 var   price: int = 123
 var   rate: float = 0.5
 
@@ -59,7 +59,7 @@ var matrix: int[][] = [
 output(fruits[0])                // 要素アクセス
 fruits[1] = "melon"              // 要素更新
 fruits.push("grape")             // 末尾に追加
-fruits.removeAt(0)               // 位置を指定して削除
+fruits.remove_at(0)               // 位置を指定して削除
 var count: int = fruits.length   // 長さ取得
 for fruit in fruits {
   output(fruit)
@@ -81,7 +81,7 @@ while true {
 
 // 回数で回す（i は 0 から 9 まで。終わりの 10 は含まない）
 for i in 0..10 {
-  output(toString(i))     // 0, 1, ..., 9
+  output(to_string(i))     // 0, 1, ..., 9
 }
 
 // 文字列補間（バッククォートと ${ }）
@@ -142,8 +142,8 @@ function main = () {
 | `void` | 戻り値なし（戻り値の型にだけ書ける） | `None` |
 
 - `null` はリテラル（値）であり、型の名前ではない。
-- `int` → `float` への暗黙変換は許可する。`float` → `int` は不可（`toInt` を使う）。配列は型が一致するものだけ渡せる（`int[]` を `float[]` に渡すのは不可）。
-- 文字列と数値は `+` で連結できない。`toString()` か文字列補間を使う（型エラーとして案内する）。
+- `int` → `float` への暗黙変換は許可する。`float` → `int` は不可（`to_int` を使う）。配列は型が一致するものだけ渡せる（`int[]` を `float[]` に渡すのは不可）。
+- 文字列と数値は `+` で連結できない。`to_string()` か文字列補間を使う（型エラーとして案内する）。
 - `/` は常に `float` を返す（`7 / 2` は `3.5`）。整数除算は組み込みの `div(a, b)` を使う。`%` と `div` は Python と同じ（負の数では切り下げ：`-7 % 3` は `2`）。
 - 整数の桁数に上限はない（Python と同じ）。数値リテラルは `0` 以外で先頭が `0` のものを許さない（`007` はエラー）。
 - `const` は再代入のみ禁止。配列の要素変更（`a[0] = 2`、`push` など）は許す。
@@ -201,18 +201,18 @@ Python側の詳細な対応は後ほど整理する。現時点で分かって�
 |---|---|---|
 | `output(x)` | 出力（改行あり） | `print(...)`（表示の規則は下） |
 | `input()` | 1行入力（常に `string`） | `input()` |
-| `toString(x)` | 文字列へ変換 | 型による（下） |
-| `toInt(s)` | 整数へ変換（失敗すると実行時エラー） | `int(s)` |
-| `toFloat(s)` | 小数へ変換（失敗すると実行時エラー） | `float(s)` |
+| `to_string(x)` | 文字列へ変換 | 型による（下） |
+| `to_int(s)` | 整数へ変換（失敗すると実行時エラー） | `int(s)` |
+| `to_float(s)` | 小数へ変換（失敗すると実行時エラー） | `float(s)` |
 | `a.length` | 配列・文字列の長さ | `len(a)` |
 | `a.push(x)` | 配列の末尾に追加 | `a.append(x)` |
-| `a.removeAt(i)` | 位置 `i` の要素を削除 | `a.pop(i)` |
+| `a.remove_at(i)` | 位置 `i` の要素を削除 | `a.pop(i)` |
 | `div(a, b)` | 整数除算 | `a // b` |
 | `random(a, b)` | `a` 以上 `b` 以下のランダムな整数（`int`） | `random.randint(a, b)`（ファイル先頭に `import random` を出す） |
 
-- 文字列補間：`` `${式}` ``。式は何でも書け、結果は自動で文字列化される（`toString` 不要）。バッククォートや `${` を文字として書くときは `\`` と `\${`。`{` と `}` はそのまま文字として書ける。
+- 文字列補間：`` `${式}` ``。式は何でも書け、結果は自動で文字列化される（`to_string` 不要）。バッククォートや `${` を文字として書くときは `\`` と `\${`。`{` と `}` はそのまま文字として書ける。
 
-### 表示の規則（`output`・`toString`・補間）
+### 表示の規則（`output`・`to_string`・補間）
 
 Kururi に書いた見た目のとおりに表示する。
 
@@ -229,7 +229,7 @@ Kururi に書いた見た目のとおりに表示する。
 
 ### 実行時エラー
 
-`toInt("abc")`、配列の範囲外アクセス、0 での割り算などは、Python の実行時エラーになる。メッセージは実行環境（narapy など）の日本語訳に任せる。narapy に渡した場合は Python の行番号で出る。プレイグラウンドでは、コンパイラの行対応表（lineMap）で Kururi の行に直して、エディタの該当行に印を付ける（S9）。
+`to_int("abc")`、配列の範囲外アクセス、0 での割り算などは、Python の実行時エラーになる。メッセージは実行環境（narapy など）の日本語訳に任せる。narapy に渡した場合は Python の行番号で出る。プレイグラウンドでは、コンパイラの行対応表（lineMap）で Kururi の行に直して、エディタの該当行に印を付ける（S9）。
 
 ## Pythonへの変換
 
@@ -252,13 +252,28 @@ Kururi に書いた見た目のとおりに表示する。
 - 変換先の Python は **3.12**（narapy の Pyodide 0.27 に合わせる）。テストも 3.12 に固定する。
 - `private` / `public` は変換後に概念が消える（名前もそのまま）。フィールドもメソッドもデフォルトは private で、`public` を付けたものだけ外から使える（`private` と明示してもよい）。違反はコンパイルエラー（例：「`name` は private なので、クラスの外からは使えません。`public` を付けるか、public なメソッド経由で使ってください」）。コンストラクタは常に外から呼べる。
 
+## 名前の書き方
+
+名前の付け方を 1 つに決め、違反はエラー（K0506）にする。直し方（例: `someVariable` → `some_variable`）を添える。
+
+| 対象 | 形 | 例 |
+|---|---|---|
+| クラス | アッパーキャメルケース | `Dog`、`ShoppingCart` |
+| `const` | 大文字のスネークケース | `TAX_RATE` |
+| 上以外（`var`、関数、`method`、引数、フィールド、ループ変数） | スネークケース | `total_price`、`bark`、`i` |
+
+- 検査するのは宣言の名前だけ。使う側は、宣言が正しければ合う。
+- 英字を含まない名前（ひらがな・カタカナ・漢字だけ）は大文字・小文字がないので対象外。
+- 組み込み名も同じ決まりに合わせた：`to_string`、`to_int`、`to_float`、配列の `remove_at`（`output`、`input`、`div`、`random`、`push`、`length` は変更なし）。
+- 構文の診断（K0506 を含む）があるあいだは、型検査には進まない。
+
 ## 予約語
 
 識別子（変数名・関数名など）には予約語を使えない。**Kururiの予約語**と**Pythonの予約語**でエラーメッセージを分ける。
 
 ### Kururiの予約語
 
-`const var function method return class public private new constructor self if else while for in break continue true false null and or not int float string boolean void` と組み込み名（`output input toString toInt toFloat div random`）。
+`const var function method return class public private new constructor self if else while for in break continue true false null and or not int float string boolean void` と組み込み名（`output input to_string to_int to_float div random`）。
 
 古い書き方（`let` `repeat` `foreach` `elseif`）は、予約語として残して「新しい書き方はこうです」と案内する（K0114）。
 
@@ -290,7 +305,7 @@ error[K0301]: 文字列と数値は + でつなげません
 19 |   row = row + " " + result
    |                     ^^^^^^ この値は int です
    |
-help: toString(result) で文字列に変換してください
+help: to_string(result) で文字列に変換してください
 ```
 
 ## 実装計画
@@ -347,12 +362,12 @@ kururi/
 | スライス | 内容 | 完了の目安 |
 |---|---|---|
 | S0 | 土台：リポジトリ、診断の仕組み、エラーコードの体系、ゴールデンテストの枠 | `kururi check` が空ファイルで動く |
-| S1 | `output`、`var`/`const`、`int`/`float`/`string`/`boolean`、四則演算、`toString`、文字列補間、**引数なしの `function main = () { }`**、`if __name__`、`kururi run`（最小） | `output("hello")` と簡単な計算が実行できる |
+| S1 | `output`、`var`/`const`、`int`/`float`/`string`/`boolean`、四則演算、`to_string`、文字列補間、**引数なしの `function main = () { }`**、`if __name__`、`kururi run`（最小） | `output("hello")` と簡単な計算が実行できる |
 | S2a | `if`/`else if`/`else`、`while`、`for i in a..b`、`break`/`continue`、複合代入 | **example.kururi が正しい出力で動く** |
-| S2b | 配列、`for`、`push`/`removeAt`/`length`、文字列の添字 | 配列を使う例が動く |
+| S2b | 配列、`for`、`push`/`remove_at`/`length`、文字列の添字 | 配列を使う例が動く |
 | S3 | 関数（引数・戻り値）、型検査、`return` 抜けの検出、シャドーイング禁止、トップレベル変数と `global` | 再帰（階乗など）が動く |
 | S4 | クラス、`constructor`、`self`、`new`、フィールド初期値、`public`/`private` 検査 | 簡単なクラスの例が動く |
-| S5 | `T?` と `null`、絞り込み（最小）、`input`/`toInt`/`toFloat`/`div`、`boolean` と `T?` の表示 | 入力を受けて計算する例が動く |
+| S5 | `T?` と `null`、絞り込み（最小）、`input`/`to_int`/`to_float`/`div`、`boolean` と `T?` の表示 | 入力を受けて計算する例が動く |
 | S6 | narapy への受け渡し：`kururi export`（`.narapy` と URL を出力）、互換テストの CI | 生成した URL を narapy で開くと実行できる |
 | S7 | Playground：Monaco の言語登録、診断の赤線表示、Python の並べて表示 | ブラウザで書きながらエラーが出る |
 | S8 | エラーメッセージの磨き込み、予約語（Kururi/Python）の別メッセージ、`for` 案内、`=` と `==` の取り違え | 代表的な間違いごとに期待したメッセージが出る |

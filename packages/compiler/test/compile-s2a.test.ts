@@ -72,8 +72,8 @@ describe("compile (S2a): 診断", () => {
   })
 
   it("const への再代入は K0212、repeat の変数への代入は K0213", () => {
-    expect(codesOf(main("  const a: int = 1\n  a = 2"))).toEqual(["K0212"])
-    expect(codesOf(`const a: int = 1\n${main("  a += 2")}`)).toEqual(["K0212"])
+    expect(codesOf(main("  const A: int = 1\n  A = 2"))).toEqual(["K0212"])
+    expect(codesOf(`const A: int = 1\n${main("  A += 2")}`)).toEqual(["K0212"])
     expect(codesOf(main("  for i in 0..3 {\n    i = 1\n  }"))).toEqual(["K0213"])
   })
 

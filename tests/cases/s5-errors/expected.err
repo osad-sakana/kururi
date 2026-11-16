@@ -22,11 +22,11 @@ error[K0330]: string? の値は null かもしれないので、このまま使�
   |
 help: if x != null { ... } の中なら使えます。いったん変数に入れてから確かめてください
 
-error[K0305]: toInt には引数が 1 個必要ですが、0 個書かれています
+error[K0305]: to_int には引数が 1 個必要ですが、0 個書かれています
  --> input.kururi:6:16
   |
-6 |     output(1 + toInt())
-  |                ^^^^^^^ 引数は 1 個です
+6 |     output(1 + to_int())
+  |                ^^^^^^^^ 引数は 1 個です
 
 error[K0330]: string? の値は null かもしれないので、このまま使えません
  --> input.kururi:9:16

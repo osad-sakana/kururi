@@ -1,15 +1,15 @@
-const taxRate: float = 0.1
+const TAX_RATE: float = 0.1
 var 合計: int = 0
 
 function main = () {
     var price: int = 1200
     var count: int = 3
     var total: int = price * count
-    var withTax: float = total * (1 + taxRate)
+    var with_tax: float = total * (1 + TAX_RATE)
     var big: boolean = total > 3000 and not (count == 0)
 
-    output("小計: " + toString(total))
-    output(`税込: ${withTax} 円（個数 ${count}、{そのまま}）`)
+    output("小計: " + to_string(total))
+    output(`税込: ${with_tax} 円（個数 ${count}、{そのまま}）`)
     output(big)
     output(7 / 2)
     output(-7 % 3)

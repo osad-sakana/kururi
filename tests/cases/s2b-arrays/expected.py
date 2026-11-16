@@ -1,4 +1,4 @@
-names = ["apple", "banana"]
+NAMES = ["apple", "banana"]
 
 
 def main():
@@ -16,7 +16,7 @@ def main():
     for row in grid:
         for v in row:
             weights.append(float(v))
-    print(names[0][0])
+    print(NAMES[0][0])
 
 
 if __name__ == "__main__":

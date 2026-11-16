@@ -66,7 +66,7 @@ export class ExprChecker {
     return actual
   }
 
-  /** 画面に出せる値の型（配列は出せない）。output・toString・補間で使う。 */
+  /** 画面に出せる値の型（配列は出せない）。output・to_string・補間で使う。 */
   displayType(expr: Expr, scope: Scope): Type {
     const type = this.valueType(expr, scope)
     const base = nonNull(type)
@@ -269,7 +269,7 @@ export class ExprChecker {
     return "error"
   }
 
-  /** 添字は int で、負の数のリテラルは書けない。位置の引数（removeAt）でも使う。 */
+  /** 添字は int で、負の数のリテラルは書けない。位置の引数（remove_at）でも使う。 */
   checkIndex(index: Expr, scope: Scope, what = "添字"): void {
     const type = this.nonNullType(index, this.valueType(index, scope))
     if (type !== "error" && type !== "int") {
@@ -322,7 +322,7 @@ export class ExprChecker {
       this.reporter.report("K0308", callee.range, { name })
       return "error"
     }
-    if (name === "output" || name === "toString") return this.builtinCall(name, expr, scope)
+    if (name === "output" || name === "to_string") return this.builtinCall(name, expr, scope)
     if (BUILTIN_FUNCTIONS.has(name)) return this.convertCall(name, expr, scope)
     if (global?.kind === "function") return this.userCall(name, expr, global, scope)
     if (global?.kind === "class") {
@@ -353,7 +353,7 @@ export class ExprChecker {
     return fn.returnType
   }
 
-  private builtinCall(name: "output" | "toString", expr: Node<"call">, scope: Scope): Type {
+  private builtinCall(name: "output" | "to_string", expr: Node<"call">, scope: Scope): Type {
     const argTypes = expr.args.map((arg) => this.displayType(arg, scope))
     if (expr.args.length !== 1) {
       this.reporter.report("K0305", expr.range, { name, expected: "1", actual: String(expr.args.length) })
@@ -381,7 +381,7 @@ export class ExprChecker {
     return method.returnType
   }
 
-  /** input / toInt / toFloat / div / random。 */
+  /** input / to_int / to_float / div / random。 */
   private convertCall(name: string, expr: Node<"call">, scope: Scope): Type {
     const spec = FIXED_BUILTINS[name]
     if (spec === undefined) return "error"
@@ -400,7 +400,7 @@ export class ExprChecker {
     return spec.returns
   }
 
-  /** a.push(x) と a.removeAt(i)。 */
+  /** a.push(x) と a.remove_at(i)。 */
   private methodCall(expr: Node<"call">, callee: Node<"member">, scope: Scope): Type {
     const base = this.nonNullType(callee.object, this.valueType(callee.object, scope))
     if (base === "error") {
@@ -410,7 +410,7 @@ export class ExprChecker {
     const info = this.classOf(base, scope)
     if (info !== undefined) return this.classMethodCall(expr, callee, info, scope)
     const method = callee.name
-    if (!isArray(base) || (method !== "push" && method !== "removeAt")) {
+    if (!isArray(base) || (method !== "push" && method !== "remove_at")) {
       this.reporter.report("K0317", callee.nameRange, { type: base, name: method })
       return "error"
     }
@@ -420,7 +420,7 @@ export class ExprChecker {
       this.reporter.report("K0305", expr.range, { name: method, expected: "1", actual: String(expr.args.length) })
       return "error"
     }
-    if (method === "removeAt") {
+    if (method === "remove_at") {
       this.checkIndex(arg, scope, "位置")
       return "void"
     }
@@ -436,8 +436,8 @@ function isBuiltin(name: string): boolean {
 /** 引数が決まっている組み込み関数。accepts は各引数で受け付ける型（どれか 1 つ）。 */
 const FIXED_BUILTINS: Readonly<Record<string, { accepts: readonly (readonly Type[])[]; returns: Type }>> = {
   input: { accepts: [], returns: "string" },
-  toInt: { accepts: [["string", "float", "int"]], returns: "int" },
-  toFloat: { accepts: [["string", "int", "float"]], returns: "float" },
+  to_int: { accepts: [["string", "float", "int"]], returns: "int" },
+  to_float: { accepts: [["string", "int", "float"]], returns: "float" },
   div: { accepts: [["int"], ["int"]], returns: "int" },
   random: { accepts: [["int"], ["int"]], returns: "int" },
 }

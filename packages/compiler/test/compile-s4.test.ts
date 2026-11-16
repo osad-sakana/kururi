@@ -20,7 +20,7 @@ const PLAYER = `class Player = {
     self.score += 1
   }
 
-  public method getName = () -> string {
+  public method get_name = () -> string {
     return self.name
   }
 
@@ -30,7 +30,7 @@ const PLAYER = `class Player = {
 
 describe("compile (S4): 生成", () => {
   it("クラスを class にし、フィールドの初期値を __init__ の先頭に出す", () => {
-    const { python, diagnostics } = compile(withMain(PLAYER, '  var p: Player = new Player("taro")\n  p.run()\n  output(p.getName())\n  output(p.age)'))
+    const { python, diagnostics } = compile(withMain(PLAYER, '  var p: Player = new Player("taro")\n  p.run()\n  output(p.get_name())\n  output(p.age)'))
     expect(diagnostics).toEqual([])
     expect(python).toContain(
       "class Player:\n    def __init__(self, name):\n        self.age = 20\n        self.score = 0\n        self.name = name\n",
@@ -38,7 +38,7 @@ describe("compile (S4): 生成", () => {
     expect(python).toContain("    def run(self):\n        self.draw()\n        self.score += 1")
     expect(python).toContain('p = Player("taro")')
     expect(python).toContain("p.run()")
-    expect(python).toContain("print(p.getName())")
+    expect(python).toContain("print(p.get_name())")
   })
 
   it("constructor がなければ、初期値だけの __init__ を作る", () => {
@@ -113,8 +113,8 @@ describe("compile (S4): 診断", () => {
     expect(codesOf(withMain(PLAYER, '  var p: Player = new Player()'))).toEqual(["K0305"])
     expect(codesOf(withMain(PLAYER, '  var p: Player = new Player(1)'))).toEqual(["K0301"])
     expect(codesOf(withMain(PLAYER, '  var p: Player = new Player("a")\n  output(p.nothing)'))).toEqual(["K0317"])
-    expect(codesOf(withMain(PLAYER, '  var p: Player = new Player("a")\n  p.getName(1)'))).toEqual(["K0305"])
-    expect(codesOf(withMain(PLAYER, '  var p: Player = new Player("a")\n  var n: int = p.getName()'))).toEqual(["K0301"])
+    expect(codesOf(withMain(PLAYER, '  var p: Player = new Player("a")\n  p.get_name(1)'))).toEqual(["K0305"])
+    expect(codesOf(withMain(PLAYER, '  var p: Player = new Player("a")\n  var n: int = p.get_name()'))).toEqual(["K0301"])
   })
 
   it("型の違うオブジェクトは代入できない", () => {
@@ -141,7 +141,7 @@ describe("compile (S4): 診断", () => {
   })
 
   it("トップレベルの初期値で new は使えない（K0323）", () => {
-    expect(codesOf(withMain("class A = {\n}\nconst a: A = new A()"))).toEqual(["K0323"])
+    expect(codesOf(withMain("class A = {\n}\nconst A_VALUE: A = new A()"))).toEqual(["K0323"])
   })
 
   it("クラス名は値として使えない", () => {

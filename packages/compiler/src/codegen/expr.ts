@@ -88,8 +88,8 @@ function emitConvert(name: string, args: readonly Expr[], info: TypeInfo): strin
   const [a, b] = args
   if (name === "input") return "input()"
   if (a === undefined) return ""
-  if (name === "toInt") return `int(${emitExpr(a, info)})`
-  if (name === "toFloat") return `float(${emitExpr(a, info)})`
+  if (name === "to_int") return `int(${emitExpr(a, info)})`
+  if (name === "to_float") return `float(${emitExpr(a, info)})`
   if (b === undefined) return ""
   if (name === "div") return `(${atom(a, info)} // ${atom(b, info)})`
   return `random.randint(${emitExpr(a, info)}, ${emitExpr(b, info)})`
@@ -109,7 +109,7 @@ function emitMethodCall(expr: Extract<Expr, { kind: "call" }>, callee: Extract<E
   }
   const [arg] = expr.args
   if (arg === undefined) return ""
-  if (callee.name === "removeAt") return `${object}.pop(${emitExpr(arg, info)})`
+  if (callee.name === "remove_at") return `${object}.pop(${emitExpr(arg, info)})`
   return `${object}.append(${emitExpr(arg, info)})`
 }
 
@@ -117,8 +117,8 @@ function emitCall(expr: Extract<Expr, { kind: "call" }>, info: TypeInfo): string
   if (expr.callee.kind === "member") return emitMethodCall(expr, expr.callee, info)
   const name = expr.callee.kind === "ident" ? expr.callee.name : ""
   const arg = expr.args[0]
-  if (["input", "toInt", "toFloat", "div", "random"].includes(name)) return emitConvert(name, expr.args, info)
-  if (name !== "output" && name !== "toString") {
+  if (["input", "to_int", "to_float", "div", "random"].includes(name)) return emitConvert(name, expr.args, info)
+  if (name !== "output" && name !== "to_string") {
     return `${name}(${expr.args.map((a) => emitExpr(a, info)).join(", ")})`
   }
   if (arg === undefined) return ""

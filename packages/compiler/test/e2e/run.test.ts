@@ -45,7 +45,7 @@ describe.skipIf(python === undefined)("E2E: 生成した Python を 3.12 で実�
   })
 
   it("boolean は true / false と表示する", () => {
-    const out = run(main("  output(1 < 2)\n  output(toString(2 < 1))\n  output(`${true and false} ${not false}`)"))
+    const out = run(main("  output(1 < 2)\n  output(to_string(2 < 1))\n  output(`${true and false} ${not false}`)"))
     expect(out).toBe("true\nfalse\nfalse true\n")
   })
 
@@ -61,7 +61,7 @@ describe.skipIf(python === undefined)("E2E: 生成した Python を 3.12 で実�
   })
 
   it("トップレベルの変数と float への暗黙変換", () => {
-    const out = run(`const rate: float = 2\nvar base: int = 10\n${main("  output(base * rate)")}`)
+    const out = run(`const RATE: float = 2\nvar base: int = 10\n${main("  output(base * RATE)")}`)
     expect(out).toBe("20.0\n")
   })
 
@@ -102,7 +102,7 @@ describe.skipIf(python === undefined)("E2E: 配列", () => {
   it("README の配列の例", () => {
     const out = run(
       main(
-        '  var fruits: string[] = ["apple", "banana"]\n  fruits[1] = "melon"\n  fruits.push("grape")\n  fruits.removeAt(0)\n  output(fruits.length)\n  for fruit in fruits {\n    output(fruit)\n  }',
+        '  var fruits: string[] = ["apple", "banana"]\n  fruits[1] = "melon"\n  fruits.push("grape")\n  fruits.remove_at(0)\n  output(fruits.length)\n  for fruit in fruits {\n    output(fruit)\n  }',
       ),
     )
     expect(out).toBe("2\nmelon\ngrape\n")
@@ -140,7 +140,7 @@ describe.skipIf(python === undefined)("E2E: 関数", () => {
 
   it("配列を渡して書き換える・グローバルを更新する", () => {
     const out = run(
-      `var calls: int = 0\nfunction addAll = (xs: int[], v: int) {\n  calls += 1\n  for i in 0..xs.length {\n    xs[i] += v\n  }\n}\n${main("  var a: int[] = [1, 2]\n  addAll(a, 10)\n  addAll(a, 1)\n  output(a[0] + a[1])\n  output(calls)")}`,
+      `var calls: int = 0\nfunction add_all = (xs: int[], v: int) {\n  calls += 1\n  for i in 0..xs.length {\n    xs[i] += v\n  }\n}\n${main("  var a: int[] = [1, 2]\n  add_all(a, 10)\n  add_all(a, 1)\n  output(a[0] + a[1])\n  output(calls)")}`,
     )
     expect(out).toBe("25\n2\n")
   })
@@ -172,7 +172,7 @@ describe.skipIf(python === undefined)("E2E: クラス", () => {
 describe.skipIf(python === undefined)("E2E: null・組み込み", () => {
   it("null と boolean の表示", () => {
     const out = run(
-      main('  var a: string? = null\n  var b: int? = 5\n  var c: boolean? = false\n  output(a)\n  output(b)\n  output(c)\n  output(`${a} ${b} ${c}`)\n  a = "x"\n  output(toString(a))'),
+      main('  var a: string? = null\n  var b: int? = 5\n  var c: boolean? = false\n  output(a)\n  output(b)\n  output(c)\n  output(`${a} ${b} ${c}`)\n  a = "x"\n  output(to_string(a))'),
     )
     expect(out).toBe("null\n5\nfalse\nnull 5 false\nx\n")
   })
@@ -188,13 +188,13 @@ describe.skipIf(python === undefined)("E2E: null・組み込み", () => {
     expect(run(main("  output(div(7, 2))\n  output(div(-7, 2))\n  output(-7 % 3)\n  output(2 * div(9, 4) + 1)"))).toBe("3\n-4\n2\n5\n")
   })
 
-  it("toInt / toFloat / random", () => {
-    const out = run(main('  output(toInt("42") + 1)\n  output(toFloat("1.5") * 2)\n  var r: int = random(3, 3)\n  output(r)\n  output(toInt(2.9))'))
+  it("to_int / to_float / random", () => {
+    const out = run(main('  output(to_int("42") + 1)\n  output(to_float("1.5") * 2)\n  var r: int = random(3, 3)\n  output(r)\n  output(to_int(2.9))'))
     expect(out).toBe("43\n3.0\n3\n2\n")
   })
 
   it("input を受けて計算する", () => {
-    const { python: code } = compile(main('  var a: int = toInt(input())\n  var b: int = toInt(input())\n  output(a + b)'))
+    const { python: code } = compile(main('  var a: int = to_int(input())\n  var b: int = to_int(input())\n  output(a + b)'))
     const out = execFileSync(python as string, ["-c", code], { encoding: "utf8", input: "3\n4\n" })
     expect(out).toBe("7\n")
   })

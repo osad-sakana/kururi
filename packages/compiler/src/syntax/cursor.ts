@@ -1,5 +1,7 @@
 import type { Reporter } from "../reporter"
 import type { DiagnosticCode } from "../diagnostics"
+import { namingProblem } from "./naming"
+import type { NameStyle } from "./naming"
 import { BUILTIN_NAMES, PYTHON_RESERVED } from "./tokens"
 import type { Range, Token } from "./tokens"
 
@@ -108,8 +110,11 @@ export class Cursor {
     }
   }
 
-  /** 宣言する名前として使えるか調べる（予約語など）。使えなければ診断を出す。 */
-  checkDeclName(tok: Token): boolean {
+  /**
+   * 宣言する名前として使えるか調べる（予約語など）。使えなければ診断を出す。
+   * 名前の書き方（スネークケースなど）が決まりに合わないときは、診断を出したうえで読み進める。
+   */
+  checkDeclName(tok: Token, style: NameStyle = "snake"): boolean {
     if (tok.kind === "keyword") {
       this.report("K0501", tok.range, { name: tok.text })
       return false
@@ -125,6 +130,10 @@ export class Cursor {
     if (PYTHON_RESERVED.has(tok.text)) {
       this.report("K0502", tok.range, { name: tok.text })
       return false
+    }
+    const problem = namingProblem(tok.text, style)
+    if (problem !== undefined) {
+      this.report("K0506", tok.range, { name: tok.text, rule: problem.rule, suggestion: problem.suggestion })
     }
     return true
   }

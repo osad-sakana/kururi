@@ -28,7 +28,7 @@ export const KEYWORDS: ReadonlySet<string> = new Set([
 
 /** 組み込みの名前。キーワードではないが、変数名などには使えない。 */
 export const BUILTIN_NAMES: ReadonlySet<string> = new Set([
-  "output", "input", "toString", "toInt", "toFloat", "div", "random",
+  "output", "input", "to_string", "to_int", "to_float", "div", "random",
 ])
 
 /** Kururi のキーワードではないが、Python の予約語・変換後のコードが使う名前。 */

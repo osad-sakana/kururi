@@ -62,9 +62,9 @@ const OTHER_LANGUAGE_NAMES: Readonly<Record<string, string>> = {
   println: "表示するときは output(...) と書きます",
   len: "配列や文字列の長さは x.length と書きます",
   length: "配列や文字列の長さは x.length と書きます",
-  str: "文字列にするときは toString(x) と書きます",
-  parseInt: "整数にするときは toInt(x) と書きます",
-  parseFloat: "小数にするときは toFloat(x) と書きます",
+  str: "文字列にするときは to_string(x) と書きます",
+  parseInt: "整数にするときは to_int(x) と書きます",
+  parseFloat: "小数にするときは to_float(x) と書きます",
   range: "回数で回すときは for i in 0..10 { ... } と書きます",
   append: "配列に足すときは list.push(x) と書きます",
 }
@@ -266,7 +266,7 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: () => "文字列と数値は + でつなげません",
     label: ({ actual = "" }) => `この値は ${actual} です`,
-    hint: () => "toString(値) で文字列にするか、文字列補間 `${値}` を使ってください",
+    hint: () => "to_string(値) で文字列にするか、文字列補間 `${値}` を使ってください",
   },
   K0303: {
     code: "K0303",
@@ -339,7 +339,7 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: ({ type = "", name = "" }) => `${type} には「${name}」がありません`,
     label: () => "使えません",
-    hint: ({ hint }) => hint ?? "配列で使えるのは length、push(x)、removeAt(i) です。文字列で使えるのは length だけです",
+    hint: ({ hint }) => hint ?? "配列で使えるのは length、push(x)、remove_at(i) です。文字列で使えるのは length だけです",
   },
   K0319: {
     code: "K0319",
@@ -456,6 +456,13 @@ export const DIAGNOSTIC_CATALOG = {
       `「${name}」は Kururi では予約語ではありませんが、Python の予約語です。変換後の Python で動かなくなるため使えません`,
     label: () => "Python の予約語です",
     hint: () => "別の名前にしてください",
+  },
+  K0506: {
+    code: "K0506",
+    severity: "error",
+    message: ({ name = "" }) => `「${name}」は、名前の書き方の決まりに合っていません`,
+    label: () => "書き方が違います",
+    hint: ({ rule = "", suggestion = "" }) => `${rule}。「${suggestion}」のように直してください`,
   },
   K0504: {
     code: "K0504",

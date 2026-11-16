@@ -1,7 +1,7 @@
 error[K0323]: トップレベルの初期値で、自分で作った関数「twice」は呼べません
  --> input.kururi:1:19
   |
-1 | const base: int = twice(2)
+1 | const BASE: int = twice(2)
   |                   ^^^^^^^^ ここでは呼べません
   |
 help: 初期値に使えるのは、リテラル・演算・const・組み込み関数だけです。main の中で計算してください

@@ -9,7 +9,7 @@ class Node = {
     }
 }
 
-function findFirstLong = (words: string[]) -> string? {
+function find_first_long = (words: string[]) -> string? {
     for w in words {
         if w.length > 3 {
             return w
@@ -20,8 +20,8 @@ function findFirstLong = (words: string[]) -> string? {
 
 function main = () {
     var name: string = input()
-    var age: int = toInt(input())
-    var found: string? = findFirstLong([name, "ab", "abcdef"])
+    var age: int = to_int(input())
+    var found: string? = find_first_long([name, "ab", "abcdef"])
     if found != null {
         output(`長い名前: ${found}（${found.length} 文字）`)
     } else {

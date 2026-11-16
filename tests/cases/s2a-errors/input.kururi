@@ -1,7 +1,7 @@
 function main = () {
-    const limit: int = 3
+    const LIMIT: int = 3
     var count: int = 0
-    limit = 5
+    LIMIT = 5
     for i in 0..3 {
         i += 1
         var count: int = 1

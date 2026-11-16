@@ -10,9 +10,9 @@ const pyOf = (body: string): string => {
 }
 
 describe("compile (S2b): 生成", () => {
-  it("配列の宣言・添字・length・push・removeAt", () => {
+  it("配列の宣言・添字・length・push・remove_at", () => {
     const py = pyOf(
-      '  var fruits: string[] = ["apple", "banana"]\n  fruits[1] = "melon"\n  fruits.push("grape")\n  fruits.removeAt(0)\n  var n: int = fruits.length\n  output(fruits[0])\n  fruits[0] += "!"',
+      '  var fruits: string[] = ["apple", "banana"]\n  fruits[1] = "melon"\n  fruits.push("grape")\n  fruits.remove_at(0)\n  var n: int = fruits.length\n  output(fruits[0])\n  fruits[0] += "!"',
     )
     expect(py).toContain('fruits = ["apple", "banana"]')
     expect(py).toContain('fruits[1] = "melon"')
@@ -46,11 +46,11 @@ describe("compile (S2b): 生成", () => {
   })
 
   it("配列の要素は const の配列でも書き換えられる", () => {
-    expect(codesOf(main("  const a: int[] = [1]\n  a[0] = 2\n  a.push(3)"))).toEqual([])
+    expect(codesOf(main("  const A: int[] = [1]\n  A[0] = 2\n  A.push(3)"))).toEqual([])
   })
 
   it("トップレベルの配列", () => {
-    expect(codesOf(`const names: string[] = ["a"]\n${main("  output(names[0])")}`)).toEqual([])
+    expect(codesOf(`const NAMES: string[] = ["a"]\n${main("  output(NAMES[0])")}`)).toEqual([])
   })
 })
 
@@ -84,7 +84,7 @@ describe("compile (S2b): 診断", () => {
   it("配列を表示すると K0313", () => {
     expect(codesOf(main("  var a: int[] = [1]\n  output(a)"))).toEqual(["K0313"])
     expect(codesOf(main("  var a: int[] = [1]\n  output(`${a}`)"))).toEqual(["K0313"])
-    expect(codesOf(main("  var a: int[] = [1]\n  output(toString(a))"))).toEqual(["K0313"])
+    expect(codesOf(main("  var a: int[] = [1]\n  output(to_string(a))"))).toEqual(["K0313"])
   })
 
   it("使えないメンバ・添字は K0317 / K0319", () => {
@@ -94,9 +94,9 @@ describe("compile (S2b): 診断", () => {
     expect(codesOf(main("  var n: int = 1\n  output(n[0])"))).toEqual(["K0319"])
   })
 
-  it("push・removeAt の引数の数は K0305、length には代入できない（K0112）", () => {
+  it("push・remove_at の引数の数は K0305、length には代入できない（K0112）", () => {
     expect(codesOf(main("  var a: int[] = [1]\n  a.push()"))).toEqual(["K0305"])
-    expect(codesOf(main("  var a: int[] = [1]\n  a.removeAt(1, 2)"))).toEqual(["K0305"])
+    expect(codesOf(main("  var a: int[] = [1]\n  a.remove_at(1, 2)"))).toEqual(["K0305"])
     expect(codesOf(main("  var a: int[] = [1]\n  a.length = 3"))).toEqual(["K0112"])
   })
 

@@ -40,7 +40,7 @@ describe("formatDiagnostic", () => {
     const start = src.indexOf("result")
     const d = diag(src, start, start + "result".length, {
       label: "この値は int です",
-      hint: "toString(result) で文字列に変換してください",
+      hint: "to_string(result) で文字列に変換してください",
     })
     expect(formatDiagnostic(d, { source: src, fileName: "x.kururi" })).toBe(
       [
@@ -50,7 +50,7 @@ describe("formatDiagnostic", () => {
         "2 | row = row + result",
         "  |             ^^^^^^ この値は int です",
         "  |",
-        "help: toString(result) で文字列に変換してください",
+        "help: to_string(result) で文字列に変換してください",
       ].join("\n"),
     )
   })

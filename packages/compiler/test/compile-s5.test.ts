@@ -25,7 +25,7 @@ describe("compile (S5): T? と null の生成", () => {
   })
 
   it("T? と boolean の表示には補助関数を使い、必要なときだけ出す", () => {
-    const py = pyOf(main("  var a: int? = null\n  output(a)\n  output(toString(a))\n  output(`${a}`)"))
+    const py = pyOf(main("  var a: int? = null\n  output(a)\n  output(to_string(a))\n  output(`${a}`)"))
     expect(py).toContain("def __kururi_show(value):")
     expect(py).toContain("print(__kururi_show(a))")
     expect(compile(main('  output("x")')).python).not.toContain("__kururi_show")
@@ -42,8 +42,8 @@ describe("compile (S5): T? と null の生成", () => {
 })
 
 describe("compile (S5): 組み込み関数", () => {
-  it("input / toInt / toFloat / div / random", () => {
-    const py = pyOf(main('  var s: string = input()\n  var n: int = toInt(s)\n  var f: float = toFloat("1.5")\n  output(div(n, 2) * 3)\n  output(div(n + 1, 2 + n))\n  output(random(1, 6))\n  output(toInt(2.5))'))
+  it("input / to_int / to_float / div / random", () => {
+    const py = pyOf(main('  var s: string = input()\n  var n: int = to_int(s)\n  var f: float = to_float("1.5")\n  output(div(n, 2) * 3)\n  output(div(n + 1, 2 + n))\n  output(random(1, 6))\n  output(to_int(2.5))'))
     expect(py).toContain("import random\n")
     expect(py).toContain("s = input()")
     expect(py).toContain("n = int(s)")
@@ -56,11 +56,11 @@ describe("compile (S5): 組み込み関数", () => {
 
   it("引数の数・型が違うと K0305 / K0301", () => {
     expect(codesOf(main("  var s: string = input(1)"))).toEqual(["K0305"])
-    expect(codesOf(main("  var n: int = toInt()"))).toEqual(["K0305"])
-    expect(codesOf(main("  var n: int = toInt(true)"))).toEqual(["K0301"])
+    expect(codesOf(main("  var n: int = to_int()"))).toEqual(["K0305"])
+    expect(codesOf(main("  var n: int = to_int(true)"))).toEqual(["K0301"])
     expect(codesOf(main("  var n: int = div(1.5, 2)"))).toEqual(["K0301"])
     expect(codesOf(main("  var n: int = random(1)"))).toEqual(["K0305"])
-    expect(codesOf(main('  var n: int = toInt("1") + "a"'))).toEqual(["K0302"])
+    expect(codesOf(main('  var n: int = to_int("1") + "a"'))).toEqual(["K0302"])
   })
 
   it("random を使わなければ import しない", () => {

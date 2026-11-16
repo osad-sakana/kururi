@@ -36,7 +36,7 @@ error[K0317]: int[] には「size」がありません
 7 |     xs.size()
   |        ^^^^ 使えません
   |
-help: 配列で使えるのは length、push(x)、removeAt(i) です。文字列で使えるのは length だけです
+help: 配列で使えるのは length、push(x)、remove_at(i) です。文字列で使えるのは length だけです
 
 error[K0316]: 文字列の 1 文字だけを書き換えることはできません
  --> input.kururi:9:5

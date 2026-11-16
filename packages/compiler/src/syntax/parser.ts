@@ -43,7 +43,7 @@ function parseTopLevel(c: Cursor): TopLevel | undefined {
 function parseClass(c: Cursor): ClassDecl | undefined {
   const keyword = c.next()
   const nameTok = c.peek()
-  if (!c.checkDeclName(nameTok)) {
+  if (!c.checkDeclName(nameTok, "class")) {
     c.recover()
     return undefined
   }
@@ -233,7 +233,7 @@ function takeVarKeyword(c: Cursor): Token {
 function parseVarDecl(c: Cursor): VarDecl | undefined {
   const keyword = takeVarKeyword(c)
   const nameTok = c.peek()
-  if (!c.checkDeclName(nameTok)) {
+  if (!c.checkDeclName(nameTok, keyword.text === "const" ? "constant" : "snake")) {
     c.recover()
     return undefined
   }
@@ -393,7 +393,7 @@ function parseStatementBody(c: Cursor): Stmt | undefined {
 function parseVarDeclBody(c: Cursor): VarDecl | undefined {
   const keyword = takeVarKeyword(c)
   const nameTok = c.peek()
-  if (!c.checkDeclName(nameTok)) return undefined
+  if (!c.checkDeclName(nameTok, keyword.text === "const" ? "constant" : "snake")) return undefined
   c.next()
   return parseVarRest(c, keyword, nameTok)
 }
