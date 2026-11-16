@@ -2,7 +2,9 @@ import * as monaco from "monaco-editor/esm/vs/editor/editor.api"
 import "monaco-editor/esm/vs/basic-languages/python/python.contribution"
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker"
 import { analyze, debounce, narapyUrl } from "./analyze"
+import { iconCss } from "./icon-css"
 import { LANGUAGE_ID, monarchDefinition } from "./language"
+import { classifyLines } from "./line-icons"
 import { mapRuntimeError } from "./runtime"
 import { createRunner } from "./runner"
 import { SAMPLE } from "./sample"
@@ -50,7 +52,21 @@ monaco.languages.setLanguageConfiguration(LANGUAGE_ID, {
 })
 
 const editorOptions = { automaticLayout: true, minimap: { enabled: false }, fontSize: 14 } as const
-const editor = monaco.editor.create(element("editor"), { ...editorOptions, value: loadSource(), language: LANGUAGE_ID })
+const editor = monaco.editor.create(element("editor"), { ...editorOptions, lineDecorationsWidth: 24, value: loadSource(), language: LANGUAGE_ID })
+const iconStyle = document.createElement("style")
+iconStyle.textContent = iconCss()
+document.head.append(iconStyle)
+const iconDecorations = editor.createDecorationsCollection()
+
+/** 行番号の右に、宣言と制御構文のアイコンを出す */
+function renderLineIcons(source: string): void {
+  iconDecorations.set(
+    classifyLines(source).map(({ line, kind, hint }) => ({
+      range: new monaco.Range(line, 1, line, 1),
+      options: { linesDecorationsClassName: `kururi-icon kururi-icon-${kind}`, linesDecorationsTooltip: hint },
+    })),
+  )
+}
 const pythonView = monaco.editor.create(element("python"), {
   ...editorOptions,
   value: "",
@@ -152,6 +168,7 @@ function render(): void {
   const source = editor.getValue()
   const analysis = analyze(source)
   currentAnalysis = analysis
+  renderLineIcons(source)
   const model = editor.getModel()
   if (model !== null) {
     monaco.editor.setModelMarkers(
