@@ -79,6 +79,8 @@ h1 svg { display: block; height: 30px; width: auto; }
 .controls { display: flex; align-items: center; gap: 0.25rem; border: 1px solid var(--color-line); border-radius: 8px; overflow: hidden; }
 .controls button { border: 0; border-radius: 0; padding: 0.4rem 0.6rem; }
 #font-size { min-width: 2.2rem; text-align: center; font: 12px var(--font-mono); color: var(--color-muted); user-select: none; }
+select { font: inherit; font-size: 12px; max-width: 11rem; padding: 0.4rem 0.5rem; border-radius: 8px; border: 1px solid var(--color-line); background: var(--color-panel); color: var(--color-muted); cursor: pointer; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 #status { flex: 1; font-size: 12px; font-family: var(--font-mono); color: var(--color-muted); }
 #status.error { color: var(--color-danger); }
 button { font: inherit; font-size: 12px; padding: 0.4rem 0.75rem; border-radius: 8px; border: 1px solid var(--color-line); background: transparent; color: var(--color-muted); cursor: pointer; transition: color 0.15s, background 0.15s; }

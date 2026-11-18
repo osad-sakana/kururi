@@ -1,5 +1,15 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api"
 import "monaco-editor/esm/vs/basic-languages/python/python.contribution"
+// editor.api は中身だけなので、使う機能（補完・ホバー・電球・検索 など）を足す
+import "monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController"
+import "monaco-editor/esm/vs/editor/contrib/snippet/browser/snippetController2"
+import "monaco-editor/esm/vs/editor/contrib/hover/browser/hoverContribution"
+import "monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionContributions"
+import "monaco-editor/esm/vs/editor/contrib/comment/browser/comment"
+import "monaco-editor/esm/vs/editor/contrib/find/browser/findController"
+import "monaco-editor/esm/vs/editor/contrib/bracketMatching/browser/bracketMatching"
+import "monaco-editor/esm/vs/editor/contrib/linesOperations/browser/linesOperations"
+import "monaco-editor/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter"
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker"
 import { applyBrand } from "./brand"
 import { analyze, debounce, narapyUrl, type EditorMarker } from "./analyze"
@@ -7,6 +17,7 @@ import { applyFix } from "./quick-fix"
 import { renderProblems } from "./problems"
 import { iconCss } from "./icon-css"
 import { kururiLineFor, pythonLinesFor } from "./line-link"
+import { registerEditorHelp } from "./editor-help"
 import { LANGUAGE_ID, monarchDefinition } from "./language"
 import { classifyLines } from "./line-icons"
 import { mapRuntimeError } from "./runtime"
@@ -14,6 +25,7 @@ import { createRunner } from "./runner"
 import type { TraceResult } from "./trace-types"
 import { createStepPanel } from "./step-panel"
 import { SAMPLE } from "./sample"
+import { SAMPLES } from "./samples"
 import { FONT_SIZE, clampFontSize, loadFontSize, loadThemePreference, nextThemePreference, saveFontSize, saveThemePreference } from "./preferences"
 import { applyTheme, defineThemes, onSystemThemeChange } from "./theme"
 import "./style.css"
@@ -67,6 +79,7 @@ applyTheme(themePreference)
 onSystemThemeChange(() => applyTheme(themePreference))
 let fontSize = loadFontSize()
 // narapy のエディタと同じ設定（書体、折り返し、細いスクロールバー など）
+registerEditorHelp(LANGUAGE_ID)
 const editorOptions = {
   automaticLayout: true,
   minimap: { enabled: false },
@@ -149,6 +162,21 @@ themeButton.addEventListener("click", () => {
   showPreferences()
 })
 showPreferences()
+
+const sampleSelect = element<HTMLSelectElement>("samples")
+sampleSelect.append(new Option("サンプルを選ぶ…", ""), ...SAMPLES.map((sample) => new Option(sample.title, sample.id)))
+sampleSelect.addEventListener("change", () => {
+  const sample = SAMPLES.find((candidate) => candidate.id === sampleSelect.value)
+  sampleSelect.value = ""
+  const model = editor.getModel()
+  if (sample === undefined || model === null) return
+  // 元に戻す操作で、書いていたコードに戻せる
+  editor.pushUndoStop()
+  editor.executeEdits("sample", [{ range: model.getFullModelRange(), text: sample.source }])
+  editor.pushUndoStop()
+  editor.setPosition({ lineNumber: 1, column: 1 })
+  editor.focus()
+})
 
 function appendOutput(text: string, className?: string): void {
   const line = document.createElement("div")

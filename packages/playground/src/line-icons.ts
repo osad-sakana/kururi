@@ -8,7 +8,7 @@ export interface LineIcon {
   readonly hint: string
 }
 
-const HINTS: Readonly<Record<IconKind, string>> = {
+export const HINTS: Readonly<Record<IconKind, string>> = {
   var: "var: あとから変えられる値を入れる",
   const: "const: 変えられない値（定数）",
   function: "function: 処理にまとめて名前を付ける",
