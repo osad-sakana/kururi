@@ -1,3 +1,5 @@
+import type { TraceResult, TraceStep } from "./trace-types"
+
 /** 実行がこの時間を超えたら、無限ループとみなして止める（入力待ちの間は数えない）。 */
 const TIMEOUT_MS = 10_000
 /** 入力 1 回ぶんの最大バイト数 */
@@ -8,19 +10,23 @@ export interface RunnerHandlers {
   readonly onStatus: (text: string) => void
   readonly onError: (traceback: string) => void
   readonly onFinish: () => void
+  /** ステップ実行のとき、実行の途中経過を受け取る */
+  readonly onTrace?: (trace: TraceResult) => void
   /** input() が呼ばれたとき、画面で入力を受け取って返す。止められたら null */
   readonly onInput: (prompt: string) => Promise<string | null>
 }
 
 interface WorkerMessage {
-  readonly type: "loading" | "running" | "stdout" | "input" | "done" | "error"
+  readonly type: "loading" | "running" | "stdout" | "input" | "done" | "error" | "trace"
+  readonly steps?: readonly TraceStep[]
+  readonly truncated?: boolean
   readonly text?: string
   readonly prompt?: string
   readonly traceback?: string
 }
 
 export interface Runner {
-  readonly run: (code: string) => void
+  readonly run: (code: string, options?: { readonly trace?: boolean }) => void
   readonly stop: () => void
 }
 
@@ -94,6 +100,7 @@ export function createRunner(handlers: RunnerHandlers): Runner {
         // Python の読み込みに時間がかかっても止めないよう、制限時間は実行が始まってから数える
         startTimer()
       } else if (message.type === "stdout") handlers.onOutput(message.text ?? "")
+      else if (message.type === "trace") handlers.onTrace?.({ steps: message.steps ?? [], truncated: message.truncated === true })
       else if (message.type === "input") void answer(message.prompt ?? "", created, buffers)
       else if (message.type === "error") {
         handlers.onError(message.traceback ?? "")
@@ -109,12 +116,12 @@ export function createRunner(handlers: RunnerHandlers): Runner {
   }
 
   return {
-    run(code) {
+    run(code, options) {
       if (worker === null) {
         buffers = createBuffers()
         worker = start()
       }
-      worker.postMessage({ code, buffers })
+      worker.postMessage({ code, buffers, trace: options?.trace === true })
     },
     stop() {
       discard()

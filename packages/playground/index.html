@@ -26,6 +26,7 @@
       </div>
       <button id="theme" type="button" title="見た目を切り替える（自動 / ライト / ダーク）"></button>
       <button id="run" class="primary" type="button" disabled>実行</button>
+      <button id="step" type="button" disabled title="1 行ずつ進めながら、変数の値を見る">ステップ実行</button>
       <button id="stop" type="button" hidden>止める</button>
       <button id="open-narapy" type="button" disabled>narapy で開く</button>
     </header>
@@ -39,6 +40,7 @@
         <div id="python" aria-label="Python（編集できません）"></div>
         <div class="pane-title">実行結果</div>
         <div id="console">
+          <div id="stepper" hidden></div>
           <pre id="output" aria-label="実行結果" aria-live="polite"></pre>
         </div>
       </section>

@@ -101,6 +101,19 @@ section + section { border-left: 1px solid var(--color-line); }
 #output .prompt-line input:focus { border-bottom-color: var(--color-accent); }
 /* Python 欄は自動で作られるので、書き込めないことが見て分かるようにする */
 #python .cursors-layer { display: none !important; }
+/* ステップ実行：行の強調と操作盤 */
+.kururi-step-line { background: color-mix(in srgb, var(--color-accent) 22%, transparent); }
+#stepper { flex-shrink: 0; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--color-line); max-height: 9rem; overflow: auto; outline: none; }
+#console:has(#stepper:not([hidden])) { height: 17rem; }
+.step-controls { display: flex; gap: 0.35rem; margin-bottom: 0.4rem; }
+.step-controls button { padding: 0.25rem 0.6rem; }
+.step-close { margin-left: auto; }
+.step-info { font: 12px var(--font-mono); color: var(--color-muted); margin-bottom: 0.3rem; }
+.step-note { font-size: 11px; color: var(--color-warn); }
+.step-vars { border-collapse: collapse; font: 12px var(--font-mono); }
+.step-vars th, .step-vars td { text-align: left; padding: 0.1rem 0.8rem 0.1rem 0; }
+.step-vars th { color: var(--color-muted); font-weight: 400; }
+.step-vars td:first-child { color: var(--color-code-builtin); }
 /* 狭い画面（スマホ）：ヘッダーは折り返し、Kururi 欄と Python 欄を縦に並べて、全体を縦にスクロールする */
 @media (max-width: 700px) {
   header { flex-wrap: wrap; gap: 0.5rem; padding: 0.5rem 0.75rem; }

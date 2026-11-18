@@ -8,6 +8,8 @@ import { LANGUAGE_ID, monarchDefinition } from "./language"
 import { classifyLines } from "./line-icons"
 import { mapRuntimeError } from "./runtime"
 import { createRunner } from "./runner"
+import type { TraceResult } from "./trace-types"
+import { createStepPanel } from "./step-panel"
 import { SAMPLE } from "./sample"
 import { FONT_SIZE, clampFontSize, loadFontSize, loadThemePreference, nextThemePreference, saveFontSize, saveThemePreference } from "./preferences"
 import { applyTheme, defineThemes, onSystemThemeChange } from "./theme"
@@ -194,9 +196,51 @@ function markRuntimeError(line: number | null): void {
   monaco.editor.setModelMarkers(model, "kururi-runtime", markers)
 }
 
+let runLines: string[] = []
+let savedOutput: Node[] | null = null
+let pendingTrace: TraceResult | null = null
+const stepButton = element<HTMLButtonElement>("step")
+const stepHighlights = { kururi: editor.createDecorationsCollection(), python: pythonView.createDecorationsCollection() }
+
+function highlightLine(collection: monaco.editor.IEditorDecorationsCollection, view: monaco.editor.IStandaloneCodeEditor, line: number | null): void {
+  collection.set(line === null ? [] : [{ range: new monaco.Range(line, 1, line, 1), options: { isWholeLine: true, className: "kururi-step-line" } }])
+  if (line !== null) view.revealLineInCenterIfOutsideViewport(line)
+}
+
+/** ステップ実行中は、出力を今の位置までに絞って見せ、閉じたら元に戻す */
+function showStepOutput(lines: number | null): void {
+  if (lines === null) {
+    if (savedOutput !== null) output.replaceChildren(...savedOutput)
+    savedOutput = null
+    return
+  }
+  savedOutput ??= [...output.childNodes].map((node) => node.cloneNode(true))
+  output.replaceChildren(
+    ...runLines.slice(0, lines).map((text) => {
+      const line = document.createElement("div")
+      line.textContent = text
+      return line
+    }),
+  )
+}
+
+const stepPanel = createStepPanel(element("stepper"), {
+  highlight: (kururiLine, pythonLine) => {
+    highlightLine(stepHighlights.kururi, editor, kururiLine)
+    highlightLine(stepHighlights.python, pythonView, pythonLine)
+  },
+  showOutput: showStepOutput,
+})
+
 const runner = createRunner({
+  onTrace: (trace) => {
+    pendingTrace = trace
+  },
   onInput: askInline,
-  onOutput: (text) => appendOutput(text),
+  onOutput: (text) => {
+    runLines = [...runLines, text]
+    appendOutput(text)
+  },
   onStatus: (text) => {
     status.textContent = text
   },
@@ -209,17 +253,27 @@ const runner = createRunner({
   onFinish: () => {
     cancelInput()
     runButton.disabled = currentAnalysis.errorCount > 0 || currentAnalysis.python === ""
+    stepButton.disabled = runButton.disabled
     stopButton.hidden = true
+    if (pendingTrace !== null) stepPanel.open(pendingTrace, currentAnalysis.lineMap)
+    pendingTrace = null
   },
 })
 
-runButton.addEventListener("click", () => {
+function start(trace: boolean): void {
+  stepPanel.close()
   output.replaceChildren()
+  runLines = []
+  pendingTrace = null
   markRuntimeError(null)
   runButton.disabled = true
+  stepButton.disabled = true
   stopButton.hidden = false
-  runner.run(currentAnalysis.python)
-})
+  runner.run(currentAnalysis.python, { trace })
+}
+
+runButton.addEventListener("click", () => start(false))
+stepButton.addEventListener("click", () => start(true))
 stopButton.addEventListener("click", () => runner.stop())
 
 function render(): void {
@@ -253,10 +307,14 @@ function render(): void {
   }
   status.classList.toggle("error", analysis.errorCount > 0)
   openButton.disabled = currentUrl === null
-  if (stopButton.hidden) runButton.disabled = analysis.errorCount > 0 || analysis.python === ""
+  if (stopButton.hidden) {
+    runButton.disabled = analysis.errorCount > 0 || analysis.python === ""
+    stepButton.disabled = runButton.disabled
+  }
   saveSource(source)
 }
 
+editor.onDidChangeModelContent(() => stepPanel.close())
 editor.onDidChangeModelContent(debounce(render, 200))
 openButton.addEventListener("click", () => {
   if (currentUrl !== null) window.open(currentUrl, "_blank", "noopener")
