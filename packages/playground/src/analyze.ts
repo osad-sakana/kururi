@@ -1,5 +1,5 @@
 import { compile, diagnosticText, formatDiagnostics, toEditorRange } from "@kururi/compiler"
-import type { Diagnostic, LineMapping } from "@kururi/compiler"
+import type { Diagnostic, Fix, LineMapping } from "@kururi/compiler"
 import { buildProjectUrl, projectFiles } from "@kururi/narapy"
 
 /** Monaco の setModelMarkers に渡す形（行・列は 1 始まり、end は含まない）。 */
@@ -11,6 +11,8 @@ export interface EditorMarker {
   readonly message: string
   readonly severity: "error" | "warning"
   readonly code: string
+  /** 1 クリックで直せるときの直し方 */
+  readonly fix?: Fix
 }
 
 export interface Analysis {
@@ -32,6 +34,7 @@ function toMarker(diagnostic: Diagnostic, lines: readonly string[]): EditorMarke
     message: diagnosticText(diagnostic),
     severity: diagnostic.severity,
     code: diagnostic.code,
+    ...(diagnostic.fix === undefined ? {} : { fix: diagnostic.fix }),
   }
 }
 

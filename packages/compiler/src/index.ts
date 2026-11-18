@@ -13,6 +13,7 @@ export {
 } from "./diagnostics"
 export type {
   Diagnostic,
+  Fix,
   DiagnosticCategory,
   DiagnosticCode,
   EditorRange,

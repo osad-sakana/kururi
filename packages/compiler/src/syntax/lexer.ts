@@ -1,4 +1,4 @@
-import type { Diagnostic } from "../diagnostics"
+import type { Diagnostic, Fix } from "../diagnostics"
 import { Reporter } from "../reporter"
 import { CONTINUATION_TEXTS, KEYWORDS } from "./tokens"
 import type { Range, TemplatePart, Token, TokenKind } from "./tokens"
@@ -235,6 +235,11 @@ export function lex(source: string): LexResult {
 
   let lastSemicolon = -1
   const SUBSTITUTES: Readonly<Record<string, string>> = { "&&": "and", "||": "or", "!": "not" }
+  const WORD_FIXES: Readonly<Record<string, Fix>> = {
+    "&&": { title: "and に直す", text: "and" },
+    "||": { title: "or に直す", text: "or" },
+    "!": { title: "not に直す", text: "not " },
+  }
 
   function readUnknown(): string | undefined {
     const start = pos
@@ -245,7 +250,7 @@ export function lex(source: string): LexResult {
     // 1 行に ; が何度もあっても、診断は最初の 1 件だけ（for (...; ...; ...) などで同じ案内が並ばないように）
     const repeated = text === ";" && lastSemicolon >= 0 && !source.slice(lastSemicolon, start).includes("\n")
     if (text === ";") lastSemicolon = start
-    if (!repeated) reporter.report("K0103", { start, end: pos }, { text })
+    if (!repeated) reporter.report("K0103", { start, end: pos }, { text }, WORD_FIXES[text])
     return SUBSTITUTES[text]
   }
 

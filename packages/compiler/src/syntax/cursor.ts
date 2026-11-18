@@ -1,5 +1,5 @@
 import type { Reporter } from "../reporter"
-import type { DiagnosticCode } from "../diagnostics"
+import type { DiagnosticCode, Fix } from "../diagnostics"
 import { namingProblem } from "./naming"
 import type { NameStyle } from "./naming"
 import { BUILTIN_NAMES, PYTHON_RESERVED } from "./tokens"
@@ -41,8 +41,8 @@ export class Cursor {
     return tok.kind === "keyword" && tok.text === text
   }
 
-  report(code: DiagnosticCode, range: Range, params: Readonly<Record<string, string>> = {}): void {
-    this.reporter.report(code, range, params)
+  report(code: DiagnosticCode, range: Range, params: Readonly<Record<string, string>> = {}, fix?: Fix): void {
+    this.reporter.report(code, range, params, fix)
   }
 
   /** 診断を出すときの位置。改行やファイルの終わりは、直前のトークンを指す。 */
@@ -133,7 +133,7 @@ export class Cursor {
     }
     const problem = namingProblem(tok.text, style)
     if (problem !== undefined) {
-      this.report("K0506", tok.range, { name: tok.text, rule: problem.rule, suggestion: problem.suggestion })
+      this.report("K0506", tok.range, { name: tok.text, rule: problem.rule, suggestion: problem.suggestion }, { title: `「${problem.suggestion}」に直す`, text: problem.suggestion, renameAll: true })
     }
     return true
   }

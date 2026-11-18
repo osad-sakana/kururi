@@ -1,4 +1,4 @@
-import type { Diagnostic, Severity, Span } from "./types"
+import type { Diagnostic, Fix, Severity, Span } from "./types"
 
 /**
  * 診断コードの体系：K + 4 桁。上位 2 桁がカテゴリ。
@@ -483,7 +483,7 @@ export const DIAGNOSTIC_CATALOG = {
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CATALOG
 
-export function createDiagnostic(code: DiagnosticCode, span: Span, params: Params = {}): Diagnostic {
+export function createDiagnostic(code: DiagnosticCode, span: Span, params: Params = {}, fix?: Fix): Diagnostic {
   const entry: CatalogEntry = DIAGNOSTIC_CATALOG[code]
   const label = entry.label?.(params)
   const hint = entry.hint?.(params)
@@ -494,6 +494,7 @@ export function createDiagnostic(code: DiagnosticCode, span: Span, params: Param
     span,
     ...(label === undefined ? {} : { label }),
     ...(hint === undefined ? {} : { hint }),
+    ...(fix === undefined ? {} : { fix }),
   }
   return Object.freeze(diagnostic)
 }

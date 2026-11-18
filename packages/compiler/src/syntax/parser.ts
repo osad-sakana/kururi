@@ -131,7 +131,7 @@ function parseMembers(c: Cursor, state: ClassState): ClassMember[] {
   if (c.isKeyword("method") || c.isKeyword("function")) {
     state.behaviorSeen = true
     if (c.isKeyword("function")) {
-      c.report("K0114", c.peek().range, { old: "function", hint: "クラスの中の関数は method と書きます（例: public method run = () { ... }）" })
+      c.report("K0114", c.peek().range, { old: "function", hint: "クラスの中の関数は method と書きます（例: public method run = () { ... }）" }, { title: "method に直す", text: "method" })
     }
     const fn = parseFunction(c)
     return fn === undefined ? [] : [{ kind: "method", access, fn }]
@@ -226,7 +226,7 @@ function parseType(c: Cursor): TypeRef | undefined {
 /** var / const を読む。古い let は、案内を出したうえで var として読み進める。 */
 function takeVarKeyword(c: Cursor): Token {
   const keyword = c.next()
-  if (keyword.text === "let") c.report("K0114", keyword.range, { old: "let", hint: "変数は var と書きます（例: var a: int = 1）" })
+  if (keyword.text === "let") c.report("K0114", keyword.range, { old: "let", hint: "変数は var と書きます（例: var a: int = 1）" }, { title: "var に直す", text: "var" })
   return keyword
 }
 
@@ -369,7 +369,7 @@ function parseStatementBody(c: Cursor): Stmt | undefined {
       c.report("K0114", tok.range, { old: "repeat", hint: "回数で回すときは for i in 0..10 { ... } と書きます" })
       return undefined
     case "foreach":
-      c.report("K0114", tok.range, { old: "foreach", hint: "配列を 1 つずつ取り出すときは for x in xs { ... } と書きます" })
+      c.report("K0114", tok.range, { old: "foreach", hint: "配列を 1 つずつ取り出すときは for x in xs { ... } と書きます" }, { title: "for に直す", text: "for" })
       return parseFor(c)
     case "for":
       return parseFor(c)
@@ -424,7 +424,7 @@ function parseIf(c: Cursor): Stmt | undefined {
     more = false
     if (c.isKeyword("elseif")) {
       // 古い elseif は、案内を出したうえで else if として読み進める
-      c.report("K0114", c.next().range, { old: "elseif", hint: "else if と、2 つに分けて書きます" })
+      c.report("K0114", c.next().range, { old: "elseif", hint: "else if と、2 つに分けて書きます" }, { title: "else if に直す", text: "else if" })
       more = true
     } else if (c.isKeyword("else")) {
       c.next()

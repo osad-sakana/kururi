@@ -2,8 +2,11 @@ import * as monaco from "monaco-editor/esm/vs/editor/editor.api"
 import "monaco-editor/esm/vs/basic-languages/python/python.contribution"
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker"
 import { applyBrand } from "./brand"
-import { analyze, debounce, narapyUrl } from "./analyze"
+import { analyze, debounce, narapyUrl, type EditorMarker } from "./analyze"
+import { applyFix } from "./quick-fix"
+import { renderProblems } from "./problems"
 import { iconCss } from "./icon-css"
+import { kururiLineFor, pythonLinesFor } from "./line-link"
 import { LANGUAGE_ID, monarchDefinition } from "./language"
 import { classifyLines } from "./line-icons"
 import { mapRuntimeError } from "./runtime"
@@ -196,11 +199,79 @@ function markRuntimeError(line: number | null): void {
   monaco.editor.setModelMarkers(model, "kururi-runtime", markers)
 }
 
+function fixedSource(marker: EditorMarker): string | null {
+  return marker.fix === undefined ? null : applyFix(editor.getValue(), marker, marker.fix)
+}
+
+/** 直し方を当てる（元に戻す操作で戻せる） */
+function applyMarkerFix(marker: EditorMarker): void {
+  const model = editor.getModel()
+  const next = fixedSource(marker)
+  if (model === null || next === null) return
+  editor.pushUndoStop()
+  editor.executeEdits("quick-fix", [{ range: model.getFullModelRange(), text: next }])
+  editor.pushUndoStop()
+  editor.focus()
+}
+
+// 電球（Ctrl+. / Cmd+.）からも、同じ直し方を使えるようにする
+monaco.languages.registerCodeActionProvider(LANGUAGE_ID, {
+  provideCodeActions(model, range) {
+    const actions: monaco.languages.CodeAction[] = []
+    for (const marker of currentAnalysis.markers) {
+      const text = marker.fix === undefined ? null : fixedSource(marker)
+      if (marker.fix === undefined || text === null) continue
+      if (range.startLineNumber > marker.endLineNumber || range.endLineNumber < marker.startLineNumber) continue
+      actions.push({
+        title: marker.fix.title,
+        kind: "quickfix",
+        isPreferred: true,
+        edit: { edits: [{ resource: model.uri, versionId: model.getVersionId(), textEdit: { range: model.getFullModelRange(), text } }] },
+      })
+    }
+    return { actions, dispose() {} }
+  },
+})
+
+const problemsList = element("problems")
+function showProblems(markers: readonly EditorMarker[]): void {
+  renderProblems(problemsList, markers, {
+    jump: (marker) => {
+      editor.setPosition({ lineNumber: marker.startLineNumber, column: marker.startColumn })
+      editor.revealLineInCenterIfOutsideViewport(marker.startLineNumber)
+      editor.focus()
+    },
+    fix: applyMarkerFix,
+  })
+}
+
 let runLines: string[] = []
 let savedOutput: Node[] | null = null
 let pendingTrace: TraceResult | null = null
 const stepButton = element<HTMLButtonElement>("step")
 const stepHighlights = { kururi: editor.createDecorationsCollection(), python: pythonView.createDecorationsCollection() }
+
+/** カーソルのある行と、対応する反対側の行を薄く示す（Kururi ↔ Python） */
+const linkHighlights = { kururi: editor.createDecorationsCollection(), python: pythonView.createDecorationsCollection() }
+
+function linkDecoration(line: number) {
+  return { range: new monaco.Range(line, 1, line, 1), options: { isWholeLine: true, className: "kururi-link-line" } }
+}
+
+function showLinkedLines(from: "kururi" | "python", line: number): void {
+  const { lineMap } = currentAnalysis
+  if (from === "kururi") {
+    linkHighlights.kururi.set([linkDecoration(line)])
+    linkHighlights.python.set(pythonLinesFor(line, lineMap).map(linkDecoration))
+    return
+  }
+  const kururiLine = kururiLineFor(line, lineMap)
+  linkHighlights.python.set([linkDecoration(line)])
+  linkHighlights.kururi.set(kururiLine === null ? [] : [linkDecoration(kururiLine)])
+}
+
+editor.onDidChangeCursorPosition((event) => showLinkedLines("kururi", event.position.lineNumber))
+pythonView.onDidChangeCursorPosition((event) => showLinkedLines("python", event.position.lineNumber))
 
 function highlightLine(collection: monaco.editor.IEditorDecorationsCollection, view: monaco.editor.IStandaloneCodeEditor, line: number | null): void {
   collection.set(line === null ? [] : [{ range: new monaco.Range(line, 1, line, 1), options: { isWholeLine: true, className: "kururi-step-line" } }])
@@ -281,6 +352,7 @@ function render(): void {
   const analysis = analyze(source)
   currentAnalysis = analysis
   renderLineIcons(source)
+  showProblems(analysis.markers)
   const model = editor.getModel()
   if (model !== null) {
     monaco.editor.setModelMarkers(

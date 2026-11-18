@@ -63,7 +63,7 @@ function parseLeftAssoc(c: Cursor, ops: ReadonlySet<string>, operand: (c: Cursor
     if (ADDITIVE.has(op.text) && again.kind === "op" && again.text === op.text && c.peek(1).kind === "nl") {
       // x++ / x-- のように、増やす・減らす書き方
       c.next()
-      c.report("K0113", { start: op.range.start, end: again.range.end }, { op: op.text })
+      c.report("K0113", { start: op.range.start, end: again.range.end }, { op: op.text }, { title: `${op.text}= 1 に直す`, text: `${op.text}= 1` })
       return undefined
     }
     const right = operand(c)

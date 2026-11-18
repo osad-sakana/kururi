@@ -1,4 +1,4 @@
-export type { Diagnostic, Position, Severity, Span } from "./types"
+export type { Diagnostic, Fix, Position, Severity, Span } from "./types"
 export { DIAGNOSTIC_CATALOG, categoryOf, createDiagnostic } from "./catalog"
 export type { DiagnosticCategory, DiagnosticCode } from "./catalog"
 export { formatDiagnostic, formatDiagnostics } from "./format"
