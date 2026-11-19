@@ -15,10 +15,10 @@ class Player = {
 
 function main = () {
     var p: Player = new Player()
-    output(p.secret)
+    print(p.secret)
     p.hidden()
     p.age = 3
-    output(p)
-    output(self)
+    print(p)
+    print(self)
     var q: Missing = new Missing()
 }

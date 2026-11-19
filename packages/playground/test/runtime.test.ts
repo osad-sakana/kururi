@@ -42,7 +42,7 @@ describe("mapRuntimeError", () => {
   })
 
   it("実際に変換した Python の行と対応する", () => {
-    const source = "function main = () {\n    var a: int = 1\n    output(div(a, 0))\n}\n"
+    const source = "function main = () {\n    var a: int = 1\n    print(div(a, 0))\n}\n"
     const { python, lineMap, diagnostics } = compile(source)
     expect(diagnostics).toEqual([])
     const pythonLine = python.split("\n").findIndex((line) => line.includes("print")) + 1

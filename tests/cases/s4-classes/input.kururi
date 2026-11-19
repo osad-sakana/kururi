@@ -20,7 +20,7 @@ class Player = {
     }
 
     method draw = () {
-        output("draw")
+        print("draw")
     }
 
     method update = () {
@@ -32,6 +32,6 @@ class Player = {
 function main = () {
     var pl: Player = new Player("taro")
     pl.run()
-    output(pl.describe())
-    output(pl.age)
+    print(pl.describe())
+    print(pl.age)
 }

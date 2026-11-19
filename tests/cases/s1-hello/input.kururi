@@ -1,4 +1,4 @@
 // はじめてのプログラム
 function main = () {
-    output("こんにちは、Kururi")
+    print("こんにちは、Kururi")
 }

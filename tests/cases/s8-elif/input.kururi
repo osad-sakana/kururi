@@ -1,8 +1,8 @@
 function main = () {
     var a: int = 1
     if a == 1 {
-        output("one")
+        print("one")
     } elif a == 2 {
-        output("two")
+        print("two")
     }
 }

@@ -8,9 +8,9 @@ export interface SampleProgram {
 export const SAMPLES: readonly SampleProgram[] = [
   {
     id: "hello",
-    title: "1. こんにちは（output）",
+    title: "1. こんにちは（print）",
     source: `function main = () {
-    output("こんにちは、Kururi！")
+    print("こんにちは、Kururi！")
 }
 `,
   },
@@ -23,11 +23,11 @@ export const SAMPLES: readonly SampleProgram[] = [
     var height: float = 148.5
     var is_student: boolean = true
 
-    output(\`\${name}さんは \${age} 歳、身長は \${height} cm です\`)
-    output(is_student)
+    print(\`\${name}さんは \${age} 歳、身長は \${height} cm です\`)
+    print(is_student)
 
     age = age + 1
-    output(\`来年は \${age} 歳\`)
+    print(\`来年は \${age} 歳\`)
 }
 `,
   },
@@ -38,11 +38,11 @@ export const SAMPLES: readonly SampleProgram[] = [
     var score: int = 75
 
     if score >= 90 {
-        output("とてもよくできました")
+        print("とてもよくできました")
     } else if score >= 60 {
-        output("よくできました")
+        print("よくできました")
     } else {
-        output("もう少しがんばろう")
+        print("もう少しがんばろう")
     }
 }
 `,
@@ -53,17 +53,17 @@ export const SAMPLES: readonly SampleProgram[] = [
     source: `function main = () {
     // 0 から 4 まで（終わりの 5 は含まない）
     for i in 0..5 {
-        output(i)
+        print(i)
     }
 
     var fruits: string[] = ["りんご", "みかん", "ぶどう"]
     for fruit in fruits {
-        output(fruit)
+        print(fruit)
     }
 
     var count: int = 3
     while count > 0 {
-        output(count)
+        print(count)
         count = count - 1
     }
 }
@@ -81,7 +81,7 @@ export const SAMPLES: readonly SampleProgram[] = [
     for n in numbers {
         total = total + n
     }
-    output(\`\${numbers.length} 個の合計は \${total}\`)
+    print(\`\${numbers.length} 個の合計は \${total}\`)
 }
 `,
   },
@@ -93,12 +93,12 @@ export const SAMPLES: readonly SampleProgram[] = [
 }
 
 function greet = (name: string) {
-    output(\`こんにちは、\${name}さん\`)
+    print(\`こんにちは、\${name}さん\`)
 }
 
 function main = () {
     greet("たろう")
-    output(add(3, 4))
+    print(add(3, 4))
 }
 `,
   },
@@ -119,7 +119,7 @@ function main = () {
     }
 
     public method show = () {
-        output(\`いまの数は \${self.count}\`)
+        print(\`いまの数は \${self.count}\`)
     }
 }
 
@@ -137,7 +137,7 @@ function main = () {
     source: `function main = () {
     var text: string = input()
     var number: int = to_int(text)
-    output(\`2 倍は \${number * 2}\`)
+    print(\`2 倍は \${number * 2}\`)
 }
 `,
   },

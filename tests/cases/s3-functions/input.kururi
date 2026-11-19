@@ -1,10 +1,10 @@
 var calls: int = 0
 
 function main = () {
-    output(fact(5))
-    output(average([80, 65, 91]))
-    output(sign(-3))
-    output(calls)
+    print(fact(5))
+    print(average([80, 65, 91]))
+    print(sign(-3))
+    print(calls)
 }
 
 function fact = (n: int) -> int {

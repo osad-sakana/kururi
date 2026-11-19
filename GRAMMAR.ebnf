@@ -66,7 +66,7 @@ templateEscape = "\" ( "`" | "$" | "\" | "n" | "t" ) ;   (* \` と \${ で文字
    （古い書き方の案内用に let repeat foreach elseif も予約語のまま残す）
    true false null and or not
    int float string boolean void
-   組み込み名: output input to_string to_int to_float div random（配列は push remove_at length） *)
+   組み込み名: print input to_string to_int to_float div random（配列は push remove_at length） *)
 
 
 (* ------------------------------------------------------------
@@ -192,7 +192,7 @@ arrayLiteral   = "[" [ expr { "," expr } [ "," ] ] "]" ;   (* 末尾カンマ可
    - 型の一致（代入、引数、戻り値、演算。int→float のみ暗黙変換可。配列は型が一致するものだけ）
    - T? を T として使う誤り（if x != null の中は T として可）
    - 空の配列 [] を、型が決まらない場所で使った
-   - boolean・T? 以外で表示できない型（配列・オブジェクト）を output / to_string / 補間に渡した
+   - boolean・T? 以外で表示できない型（配列・オブジェクト）を print / to_string / 補間に渡した
    - 文字列の要素への代入（s[i] = ...）
    - 添字に負の整数リテラル（a[-1]）
    - T? の絞り込み範囲の外で T として使った（絞り込みはローカル変数・引数のみ）

@@ -8,9 +8,9 @@ function main = () {
     var with_tax: float = total * (1 + TAX_RATE)
     var big: boolean = total > 3000 and not (count == 0)
 
-    output("小計: " + to_string(total))
-    output(`税込: ${with_tax} 円（個数 ${count}、{そのまま}）`)
-    output(big)
-    output(7 / 2)
-    output(-7 % 3)
+    print("小計: " + to_string(total))
+    print(`税込: ${with_tax} 円（個数 ${count}、{そのまま}）`)
+    print(big)
+    print(7 / 2)
+    print(-7 % 3)
 }

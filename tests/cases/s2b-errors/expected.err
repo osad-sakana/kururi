@@ -1,24 +1,24 @@
 error[K0313]: 配列はそのまま表示できません
- --> input.kururi:3:12
+ --> input.kururi:3:11
   |
-3 |     output(xs)
-  |            ^^ 配列です
+3 |     print(xs)
+  |           ^^ 配列です
   |
-help: for で 1 つずつ output してください（例: for x in xs { output(x) }）
+help: for で 1 つずつ print してください（例: for x in xs { print(x) }）
 
 error[K0315]: 添字に負の数は書けません
- --> input.kururi:4:15
+ --> input.kururi:4:14
   |
-4 |     output(xs[-1])
-  |               ^^ 負の数です
+4 |     print(xs[-1])
+  |              ^^ 負の数です
   |
 help: Python と違い、a[-1] は末尾を指しません。末尾は a[a.length - 1] と書きます
 
 error[K0306]: 添字には int が必要ですが、string です
- --> input.kururi:5:15
+ --> input.kururi:5:14
   |
-5 |     output(xs["a"])
-  |               ^^^ この値は string です
+5 |     print(xs["a"])
+  |              ^^^ この値は string です
   |
 help: 整数になる式を書いてください
 
@@ -47,10 +47,10 @@ error[K0316]: 文字列の 1 文字だけを書き換えることはできませ
 help: 新しい文字列を作って、変数に代入し直してください
 
 error[K0314]: 空の配列 [] は、型が決まる場所でしか書けません
-  --> input.kururi:10:12
+  --> input.kururi:10:11
    |
-10 |     output([])
-   |            ^^ 何の配列か分かりません
+10 |     print([])
+   |           ^^ 何の配列か分かりません
    |
 help: var a: int[] = [] のように、型を書いた変数に入れてください
 

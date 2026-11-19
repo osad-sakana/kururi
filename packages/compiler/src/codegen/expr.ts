@@ -118,11 +118,11 @@ function emitCall(expr: Extract<Expr, { kind: "call" }>, info: TypeInfo): string
   const name = expr.callee.kind === "ident" ? expr.callee.name : ""
   const arg = expr.args[0]
   if (["input", "to_int", "to_float", "div", "random"].includes(name)) return emitConvert(name, expr.args, info)
-  if (name !== "output" && name !== "to_string") {
+  if (name !== "print" && name !== "to_string") {
     return `${name}(${expr.args.map((a) => emitExpr(a, info)).join(", ")})`
   }
   if (arg === undefined) return ""
-  if (name === "output") return `print(${emitShown(arg, info)})`
+  if (name === "print") return `print(${emitShown(arg, info)})`
   const type = info.types.get(arg)
   if (isShownByHelper(arg, info)) return `__kururi_show(${emitExpr(arg, info)})`
   if (type === "string") return emitExpr(arg, info)

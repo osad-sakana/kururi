@@ -12,5 +12,5 @@ function main = () {
             total += n
         }
     }
-    output(`合計は ${total}`)
+    print(`合計は ${total}`)
 }

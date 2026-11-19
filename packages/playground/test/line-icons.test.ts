@@ -29,7 +29,7 @@ describe("classifyLines", () => {
   })
 
   it("コメント・空行・ふつうの式・フィールド宣言には付けない", () => {
-    const source = ["// var x", "", "    output(1)", "x = 1", "private name: string", "variable = 2"].join("\n")
+    const source = ["// var x", "", "    print(1)", "x = 1", "private name: string", "variable = 2"].join("\n")
     expect(kinds(source)).toEqual([])
   })
 

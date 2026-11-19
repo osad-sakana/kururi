@@ -3,7 +3,7 @@ import { runCli } from "../src/cli"
 import type { CliIo } from "../src/cli"
 
 const UNSUPPORTED = "function main = () {\n  class\n}\n"
-const HELLO = 'function main = () {\n  output("hi")\n}\n'
+const HELLO = 'function main = () {\n  print("hi")\n}\n'
 
 function io(
   files: Record<string, string>,
@@ -133,7 +133,7 @@ describe("kururi export", () => {
   })
 
   it("URL が長すぎるときは .narapy を使うよう案内する", () => {
-    const body = Array.from({ length: 6000 }, (_, i) => `  output(${i * 7919})`).join("\n")
+    const body = Array.from({ length: 6000 }, (_, i) => `  print(${i * 7919})`).join("\n")
     const r = runCli(["export", "a.kururi"], io({ "a.kururi": `function main = () {\n${body}\n}\n` }))
     expect(r.exitCode).toBe(1)
     expect(r.stderr).toContain("長すぎ")

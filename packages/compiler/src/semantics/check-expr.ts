@@ -21,7 +21,7 @@ export class ExprChecker {
   constructor(private readonly reporter: Reporter) {}
 
   /**
-   * 値として使う式の型。値を返さない呼び出し（output など）は、ここでエラーにする。
+   * 値として使う式の型。値を返さない呼び出し（print など）は、ここでエラーにする。
    * 空の配列 [] は、型が決まる場所（allowEmpty）でだけ使える。
    */
   valueType(expr: Expr, scope: Scope, allowEmpty = false): Type {
@@ -66,7 +66,7 @@ export class ExprChecker {
     return actual
   }
 
-  /** 画面に出せる値の型（配列は出せない）。output・to_string・補間で使う。 */
+  /** 画面に出せる値の型（配列は出せない）。print・to_string・補間で使う。 */
   displayType(expr: Expr, scope: Scope): Type {
     const type = this.valueType(expr, scope)
     const base = nonNull(type)
@@ -322,7 +322,7 @@ export class ExprChecker {
       this.reporter.report("K0308", callee.range, { name })
       return "error"
     }
-    if (name === "output" || name === "to_string") return this.builtinCall(name, expr, scope)
+    if (name === "print" || name === "to_string") return this.builtinCall(name, expr, scope)
     if (BUILTIN_FUNCTIONS.has(name)) return this.convertCall(name, expr, scope)
     if (global?.kind === "function") return this.userCall(name, expr, global, scope)
     if (global?.kind === "class") {
@@ -353,14 +353,14 @@ export class ExprChecker {
     return fn.returnType
   }
 
-  private builtinCall(name: "output" | "to_string", expr: Node<"call">, scope: Scope): Type {
+  private builtinCall(name: "print" | "to_string", expr: Node<"call">, scope: Scope): Type {
     const argTypes = expr.args.map((arg) => this.displayType(arg, scope))
     if (expr.args.length !== 1) {
       this.reporter.report("K0305", expr.range, { name, expected: "1", actual: String(expr.args.length) })
       return "error"
     }
     if (argTypes[0] === "error") return "error"
-    return name === "output" ? "void" : "string"
+    return name === "print" ? "void" : "string"
   }
 
   private classMethodCall(expr: Node<"call">, callee: Node<"member">, info: ClassInfo, scope: Scope): Type {

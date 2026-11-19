@@ -5,7 +5,7 @@ import { SAMPLE } from "../src/sample"
 
 describe("analyze", () => {
   it("エラーがなければ Python を返し、印は空", () => {
-    const result = analyze('function main = () {\n    output("こんにちは")\n}\n')
+    const result = analyze('function main = () {\n    print("こんにちは")\n}\n')
     expect(result.errorCount).toBe(0)
     expect(result.markers).toEqual([])
     expect(result.python).toContain("print")
@@ -30,7 +30,7 @@ describe("analyze", () => {
   })
 
   it("変換できないときは、Python 欄に出すエラーの文章を返す", () => {
-    const bad = analyze("function main = () {\n    print(1)\n}\n")
+    const bad = analyze("function main = () {\n    println(1)\n}\n")
     expect(bad.errorText).toContain("K0201")
     expect(bad.errorText).toContain("main.kururi")
     expect(analyze("function main = () {\n}\n").errorText).toBe("")
@@ -43,7 +43,7 @@ describe("analyze", () => {
 
 describe("narapyUrl", () => {
   it("正常なら narapy の URL", () => {
-    const source = 'function main = () {\n    output("hi")\n}\n'
+    const source = 'function main = () {\n    print("hi")\n}\n'
     expect(narapyUrl(source, analyze(source))).toMatch(/#project=/)
   })
 
@@ -75,6 +75,6 @@ describe("monarchDefinition", () => {
     expect(def.keywords).not.toContain("int")
     expect(def.typeKeywords).toContain("int")
     expect(def.constants).toContain("null")
-    expect(def.builtins).toContain("output")
+    expect(def.builtins).toContain("print")
   })
 })

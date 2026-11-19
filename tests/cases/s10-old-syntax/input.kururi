@@ -3,10 +3,10 @@ let z: int = 0
 function main = () {
     let b: int = 2
     repeat i: 3 {
-        output(i)
+        print(i)
     }
     foreach x in [1, 2] {
-        output(x)
+        print(x)
     }
     if a == 1 {
     } elseif a == 2 {

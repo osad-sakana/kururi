@@ -1,8 +1,8 @@
 function main = () {
     var a: int = "x"
     var b: string = a + 1
-    output(c)
-    output(1, 2)
+    print(c)
+    print(1, 2)
     var a: int = 3
     1 + 2
 }

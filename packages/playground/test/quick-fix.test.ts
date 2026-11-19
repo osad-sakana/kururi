@@ -9,7 +9,7 @@ describe("renameIdentifier", () => {
   })
 
   it("テンプレート文字列は、文字の部分は変えず、${ } の中だけ置き換える", () => {
-    expect(renameIdentifier("output(`someValue ${someValue}`)", "someValue", "some_value")).toBe("output(`someValue ${some_value}`)")
+    expect(renameIdentifier("print(`someValue ${someValue}`)", "someValue", "some_value")).toBe("print(`someValue ${some_value}`)")
   })
 
   it("別の名前の一部は変えない", () => {
@@ -20,8 +20,8 @@ describe("renameIdentifier", () => {
 describe("applyFix", () => {
   it("診断の直し方を当てると、そのエラーがなくなる", () => {
     const sources = [
-      "function main = () {\n    let x: int = 1\n    output(x)\n}\n",
-      "function main = () {\n    var someValue: int = 1\n    output(someValue)\n}\n",
+      "function main = () {\n    let x: int = 1\n    print(x)\n}\n",
+      "function main = () {\n    var someValue: int = 1\n    print(someValue)\n}\n",
       "function main = () {\n    var count: int = 0\n    count++\n}\n",
       "function main = () {\n    var a: boolean = true && false\n}\n",
     ]

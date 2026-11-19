@@ -38,7 +38,7 @@ describe("indexSymbols / signature", () => {
 
   it("キーワード・組み込み・型の説明も出す", () => {
     expect(helpFor("for", [], 1)).toContain("for")
-    expect(helpFor("output", [], 1)).toContain("output")
+    expect(helpFor("print", [], 1)).toContain("print")
     expect(helpFor("int", [], 1)).toContain("整数")
     expect(helpFor("nothing", [], 1)).toBeUndefined()
   })
@@ -66,6 +66,6 @@ describe("suggestions", () => {
 
   it("ふつうの候補に、宣言した名前と組み込みが入る", () => {
     const labels = generalSuggestions(symbols).map((s) => s.label)
-    expect(labels).toEqual(expect.arrayContaining(["var", "int", "output", "add", "Dog", "dog", "LIMIT"]))
+    expect(labels).toEqual(expect.arrayContaining(["var", "int", "print", "add", "Dog", "dog", "LIMIT"]))
   })
 })

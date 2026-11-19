@@ -17,7 +17,7 @@ export interface KSymbol {
 }
 
 const BUILTIN_DOCS: Readonly<Record<string, string>> = {
-  output: "output(x): 値を画面に出す",
+  print: "print(x): 値を画面に出す",
   input: "input(): キーボードから 1 行を文字列で受け取る",
   to_string: "to_string(x): 値を string にする",
   to_int: "to_int(s): string を int にする（失敗すると実行時エラー）",

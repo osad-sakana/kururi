@@ -23,12 +23,12 @@ function main = () {
     var age: int = to_int(input())
     var found: string? = find_first_long([name, "ab", "abcdef"])
     if found != null {
-        output(`長い名前: ${found}（${found.length} 文字）`)
+        print(`長い名前: ${found}（${found.length} 文字）`)
     } else {
-        output("なし")
+        print("なし")
     }
-    output(found)
-    output(age > 18)
+    print(found)
+    print(age > 18)
 
     var head: Node = new Node(1)
     head.next = new Node(2)
@@ -38,6 +38,6 @@ function main = () {
         sum += cur.value
         cur = cur.next
     }
-    output(sum)
-    output(div(sum, 2) + random(1, 1))
+    print(sum)
+    print(div(sum, 2) + random(1, 1))
 }

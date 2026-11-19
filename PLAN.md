@@ -75,22 +75,22 @@ var matrix: int[][] = [
 ]
 
 // 配列操作
-output(fruits[0])                // 要素アクセス
+print(fruits[0])                // 要素アクセス
 fruits[1] = "melon"              // 要素更新
 fruits.push("grape")             // 末尾に追加
 fruits.remove_at(0)               // 位置を指定して削除
 var count: int = fruits.length   // 長さ取得
 for fruit in fruits {
-  output(fruit)
+  print(fruit)
 }
 
 // 条件分岐（論理演算は and / or / not、比較は ==）
 if price < 300 and price != 0 {
-  output("hoge")
+  print("hoge")
 } else if price < 600 {
-  output("fuga")
+  print("fuga")
 } else {
-  output("hohe")
+  print("hohe")
 }
 
 // while ループ（条件で回す。break / continue が使える）
@@ -100,7 +100,7 @@ while true {
 
 // 回数で回す（i は 0 から 9 まで。終わりの 10 は含まない）
 for i in 0..10 {
-  output(to_string(i))     // 0, 1, ..., 9
+  print(to_string(i))     // 0, 1, ..., 9
 }
 
 // 文字列補間（バッククォートと ${ }）
@@ -109,7 +109,7 @@ var message: string = `${fruits[0]} は ${price} 円です`
 // null（値がない）。T? と書いた型だけ null を入れられる
 var nickname: string? = null
 if nickname != null {
-  output(nickname)
+  print(nickname)
 }
 
 // 関数宣言（TypeScript 風の戻り値型注釈）
@@ -218,7 +218,7 @@ Python側の詳細な対応は後ほど整理する。現時点で分かって�
 
 | Kururi | 説明 | Python |
 |---|---|---|
-| `output(x)` | 出力（改行あり） | `print(...)`（表示の規則は下） |
+| `print(x)` | 出力（改行あり） | `print(...)`（表示の規則は下） |
 | `input()` | 1行入力（常に `string`） | `input()` |
 | `to_string(x)` | 文字列へ変換 | 型による（下） |
 | `to_int(s)` | 整数へ変換（失敗すると実行時エラー） | `int(s)` |
@@ -231,7 +231,7 @@ Python側の詳細な対応は後ほど整理する。現時点で分かって�
 
 - 文字列補間：`` `${式}` ``。式は何でも書け、結果は自動で文字列化される（`to_string` 不要）。バッククォートや `${` を文字として書くときは `\`` と `\${`。`{` と `}` はそのまま文字として書ける。
 
-### 表示の規則（`output`・`to_string`・補間）
+### 表示の規則（`print`・`to_string`・補間）
 
 Kururi に書いた見た目のとおりに表示する。
 
@@ -283,7 +283,7 @@ Kururi に書いた見た目のとおりに表示する。
 
 - 検査するのは宣言の名前だけ。使う側は、宣言が正しければ合う。
 - 英字を含まない名前（ひらがな・カタカナ・漢字だけ）は大文字・小文字がないので対象外。
-- 組み込み名も同じ決まりに合わせた：`to_string`、`to_int`、`to_float`、配列の `remove_at`（`output`、`input`、`div`、`random`、`push`、`length` は変更なし）。
+- 組み込み名も同じ決まりに合わせた：`to_string`、`to_int`、`to_float`、配列の `remove_at`（`print`、`input`、`div`、`random`、`push`、`length` は変更なし）。
 - 構文の診断（K0506 を含む）があるあいだは、型検査には進まない。
 
 ## 予約語
@@ -292,7 +292,7 @@ Kururi に書いた見た目のとおりに表示する。
 
 ### Kururiの予約語
 
-`const var function method return class public private new constructor self if else while for in break continue true false null and or not int float string boolean void` と組み込み名（`output input to_string to_int to_float div random`）。
+`const var function method return class public private new constructor self if else while for in break continue true false null and or not int float string boolean void` と組み込み名（`print input to_string to_int to_float div random`）。
 
 古い書き方（`let` `repeat` `foreach` `elseif`）は、予約語として残して「新しい書き方はこうです」と案内する（K0114）。
 
@@ -381,7 +381,7 @@ kururi/
 | スライス | 内容 | 完了の目安 |
 |---|---|---|
 | S0 | 土台：リポジトリ、診断の仕組み、エラーコードの体系、ゴールデンテストの枠 | `kururi check` が空ファイルで動く |
-| S1 | `output`、`var`/`const`、`int`/`float`/`string`/`boolean`、四則演算、`to_string`、文字列補間、**引数なしの `function main = () { }`**、`if __name__`、`kururi run`（最小） | `output("hello")` と簡単な計算が実行できる |
+| S1 | `print`、`var`/`const`、`int`/`float`/`string`/`boolean`、四則演算、`to_string`、文字列補間、**引数なしの `function main = () { }`**、`if __name__`、`kururi run`（最小） | `print("hello")` と簡単な計算が実行できる |
 | S2a | `if`/`else if`/`else`、`while`、`for i in a..b`、`break`/`continue`、複合代入 | **example.kururi が正しい出力で動く** |
 | S2b | 配列、`for`、`push`/`remove_at`/`length`、文字列の添字 | 配列を使う例が動く |
 | S3 | 関数（引数・戻り値）、型検査、`return` 抜けの検出、シャドーイング禁止、トップレベル変数と `global` | 再帰（階乗など）が動く |
@@ -390,7 +390,7 @@ kururi/
 | S6 | narapy への受け渡し：`kururi export`（`.narapy` と URL を出力）、互換テストの CI | 生成した URL を narapy で開くと実行できる |
 | S7 | Playground：Monaco の言語登録、診断の赤線表示、Python の並べて表示 | ブラウザで書きながらエラーが出る |
 | S8 | エラーメッセージの磨き込み、予約語（Kururi/Python）の別メッセージ、`for` 案内、`=` と `==` の取り違え | 代表的な間違いごとに期待したメッセージが出る |
-| S9 | プレイグラウンド内の最小の Pyodide 実行（`output` と `input` のみ）と、実行時エラーの Kururi の行への対応づけ、LSP | その場で実行でき、エディタでも診断が出る |
+| S9 | プレイグラウンド内の最小の Pyodide 実行（`print` と `input` のみ）と、実行時エラーの Kururi の行への対応づけ、LSP | その場で実行でき、エディタでも診断が出る |
 
 - v0.1 のゴールは **S0〜S6**。
 - エラーメッセージの品質は S8 だけに任せず、S0 で診断の仕組みを作り、各スライスで文言も同時に書く。

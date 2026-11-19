@@ -1,7 +1,7 @@
 export const SAMPLE = `
 function main = () {
-    output("掛け算九九の表")
-    output("=================")
+    print("掛け算九九の表")
+    print("=================")
 
     // 外側のループ（i は 0 から 8 まで）
     for i in 0..9 {
@@ -24,7 +24,7 @@ function main = () {
         }
 
         // 行を出力
-        output(row)
+        print(row)
     }
 }
 `.trimStart()

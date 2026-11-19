@@ -50,5 +50,5 @@ export interface Scope {
   readonly narrowed?: ReadonlySet<string> | undefined
 }
 
-/** 組み込み関数の名前（output と to_string は表示できる値なら何でも受ける特別な関数）。 */
-export const BUILTIN_FUNCTIONS: ReadonlySet<string> = new Set(["output", "to_string", "input", "to_int", "to_float", "div", "random"])
+/** 組み込み関数の名前（print と to_string は表示できる値なら何でも受ける特別な関数）。 */
+export const BUILTIN_FUNCTIONS: ReadonlySet<string> = new Set(["print", "to_string", "input", "to_int", "to_float", "div", "random"])

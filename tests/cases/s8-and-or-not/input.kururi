@@ -1,6 +1,6 @@
 function main = () {
     var a: boolean = true
     if a && false || !a {
-        output("x")
+        print("x")
     }
 }

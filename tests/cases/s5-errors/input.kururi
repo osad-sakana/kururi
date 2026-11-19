@@ -2,12 +2,12 @@ function main = () {
     var s: string? = null
     var n: int = s
     var m: int = null
-    output(s.length)
-    output(1 + to_int())
+    print(s.length)
+    print(1 + to_int())
     if s != null {
         s = null
-        output(s.length)
+        print(s.length)
     }
     var t: string = "a"
-    output(t == null)
+    print(t == null)
 }

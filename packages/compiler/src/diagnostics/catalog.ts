@@ -58,8 +58,7 @@ function unknownCharHint(text: string): string | undefined {
 
 /** 他の言語でよく使う名前には、Kururi での書き方を案内する。 */
 const OTHER_LANGUAGE_NAMES: Readonly<Record<string, string>> = {
-  print: "表示するときは output(...) と書きます",
-  println: "表示するときは output(...) と書きます",
+  println: "表示するときは print(...) と書きます",
   len: "配列や文字列の長さは x.length と書きます",
   length: "配列や文字列の長さは x.length と書きます",
   str: "文字列にするときは to_string(x) と書きます",
@@ -310,8 +309,8 @@ export const DIAGNOSTIC_CATALOG = {
     label: ({ what = "配列" }) => `${what}です`,
     hint: ({ what = "配列" }) =>
       what === "配列"
-        ? "for で 1 つずつ output してください（例: for x in xs { output(x) }）"
-        : "表示したいフィールドを取り出して、output してください（例: output(p.name)）",
+        ? "for で 1 つずつ print してください（例: for x in xs { print(x) }）"
+        : "表示したいフィールドを取り出して、print してください（例: print(p.name)）",
   },
   K0314: {
     code: "K0314",
@@ -427,7 +426,7 @@ export const DIAGNOSTIC_CATALOG = {
     hint: ({ op }) =>
       op === "=="
         ? "値を入れるときは = と書きます（例: a = 2）。== は比べるだけで、変数は変わりません"
-        : "文として書けるのは、関数の呼び出し（例: output(...)）だけです",
+        : "文として書けるのは、関数の呼び出し（例: print(...)）だけです",
   },
   K0308: {
     code: "K0308",

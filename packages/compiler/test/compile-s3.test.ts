@@ -9,7 +9,7 @@ describe("compile (S3): 生成", () => {
     const { python, diagnostics } = compile(
       withMain(
         "function add = (a: int, b: int) -> int {\n  return a + b\n}\nfunction greet = (names: string[], flag: boolean) {\n  return\n}",
-        "  output(add(1, 2))",
+        "  print(add(1, 2))",
       ),
     )
     expect(diagnostics).toEqual([])
@@ -22,7 +22,7 @@ describe("compile (S3): 生成", () => {
     const { python } = compile(
       withMain(
         "function half = (x: float) -> float {\n  return 1\n}",
-        "  var n: int = 3\n  output(half(2))\n  output(half(n))\n  var xs: float[] = [1, 2]\n  xs.push(n)",
+        "  var n: int = 3\n  print(half(2))\n  print(half(n))\n  var xs: float[] = [1, 2]\n  xs.push(n)",
       ),
     )
     expect(python).toContain("return 1.0")
@@ -37,7 +37,7 @@ describe("compile (S3): 生成", () => {
       codesOf(
         withMain(
           "function even = (n: int) -> boolean {\n  if n == 0 { return true }\n  return odd(n - 1)\n}\nfunction odd = (n: int) -> boolean {\n  if n == 0 { return false }\n  return even(n - 1)\n}",
-          "  output(even(4))",
+          "  print(even(4))",
         ),
       ),
     ).toEqual([])

@@ -10,7 +10,7 @@ describe("compile (S10): 新しい書き方", () => {
   })
 
   it("for i in a..b は range になる。始まりが 0 なら省く", () => {
-    const { python } = compile(main("  for i in 0..3 {\n    output(i)\n  }\n  for j in 2..5 {\n    output(j)\n  }"))
+    const { python } = compile(main("  for i in 0..3 {\n    print(i)\n  }\n  for j in 2..5 {\n    print(j)\n  }"))
     expect(python).toContain("for i in range(3):")
     expect(python).toContain("for j in range(2, 5):")
   })
@@ -22,7 +22,7 @@ describe("compile (S10): 新しい書き方", () => {
   })
 
   it("for x in 配列 は for のまま。配列でなければ K0306", () => {
-    expect(compile(main("  var xs: int[] = [1]\n  for x in xs {\n    output(x)\n  }")).python).toContain("for x in xs:")
+    expect(compile(main("  var xs: int[] = [1]\n  for x in xs {\n    print(x)\n  }")).python).toContain("for x in xs:")
     expect(codesOf(main("  var n: int = 1\n  for x in n {\n  }"))).toEqual(["K0306"])
   })
 

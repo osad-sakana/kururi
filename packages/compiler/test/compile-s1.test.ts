@@ -9,7 +9,7 @@ const main = (body: string): string => `function main = () {\n${body}\n}\n`
 
 describe("compile (S1): 生成", () => {
   it("hello を変換する", () => {
-    const { python, diagnostics } = compile(main('  output("hello")'))
+    const { python, diagnostics } = compile(main('  print("hello")'))
     expect(diagnostics).toEqual([])
     expect(python).toBe(
       [
@@ -42,7 +42,7 @@ describe("compile (S1): 生成", () => {
   })
 
   it("トップレベルの変数を出力する", () => {
-    const { python } = compile(`const RATE: float = 0.5\n${main("  output(to_string(RATE))")}`)
+    const { python } = compile(`const RATE: float = 0.5\n${main("  print(to_string(RATE))")}`)
     expect(python).toContain("RATE = 0.5\n\n\ndef main()")
     expect(python).toContain("print(str(RATE))")
   })
@@ -53,22 +53,22 @@ describe("compile (S1): 生成", () => {
   })
 
   it("boolean は true / false と表示する", () => {
-    const { python } = compile(main("  var a: boolean = 1 < 2 and not false\n  output(a)\n  output(to_string(a))"))
+    const { python } = compile(main("  var a: boolean = 1 < 2 and not false\n  print(a)\n  print(to_string(a))"))
     expect(python).toContain('print("true" if a else "false")')
     expect(python).toContain('print(("true" if a else "false"))')
   })
 
   it("文字列補間は f 文字列になり、{ } は二重にする", () => {
-    const { python } = compile(main('  var n: int = 1\n  var b: boolean = false\n  output(`{n} ${n + 1} ${b} "x"`)'))
+    const { python } = compile(main('  var n: int = 1\n  var b: boolean = false\n  print(`{n} ${n + 1} ${b} "x"`)'))
     expect(python).toContain('print(f"{{n}} {n + 1} {("true" if b else "false")} \\"x\\"")')
   })
 
   it("式を含まない補間は普通の文字列にする", () => {
-    expect(compile(main("  output(`abc`)")).python).toContain('print("abc")')
+    expect(compile(main("  print(`abc`)")).python).toContain('print("abc")')
   })
 
   it("行の対応表を作る", () => {
-    const { lineMap } = compile(main('  output("a")\n  output("b")'))
+    const { lineMap } = compile(main('  print("a")\n  print("b")'))
     expect(lineMap).toEqual([
       { kururiLine: 1, pythonLine: 1 },
       { kururiLine: 2, pythonLine: 2 },
@@ -88,24 +88,24 @@ describe("compile (S1): 型・名前の診断", () => {
   })
 
   it("文字列と数値の + は K0302", () => {
-    expect(codesOf(main('  var a: int = 1\n  output("x" + a)'))).toEqual(["K0302"])
+    expect(codesOf(main('  var a: int = 1\n  print("x" + a)'))).toEqual(["K0302"])
   })
 
   it("演算が使えない型は K0303", () => {
-    expect(codesOf(main('  output("a" - "b")'))).toEqual(["K0303"])
-    expect(codesOf(main("  output(1 and 2)"))).toEqual(["K0303"])
-    expect(codesOf(main("  output(not 1)"))).toEqual(["K0303"])
-    expect(codesOf(main('  output(1 < "a")'))).toEqual(["K0303"])
-    expect(codesOf(main("  output(-true)"))).toEqual(["K0303"])
+    expect(codesOf(main('  print("a" - "b")'))).toEqual(["K0303"])
+    expect(codesOf(main("  print(1 and 2)"))).toEqual(["K0303"])
+    expect(codesOf(main("  print(not 1)"))).toEqual(["K0303"])
+    expect(codesOf(main('  print(1 < "a")'))).toEqual(["K0303"])
+    expect(codesOf(main("  print(-true)"))).toEqual(["K0303"])
   })
 
   it("値のない呼び出しを値として使うと K0304", () => {
-    expect(codesOf(main('  var a: int = output("x")'))).toEqual(["K0304"])
+    expect(codesOf(main('  var a: int = print("x")'))).toEqual(["K0304"])
   })
 
   it("引数の数が違うと K0305", () => {
-    expect(codesOf(main("  output()"))).toEqual(["K0305"])
-    expect(codesOf(main("  output(1, 2)"))).toEqual(["K0305"])
+    expect(codesOf(main("  print()"))).toEqual(["K0305"])
+    expect(codesOf(main("  print(1, 2)"))).toEqual(["K0305"])
   })
 
   it("意味のない式は K0307", () => {
@@ -118,8 +118,8 @@ describe("compile (S1): 型・名前の診断", () => {
   })
 
   it("宣言していない名前は K0201", () => {
-    expect(codesOf(main("  output(x)"))).toEqual(["K0201"])
-    expect(codesOf(main("  output(x)\n  var x: int = 1"))).toEqual(["K0201"])
+    expect(codesOf(main("  print(x)"))).toEqual(["K0201"])
+    expect(codesOf(main("  print(x)\n  var x: int = 1"))).toEqual(["K0201"])
   })
 
   it("同じ名前の再宣言・シャドーイングは K0202", () => {
@@ -154,27 +154,26 @@ describe("compile (S1): 型・名前の診断", () => {
 
 describe("compile (S1): 構文・予約語の診断", () => {
   it("1 行に 2 つの文があると K0101", () => {
-    expect(codesOf(main('  output("a") output("b")'))).toEqual(["K0101"])
+    expect(codesOf(main('  print("a") print("b")'))).toEqual(["K0101"])
   })
 
   it("比較の連鎖は K0106", () => {
-    expect(codesOf(main("  output(1 < 2 < 3)"))).toEqual(["K0106"])
+    expect(codesOf(main("  print(1 < 2 < 3)"))).toEqual(["K0106"])
   })
 
   it("トップレベルに文を書くと K0110", () => {
-    expect(codesOf('output("a")\n')).toEqual(["K0110"])
+    expect(codesOf('print("a")\n')).toEqual(["K0110"])
   })
 
   it("予約語を名前にすると K0501 / K0502", () => {
     expect(codesOf(main("  var class: int = 1"))).toEqual(["K0501"])
-    expect(codesOf(main("  var output: int = 1"))).toEqual(["K0501"])
+    expect(codesOf(main("  var print: int = 1"))).toEqual(["K0501"])
     expect(codesOf(main("  var lambda: int = 1"))).toEqual(["K0502"])
-    expect(codesOf(main("  var print: int = 1"))).toEqual(["K0502"])
     expect(codesOf(main("  var for: int = 1"))).toEqual(["K0501"])
   })
 
   it("構文エラーが複数あれば、まとめて報告する", () => {
-    expect(codesOf(main("  var a = 1\n  var b: int\n  output(")).length).toBeGreaterThanOrEqual(2)
+    expect(codesOf(main("  var a = 1\n  var b: int\n  print(")).length).toBeGreaterThanOrEqual(2)
   })
 
   it("診断のあるソースは python を空で返す", () => {

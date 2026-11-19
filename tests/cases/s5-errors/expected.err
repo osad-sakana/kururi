@@ -15,32 +15,32 @@ error[K0301]: null の値を int には入れられません
 help: null を入れたいときは、型の後ろに ? を付けてください（例: int?）
 
 error[K0330]: string? の値は null かもしれないので、このまま使えません
- --> input.kururi:5:12
+ --> input.kururi:5:11
   |
-5 |     output(s.length)
-  |            ^ null かもしれません
+5 |     print(s.length)
+  |           ^ null かもしれません
   |
 help: if x != null { ... } の中なら使えます。いったん変数に入れてから確かめてください
 
 error[K0305]: to_int には引数が 1 個必要ですが、0 個書かれています
- --> input.kururi:6:16
+ --> input.kururi:6:15
   |
-6 |     output(1 + to_int())
-  |                ^^^^^^^^ 引数は 1 個です
+6 |     print(1 + to_int())
+  |               ^^^^^^^^ 引数は 1 個です
 
 error[K0330]: string? の値は null かもしれないので、このまま使えません
- --> input.kururi:9:16
+ --> input.kururi:9:15
   |
-9 |         output(s.length)
-  |                ^ null かもしれません
+9 |         print(s.length)
+  |               ^ null かもしれません
   |
 help: if x != null { ... } の中なら使えます。いったん変数に入れてから確かめてください
 
 error[K0303]: string と null には「==」を使えません
-  --> input.kururi:12:12
+  --> input.kururi:12:11
    |
-12 |     output(t == null)
-   |            ^^^^^^^^^ 「==」が使えません
+12 |     print(t == null)
+   |           ^^^^^^^^^ 「==」が使えません
    |
 help: 比べられるのは、数値どうしか、同じ型どうしです
 

@@ -25,18 +25,18 @@ function main = () {
     }
     for j in 2..LIMIT {
         if j % 2 == 0 {
-            output(j)
+            print(j)
         } else if j == 3 {
-            output("three")
+            print("three")
         } else {
-            output("other")
+            print("other")
         }
     }
     var names: string[] = ["a", "b"]
     for name in names {
-        output(name)
+        print(name)
     }
     var c: Counter = new Counter(10)
-    output(c.next())
-    output(total)
+    print(c.next())
+    print(total)
 }

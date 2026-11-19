@@ -11,7 +11,7 @@ const pyBody = (body: string): string => {
 
 describe("compile (S2a): 生成", () => {
   it("if / else if / else", () => {
-    const py = pyBody("  var a: int = 1\n  if a < 0 {\n    output(\"n\")\n  } else if a == 0 {\n    output(\"z\")\n  } else {\n    output(\"p\")\n  }")
+    const py = pyBody("  var a: int = 1\n  if a < 0 {\n    print(\"n\")\n  } else if a == 0 {\n    print(\"z\")\n  } else {\n    print(\"p\")\n  }")
     expect(py).toContain('    if a < 0:\n        print("n")\n    elif a == 0:\n        print("z")\n    else:\n        print("p")')
   })
 
@@ -25,7 +25,7 @@ describe("compile (S2a): 生成", () => {
   })
 
   it("repeat は range になる", () => {
-    expect(pyBody("  for i in 0..3 + 1 {\n    output(i)\n  }")).toContain("    for i in range(3 + 1):\n        print(i)")
+    expect(pyBody("  for i in 0..3 + 1 {\n    print(i)\n  }")).toContain("    for i in range(3 + 1):\n        print(i)")
   })
 
   it("空のブロックは pass", () => {
@@ -39,7 +39,7 @@ describe("compile (S2a): 生成", () => {
   })
 
   it("関数の中で書き換えるトップレベルの var に global を付ける", () => {
-    const { python } = compile(`var count: int = 0\nvar other: int = 1\nfunction main = () {\n  count += 1\n  output(other)\n}\n`)
+    const { python } = compile(`var count: int = 0\nvar other: int = 1\nfunction main = () {\n  count += 1\n  print(other)\n}\n`)
     expect(python).toContain("def main():\n    global count\n    count += 1")
     expect(python).not.toContain("global count, other")
   })
@@ -49,7 +49,7 @@ describe("compile (S2a): 生成", () => {
   })
 
   it("行の対応表に if の中の文も入る", () => {
-    const { lineMap } = compile(main("  if true {\n    output(\"a\")\n  }"))
+    const { lineMap } = compile(main("  if true {\n    print(\"a\")\n  }"))
     expect(lineMap.map((m) => m.kururiLine)).toEqual([1, 2, 3])
   })
 })
@@ -90,8 +90,8 @@ describe("compile (S2a): 診断", () => {
   })
 
   it("ブロックの外で変数を使うと K0201", () => {
-    expect(codesOf(main("  if true {\n    var a: int = 1\n  }\n  output(a)"))).toEqual(["K0201"])
-    expect(codesOf(main("  for i in 0..2 {\n  }\n  output(i)"))).toEqual(["K0201"])
+    expect(codesOf(main("  if true {\n    var a: int = 1\n  }\n  print(a)"))).toEqual(["K0201"])
+    expect(codesOf(main("  for i in 0..2 {\n  }\n  print(i)"))).toEqual(["K0201"])
   })
 
   it("入れ子での再宣言（シャドーイング）は K0202", () => {

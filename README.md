@@ -23,7 +23,7 @@ class Dog = {
     }
 
     public method bark = () {
-        output(`${GREETING}、${self.name} です`)
+        print(`${GREETING}、${self.name} です`)
     }
 }
 
@@ -38,7 +38,7 @@ function main = () {
         dog.bark()
         total = add(total, i)
     }
-    output(total)
+    print(total)
 }
 ```
 

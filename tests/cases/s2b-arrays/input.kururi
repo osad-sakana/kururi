@@ -9,14 +9,14 @@ function main = () {
     var weights: float[] = [1, 2.5]
     var grid: int[][] = [[1, 2], [3, 4]]
     var empty: int[] = []
-    output(`${count} 個`)
+    print(`${count} 個`)
     for fruit in fruits {
-        output(fruit)
+        print(fruit)
     }
     for row in grid {
         for v in row {
             weights.push(v)
         }
     }
-    output(NAMES[0][0])
+    print(NAMES[0][0])
 }
