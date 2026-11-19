@@ -61,7 +61,14 @@ describe("suggestions", () => {
   })
 
   it("配列には push などが出る", () => {
-    expect(memberSuggestions(symbols, "xs", 19).map((s) => s.label)).toEqual(["push", "remove_at", "length"])
+    expect(memberSuggestions(symbols, "xs", 19).map((s) => s.label)).toEqual(["push", "remove_at", "contains", "length"])
+  })
+
+  it("string には文字列のメソッド、string[] には join も出る", () => {
+    const text = indexSymbols('var s: string = "a"\nvar names: string[] = []')
+    expect(memberSuggestions(text, "s", 3).map((x) => x.label)).toEqual(expect.arrayContaining(["upper", "split", "contains", "length"]))
+    expect(memberSuggestions(text, "names", 3).map((x) => x.label)).toContain("join")
+    expect(helpFor("upper", [], 1)).toContain("大文字")
   })
 
   it("ふつうの候補に、宣言した名前と組み込みが入る", () => {

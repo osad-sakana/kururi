@@ -1,4 +1,5 @@
 import type { Expr } from "../syntax/ast"
+import { STRING_METHODS } from "../semantics/builtin-methods"
 import { isArray, isNullable } from "../semantics/types"
 import type { Type } from "../semantics/types"
 
@@ -104,6 +105,11 @@ function isLength(expr: Extract<Expr, { kind: "member" }>, info: TypeInfo): bool
 function emitMethodCall(expr: Extract<Expr, { kind: "call" }>, callee: Extract<Expr, { kind: "member" }>, info: TypeInfo): string {
   const object = emitExpr(callee.object, info)
   const objectType = info.types.get(callee.object)
+  const args = expr.args.map((a) => emitExpr(a, info))
+  const stringMethod = objectType === "string" ? STRING_METHODS[callee.name] : undefined
+  if (stringMethod !== undefined) return stringMethod.python(object, args)
+  if (objectType !== undefined && isArray(objectType) && callee.name === "contains") return `(${args[0] ?? ""} in ${object})`
+  if (objectType === "string[]" && callee.name === "join") return `${args[0] ?? ""}.join(${object})`
   if (objectType === undefined || !isArray(objectType)) {
     return `${object}.${callee.name}(${expr.args.map((a) => emitExpr(a, info)).join(", ")})`
   }

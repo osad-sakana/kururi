@@ -1,3 +1,5 @@
+import type { MethodSpec } from "./builtin-methods"
+import { STRING_METHODS } from "./builtin-methods"
 import type { Reporter } from "../reporter"
 import type { Expr } from "../syntax/ast"
 import type { Range } from "../syntax/tokens"
@@ -400,6 +402,17 @@ export class ExprChecker {
     return spec.returns
   }
 
+  /** 引数の数と型が決まっている組み込みのメソッド（string のメソッド、配列の contains / join）。 */
+  private fixedMethodCall(expr: Node<"call">, callee: Node<"member">, spec: MethodSpec, scope: Scope): Type {
+    if (expr.args.length !== spec.params.length) {
+      expr.args.forEach((a) => this.valueType(a, scope, true))
+      this.reporter.report("K0305", expr.range, { name: callee.name, expected: String(spec.params.length), actual: String(expr.args.length) })
+      return spec.returns
+    }
+    expr.args.forEach((arg, i) => this.checkAssignable(arg, scope, spec.params[i] ?? "error"))
+    return spec.returns
+  }
+
   /** a.push(x) と a.remove_at(i)。 */
   private methodCall(expr: Node<"call">, callee: Node<"member">, scope: Scope): Type {
     const base = this.nonNullType(callee.object, this.valueType(callee.object, scope))
@@ -410,6 +423,9 @@ export class ExprChecker {
     const info = this.classOf(base, scope)
     if (info !== undefined) return this.classMethodCall(expr, callee, info, scope)
     const method = callee.name
+    if (base === "string" && STRING_METHODS[method] !== undefined) return this.fixedMethodCall(expr, callee, STRING_METHODS[method], scope)
+    if (isArray(base) && method === "contains") return this.fixedMethodCall(expr, callee, { params: [elementType(base)], returns: "boolean", python: () => "" }, scope)
+    if (base === "string[]" && method === "join") return this.fixedMethodCall(expr, callee, { params: ["string"], returns: "string", python: () => "" }, scope)
     if (!isArray(base) || (method !== "push" && method !== "remove_at")) {
       this.reporter.report("K0317", callee.nameRange, { type: base, name: method })
       return "error"

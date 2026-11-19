@@ -1,0 +1,21 @@
+// 文字列と配列のメソッド
+function main = () {
+    var line: string = "  Hello, Kururi  "
+    var text: string = line.trim()
+    print(text.upper())
+    print(text.lower())
+
+    if text.contains("Kururi") {
+        print("Kururi が入っています")
+    }
+    if text.starts_with("Hello") and not text.ends_with("!") {
+        print("あいさつで始まります")
+    }
+    print(text.index_of("K"))
+    print(text.replace("Kururi", "世界"))
+
+    var words: string[] = text.split(", ")
+    print(words.length)
+    print(words.contains("Hello"))
+    print(words.join("-"))
+}

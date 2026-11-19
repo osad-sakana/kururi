@@ -37,7 +37,25 @@ const TYPE_DOCS: Readonly<Record<string, string>> = {
 const ARRAY_MEMBERS: Readonly<Record<string, string>> = {
   push: "push(x): 配列の末尾に追加する",
   remove_at: "remove_at(i): 位置 i の要素を削除する",
+  contains: "contains(x): x が入っているか（boolean）",
   length: "length: 配列の長さ",
+}
+
+const STRING_ARRAY_MEMBERS: Readonly<Record<string, string>> = {
+  join: "join(sep): 要素を sep でつないだ string",
+}
+
+const STRING_MEMBERS: Readonly<Record<string, string>> = {
+  length: "length: 文字数",
+  upper: "upper(): 大文字にした string",
+  lower: "lower(): 小文字にした string",
+  trim: "trim(): 前後の空白を取った string",
+  contains: "contains(t): t が入っているか（boolean）",
+  starts_with: "starts_with(t): t で始まるか（boolean）",
+  ends_with: "ends_with(t): t で終わるか（boolean）",
+  index_of: "index_of(t): t が最初に出る位置（なければ -1）",
+  replace: "replace(a, b): a を b に置き換えた string",
+  split: "split(sep): sep で区切った string[]",
 }
 
 const VAR = /^\s*(var|const)\s+([\p{L}_][\p{L}\p{N}_]*)\s*:\s*([^=\n]+?)\s*(?:=|$)/u
@@ -142,7 +160,7 @@ export function helpFor(word: string, symbols: readonly KSymbol[], line: number)
   // 同じ名前が複数あれば、カーソルより手前で、いちばん近いものを使う
   const symbol = [...declared].reverse().find((candidate) => candidate.line <= line) ?? declared[0]
   if (symbol !== undefined) return signature(symbol)
-  return BUILTIN_DOCS[word] ?? TYPE_DOCS[word] ?? HINTS[word as keyof typeof HINTS]
+  return BUILTIN_DOCS[word] ?? TYPE_DOCS[word] ?? HINTS[word as keyof typeof HINTS] ?? STRING_MEMBERS[word] ?? ARRAY_MEMBERS[word] ?? STRING_ARRAY_MEMBERS[word]
 }
 
 export interface Suggestion {
@@ -167,7 +185,8 @@ function typeOfObject(symbols: readonly KSymbol[], object: string, line: number)
 export function memberSuggestions(symbols: readonly KSymbol[], object: string, line: number): readonly Suggestion[] {
   const type = typeOfObject(symbols, object, line)
   if (type === undefined) return []
-  if (type.endsWith("[]")) return Object.entries(ARRAY_MEMBERS).map(([label, detail]) => ({ label, detail, kind: "member" }))
+  const builtin = type === "string" ? STRING_MEMBERS : type === "string[]" ? { ...ARRAY_MEMBERS, ...STRING_ARRAY_MEMBERS } : type.endsWith("[]") ? ARRAY_MEMBERS : undefined
+  if (builtin !== undefined) return Object.entries(builtin).map(([label, detail]) => ({ label, detail, kind: "member" as const }))
   const inside = object === "self"
   return symbols
     .filter((symbol) => symbol.owner === type && (symbol.kind === "method" || symbol.kind === "field") && (inside || symbol.access !== "private"))
