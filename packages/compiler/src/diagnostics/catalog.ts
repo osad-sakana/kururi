@@ -3,7 +3,8 @@ import type { Diagnostic, Fix, Severity, Span } from "./types"
 /**
  * 診断コードの体系：K + 4 桁。上位 2 桁がカテゴリ。
  *   K00xx 内部（未対応など）  K01xx 構文  K02xx 名前・スコープ
- *   K03xx 型                  K04xx クラス・アクセス  K05xx 予約語
+ *   K03xx 型                  K04xx クラス・アクセス  K05xx 予約語・名前の書き方
+ *   K06xx 警告（動くが、見直したほうがよい書き方）
  */
 export type DiagnosticCategory =
   | "internal"
@@ -12,6 +13,7 @@ export type DiagnosticCategory =
   | "type"
   | "class"
   | "reserved"
+  | "warning"
   | "unknown"
 
 const CATEGORY_BY_PREFIX: Readonly<Record<string, DiagnosticCategory>> = {
@@ -21,6 +23,7 @@ const CATEGORY_BY_PREFIX: Readonly<Record<string, DiagnosticCategory>> = {
   "03": "type",
   "04": "class",
   "05": "reserved",
+  "06": "warning",
 }
 
 export function categoryOf(code: string): DiagnosticCategory {
@@ -477,6 +480,20 @@ export const DIAGNOSTIC_CATALOG = {
     label: () => "Python では別の文字に変わってしまいます",
     hint: ({ normalized = "" }) =>
       `「${normalized}」のように、半角の英数字か日本語（ひらがな・カタカナ・漢字）で書いてください`,
+  },
+  K0601: {
+    code: "K0601",
+    severity: "warning",
+    message: ({ name = "" }) => `変数「${name}」は使われていません`,
+    label: () => "使われていません",
+    hint: () => "使わないなら消し、使うつもりなら書き忘れがないか確かめてください",
+  },
+  K0602: {
+    code: "K0602",
+    severity: "warning",
+    message: () => "この行は実行されません",
+    label: () => "ここには届きません",
+    hint: ({ after = "" }) => `「${after}」のあとの行は実行されません。不要なら消してください`,
   },
 } as const satisfies Readonly<Record<string, CatalogEntry>>
 

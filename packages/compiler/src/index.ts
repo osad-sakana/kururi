@@ -1,5 +1,5 @@
 export { compile } from "./compile"
-export type { CompileResult, LineMapping } from "./compile"
+export type { CompileOptions, CompileResult, LineMapping } from "./compile"
 export {
   DIAGNOSTIC_CATALOG,
   categoryOf,

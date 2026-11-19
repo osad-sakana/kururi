@@ -40,7 +40,7 @@ function toMarker(diagnostic: Diagnostic, lines: readonly string[]): EditorMarke
 
 /** ソースを変換し、エディタに出す印と Python をまとめて返す。 */
 export function analyze(source: string): Analysis {
-  const { python, diagnostics, lineMap } = compile(source)
+  const { python, diagnostics, lineMap } = compile(source, { warnings: true })
   const lines = source.split("\n")
   const markers = diagnostics.map((diagnostic) => toMarker(diagnostic, lines))
   const errorText = diagnostics.length === 0 ? "" : formatDiagnostics(diagnostics, { source, fileName: "main.kururi" })

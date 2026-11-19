@@ -2,6 +2,7 @@ import { emitPython } from "./codegen/python"
 import type { Diagnostic } from "./diagnostics"
 import { Reporter } from "./reporter"
 import { check } from "./semantics/check"
+import { lint } from "./semantics/lint"
 import { lex } from "./syntax/lexer"
 import { parse } from "./syntax/parser"
 
@@ -22,9 +23,14 @@ export interface CompileResult {
  * ファイルや DOM には触れない純粋な関数。
  *
  * 字句・構文の診断があるときは、名前や型の検査には進まない（読み取れていない部分のせいで
- * 余計なエラーが連鎖するのを避けるため）。診断が 1 件でもあれば python は空になる。
+ * 余計なエラーが連鎖するのを避けるため）。エラーが 1 件でもあれば python は空になる（警告だけなら作る）。
  */
-export function compile(source: string): CompileResult {
+export interface CompileOptions {
+  /** true なら、使っていない変数などの警告も返す（警告があっても python は作る） */
+  readonly warnings?: boolean
+}
+
+export function compile(source: string, options: CompileOptions = {}): CompileResult {
   const lexed = lex(source)
   const parsed = parse(lexed.tokens, source)
   const syntaxDiagnostics = [...lexed.diagnostics, ...parsed.diagnostics]
@@ -34,8 +40,10 @@ export function compile(source: string): CompileResult {
   const { types, widened, globalWrites } = check(parsed.program, reporter)
   if (reporter.count > 0) return result("", reporter.list(), [])
 
+  const warnings = new Reporter(source)
+  if (options.warnings === true) lint(parsed.program, warnings)
   const output = emitPython(parsed.program, { types, widened }, globalWrites, source)
-  return result(output.python, [], output.lineMap)
+  return result(output.python, warnings.list(), output.lineMap)
 }
 
 function result(

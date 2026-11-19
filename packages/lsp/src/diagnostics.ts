@@ -15,7 +15,7 @@ export interface LspDiagnostic {
 /** Kururi のソースを調べ、エディタに出す診断にする。 */
 export function toLspDiagnostics(source: string): LspDiagnostic[] {
   const lines = source.split("\n")
-  return compile(source).diagnostics.map((diagnostic) => {
+  return compile(source, { warnings: true }).diagnostics.map((diagnostic) => {
     const range = toEditorRange(diagnostic, lines)
     return {
       range: {
