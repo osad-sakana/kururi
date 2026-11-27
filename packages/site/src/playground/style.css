@@ -73,3 +73,6 @@ section + section { border-left: 1px solid var(--color-line); }
   .right { height: 32rem; }
   #console { height: 9rem; }
 }
+
+/* チュートリアルの横に埋め込んだとき */
+.embed .brand, .embed .site-links { display: none; }

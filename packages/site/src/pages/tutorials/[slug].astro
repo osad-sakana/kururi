@@ -18,39 +18,120 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
 ---
 
 <Base title={lesson.data.title} current="tutorials" description={lesson.data.summary}>
-  <main class="wrap prose" data-playground={`${home}playground`}>
-    <p class="crumb"><a href={home}>トップ</a> / <a href={`${home}tutorials`}>チュートリアル</a> / 第 {lesson.data.order} 回</p>
-    <p class="crumb">学ぶ概念：{lesson.data.concept}</p>
-    <h1>{lesson.data.title}</h1>
-    <p class="lead">{lesson.data.summary}</p>
-    <Content />
-    <nav class="pager" aria-label="前後の回">
-      {previous !== undefined ? (
-        <a href={`${home}tutorials/${slugOf(previous.id)}`}><small>前の回</small>{previous.data.title}</a>
-      ) : <span />}
-      {next !== undefined ? (
-        <a class="next" href={`${home}tutorials/${slugOf(next.id)}`}><small>次の回</small>{next.data.title}</a>
-      ) : (
-        <a class="next" href={`${home}playground`}><small>つづき</small>プレイグラウンドで自由に書く</a>
-      )}
-    </nav>
-  </main>
+  <!-- 横に開くプレイグラウンドで input() を使えるよう、必要なヘッダーをサービスワーカーで付ける（MIT） -->
+  <script is:inline slot="head" src={`${home}coi-serviceworker.js`}></script>
+  <div class="reader" data-playground={`${home}playground`}>
+    <main class="wrap prose">
+      <p class="crumb"><a href={home}>トップ</a> / <a href={`${home}tutorials`}>チュートリアル</a> / 第 {lesson.data.order} 回</p>
+      <p class="crumb">学ぶ概念：{lesson.data.concept}</p>
+      <h1>{lesson.data.title}</h1>
+      <p class="lead">{lesson.data.summary}</p>
+      <Content />
+      <nav class="pager" aria-label="前後の回">
+        {previous !== undefined ? (
+          <a href={`${home}tutorials/${slugOf(previous.id)}`}><small>前の回</small>{previous.data.title}</a>
+        ) : <span />}
+        {next !== undefined ? (
+          <a class="next" href={`${home}tutorials/${slugOf(next.id)}`}><small>次の回</small>{next.data.title}</a>
+        ) : (
+          <a class="next" href={`${home}playground`}><small>つづき</small>プレイグラウンドで自由に書く</a>
+        )}
+      </nav>
+    </main>
+    <aside class="side" aria-label="プレイグラウンド">
+      <div class="side-resize" role="separator" aria-orientation="vertical" aria-label="幅を変える"></div>
+      <div class="side-bar">
+        <strong>PLAYGROUND</strong>
+        <a href={`${home}playground`} target="_blank" rel="noopener">別のタブで開く</a>
+        <button type="button" class="side-close">閉じる</button>
+      </div>
+      <iframe title="プレイグラウンド" allow="cross-origin-isolated"></iframe>
+    </aside>
+  </div>
+  <button type="button" class="side-toggle">プレイグラウンドを開く</button>
   <script>
-    import { codeHash } from "../../playground/share"
+    import { codeHash, sourceFromHash } from "../../playground/share"
 
-    // Kururi のコードブロックに、「プレイグラウンドで試す」リンクを付ける
-    const root = document.querySelector<HTMLElement>("[data-playground]")
-    const target = root?.dataset.playground ?? "/playground"
+    const PANEL_KEY = "kururi.panel"
+    const WIDTH_KEY = "kururi.panelWidth"
+    const reader = document.querySelector<HTMLElement>(".reader")
+    const iframe = document.querySelector<HTMLIFrameElement>(".side iframe")
+    const toggle = document.querySelector<HTMLButtonElement>(".side-toggle")
+    const closeButton = document.querySelector<HTMLButtonElement>(".side-close")
+    const resize = document.querySelector<HTMLElement>(".side-resize")
+    const target = reader?.dataset.playground ?? "/playground"
+    const store = {
+      get: (key: string) => { try { return localStorage.getItem(key) } catch { return null } },
+      set: (key: string, value: string) => { try { localStorage.setItem(key, value) } catch { /* 保存できなくても使える */ } },
+    }
+
+    // ヘッダーの高さに合わせる
+    const header = document.querySelector<HTMLElement>(".site-header")
+    if (reader && header) reader.style.setProperty("--hh", `${header.offsetHeight}px`)
+
+    const savedWidth = Number(store.get(WIDTH_KEY))
+    if (reader && Number.isFinite(savedWidth) && savedWidth >= 360) reader.style.setProperty("--panel", `${savedWidth}px`)
+
+    let loaded = false
+    const send = (source: string) => iframe?.contentWindow?.postMessage({ type: "kururi:set-source", source }, location.origin)
+
+    /** パネルを開く。code があれば、そのコードを入れる（初回は URL で、2 回目からは postMessage で） */
+    const open = (code?: string) => {
+      if (!reader || !iframe) return
+      reader.classList.add("open")
+      store.set(PANEL_KEY, "open")
+      if (!loaded) {
+        loaded = true
+        iframe.src = `${target}?embed=1${code === undefined ? "" : codeHash(code)}`
+      } else if (code !== undefined) send(code)
+    }
+    const close = () => {
+      reader?.classList.remove("open")
+      store.set(PANEL_KEY, "closed")
+    }
+    toggle?.addEventListener("click", () => open())
+    closeButton?.addEventListener("click", close)
+
+    // Kururi のコードブロックに「プレイグラウンドで試す」を付ける。押すと、横のパネルにそのコードが入る
     for (const pre of document.querySelectorAll<HTMLElement>("pre[data-language='kururi']")) {
-      const code = pre.textContent ?? ""
+      const code = (pre.textContent ?? "").replace(/\n$/, "") + "\n"
       const wrapper = document.createElement("div")
       wrapper.className = "code-block"
       pre.replaceWith(wrapper)
       const link = document.createElement("a")
       link.className = "try"
-      link.href = `${target}${codeHash(code.replace(/\n$/, "") + "\n")}`
+      link.href = `${target}${codeHash(code)}`
       link.textContent = "プレイグラウンドで試す"
+      link.addEventListener("click", (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return
+        event.preventDefault()
+        open(code)
+      })
       wrapper.append(pre, link)
     }
+
+    // 幅をドラッグで変える
+    resize?.addEventListener("pointerdown", (event) => {
+      if (!reader) return
+      event.preventDefault()
+      reader.classList.add("dragging")
+      const move = (e: PointerEvent) => {
+        const width = Math.min(Math.max(innerWidth - e.clientX, 360), innerWidth * 0.72)
+        reader.style.setProperty("--panel", `${width}px`)
+        store.set(WIDTH_KEY, String(Math.round(width)))
+      }
+      const stop = () => {
+        reader.classList.remove("dragging")
+        removeEventListener("pointermove", move)
+        removeEventListener("pointerup", stop)
+      }
+      addEventListener("pointermove", move)
+      addEventListener("pointerup", stop)
+    })
+
+    // 前回開いていたら、広い画面では開いたままにする（#code= で来たときは、そのコードを入れる）
+    const fromHash = sourceFromHash(location.hash)
+    if (fromHash !== null) open(fromHash)
+    else if (store.get(PANEL_KEY) === "open" && innerWidth > 1100) open()
   </script>
 </Base>

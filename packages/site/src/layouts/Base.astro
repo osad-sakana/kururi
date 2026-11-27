@@ -40,6 +40,7 @@ const pageTitle = title === undefined ? "「Kururi」は学習用プログラミ
         if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
       } catch (e) {}
     </script>
+    <slot name="head" />
   </head>
   <body>
     <header class="site-header">

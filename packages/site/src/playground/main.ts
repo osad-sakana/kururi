@@ -170,18 +170,32 @@ showPreferences()
 
 const sampleSelect = element<HTMLSelectElement>("samples")
 sampleSelect.append(new Option("サンプルを選ぶ…", ""), ...SAMPLES.map((sample) => new Option(sample.title, sample.id)))
+/** エディタの中身を入れ替える（元に戻す操作で、書いていたコードに戻せる） */
+function replaceSource(text: string, focus: boolean): void {
+  const model = editor.getModel()
+  if (model === null) return
+  editor.pushUndoStop()
+  editor.executeEdits("replace", [{ range: model.getFullModelRange(), text }])
+  editor.pushUndoStop()
+  editor.setPosition({ lineNumber: 1, column: 1 })
+  if (focus) editor.focus()
+}
+
 sampleSelect.addEventListener("change", () => {
   const sample = SAMPLES.find((candidate) => candidate.id === sampleSelect.value)
   sampleSelect.value = ""
-  const model = editor.getModel()
-  if (sample === undefined || model === null) return
-  // 元に戻す操作で、書いていたコードに戻せる
-  editor.pushUndoStop()
-  editor.executeEdits("sample", [{ range: model.getFullModelRange(), text: sample.source }])
-  editor.pushUndoStop()
-  editor.setPosition({ lineNumber: 1, column: 1 })
-  editor.focus()
+  if (sample !== undefined) replaceSource(sample.source, true)
 })
+
+// チュートリアルの横に埋め込まれたとき：ロゴやサイトのリンクを隠し、親ページからコードを受け取る
+if (new URLSearchParams(location.search).has("embed")) {
+  document.body.classList.add("embed")
+  window.addEventListener("message", (event: MessageEvent<unknown>) => {
+    if (event.origin !== location.origin) return
+    const data = event.data as { type?: unknown; source?: unknown } | null
+    if (data?.type === "kururi:set-source" && typeof data.source === "string") replaceSource(data.source, false)
+  })
+}
 
 function appendOutput(text: string, className?: string): void {
   const line = document.createElement("div")
