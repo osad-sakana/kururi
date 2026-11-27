@@ -177,7 +177,9 @@ mark.r { --mk: var(--color-code-keyword); }
 .langs-sec { background: var(--color-panel); border-block: 1px solid var(--color-line); }
 .langs-sec .head { max-width: 42rem; margin-bottom: 2rem; }
 .lp table.langs th { text-transform: none; }
-.lp table.langs td:first-child { color: var(--color-spark); }
+.lp table.langs td:first-child { white-space: nowrap; }
+.lp table.langs .ext { display: inline-block; min-width: 4.4rem; margin-right: 0.8rem; padding: 0.15rem 0.6rem; border-radius: 8px; background: color-mix(in srgb, var(--color-spark) 16%, transparent); color: var(--color-spark); font: 700 12px var(--font-mono); text-align: center; }
+.lp table.langs .lang-name { font-weight: 700; }
 
 /* ---- 終わりに ---- */
 .scope { max-width: 46rem; }

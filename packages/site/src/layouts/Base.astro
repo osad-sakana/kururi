@@ -42,7 +42,6 @@ const pageTitle = title === undefined ? "「Kururi」は学習用プログラミ
     </script>
   </head>
   <body>
-    <div class="scroll-progress" aria-hidden="true"></div>
     <header class="site-header">
       <div class="wrap">
         <a class="brand" href={home} aria-label="Kururi のトップへ"><Logo animated /></a>
@@ -54,18 +53,6 @@ const pageTitle = title === undefined ? "「Kururi」は学習用プログラミ
       </div>
     </header>
     <slot />
-    <script>
-      // 先頭の進み具合の線と、スクロール後のヘッダーの影
-      const header = document.querySelector<HTMLElement>(".site-header")
-      const progress = document.querySelector<HTMLElement>(".scroll-progress")
-      const update = () => {
-        const max = document.documentElement.scrollHeight - innerHeight
-        progress?.style.setProperty("--p", String(max > 0 ? scrollY / max : 0))
-        header?.classList.toggle("scrolled", scrollY > 8)
-      }
-      addEventListener("scroll", update, { passive: true })
-      update()
-    </script>
     <footer class="site-footer">
       <div class="wrap">
         <span>「Kururi」は学習用プログラミング言語！</span>
