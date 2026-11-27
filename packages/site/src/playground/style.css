@@ -15,7 +15,7 @@ h1 svg { display: block; height: 30px; width: auto; }
 #font-size { min-width: 2.2rem; text-align: center; font: 12px var(--font-mono); color: var(--color-muted); user-select: none; }
 select { font: inherit; font-size: 12px; max-width: 11rem; padding: 0.4rem 0.5rem; border-radius: 8px; border: 1px solid var(--color-line); background: var(--color-panel); color: var(--color-muted); cursor: pointer; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-#status { flex: 1; font-size: 12px; font-family: var(--font-mono); color: var(--color-muted); }
+#status { font-size: 12px; font-family: var(--font-mono); color: var(--color-muted); }
 #status.error { color: var(--color-danger); }
 button { font: inherit; font-size: 12px; padding: 0.4rem 0.75rem; border-radius: 8px; border: 1px solid var(--color-line); background: transparent; color: var(--color-muted); cursor: pointer; transition: color 0.15s, background 0.15s; }
 button:hover:not(:disabled) { color: var(--color-canvas); background: var(--color-ink); border-color: var(--color-ink); }
@@ -107,11 +107,7 @@ section + section { border-left: 1px solid var(--color-line); }
 #boot.done { opacity: 0; visibility: hidden; pointer-events: none; }
 #boot .boot-logo { width: min(15rem, 60vw); height: auto; overflow: visible; }
 #boot p { margin: 0; font-size: 12px; letter-spacing: 0.16em; color: var(--color-muted); }
-.boot-bar { width: 7rem; height: 3px; border-radius: 2px; background: var(--color-line); overflow: hidden; }
-.boot-bar i { display: block; width: 40%; height: 100%; border-radius: 2px; background: var(--color-spark); animation: boot-slide 1s ease-in-out infinite; }
-@keyframes boot-slide { from { translate: -100% 0; } to { translate: 250% 0; } }
-#boot .logo-rays { animation: boot-rays 1.4s ease-in-out infinite; }
-#boot .logo-bulb { animation: boot-glow 1.4s ease-in-out infinite; }
-@keyframes boot-glow { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(0 0 6px var(--color-spark)); } }
-@keyframes boot-rays { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .boot-bar i, #boot .logo-rays, #boot .logo-bulb { animation: none; } #boot .logo-rays { opacity: 1; } }
+#boot .boot-bulb { width: 2.6rem; height: 2.6rem; }
+#boot .logo-rays { opacity: 0; }
+#status-wrap { flex: 1; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+#busy { width: 1.5rem; height: 1.5rem; }

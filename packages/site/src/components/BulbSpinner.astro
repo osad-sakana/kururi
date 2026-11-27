@@ -1,0 +1,23 @@
+---
+// 読み込み中を表す、電球がピカッと光る小さな印（ぐるぐる回る輪の代わり）。
+interface Props {
+  class?: string
+  id?: string
+  hidden?: boolean
+}
+const { class: className = "", id, hidden = false } = Astro.props
+---
+
+<svg class={`bulb-spin ${className}`} id={id} hidden={hidden} viewBox="-14 -9 28 37" role="img" aria-label="読み込み中">
+  <title>読み込み中</title>
+  <g class="rays" fill="none" stroke-linecap="round">
+    <path d="M0 -7V-3M-9 -4L-7 -1M9 -4L7 -1" />
+  </g>
+  <g transform="rotate(180 0 7)">
+    <path class="glass" d="M-6 0V4A11 11 0 1 0 6 4V0Z" />
+    <g class="b" fill="none">
+      <path d="M-6 0V4A11 11 0 1 0 6 4V0Z" />
+      <path d="M-5 -5H5M-3 -10H3" />
+    </g>
+  </g>
+</svg>

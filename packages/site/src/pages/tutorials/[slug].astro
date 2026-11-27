@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from "astro:content"
 import Base from "../../layouts/Base.astro"
+import BulbSpinner from "../../components/BulbSpinner.astro"
 
 export async function getStaticPaths() {
   const lessons = (await getCollection("tutorials")).sort((a, b) => a.data.order - b.data.order)
@@ -45,6 +46,7 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
         <a href={`${home}playground`} target="_blank" rel="noopener">別のタブで開く</a>
         <button type="button" class="side-close">閉じる</button>
       </div>
+      <div class="side-loading"><BulbSpinner class="side-bulb" /><span>読み込み中…</span></div>
       <iframe title="プレイグラウンド" allow="cross-origin-isolated"></iframe>
     </aside>
   </div>
@@ -59,6 +61,7 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
     const closeButton = document.querySelector<HTMLButtonElement>(".side-close")
     const resize = document.querySelector<HTMLElement>(".side-resize")
     const target = reader?.dataset.playground ?? "/playground"
+    iframe?.addEventListener("load", () => iframe.closest(".side")?.classList.add("loaded"))
     const store = {
       get: (key: string) => { try { return localStorage.getItem(key) } catch { return null } },
       set: (key: string, value: string) => { try { localStorage.setItem(key, value) } catch { /* 保存できなくても使える */ } },

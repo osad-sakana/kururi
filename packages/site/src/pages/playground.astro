@@ -1,8 +1,10 @@
 ---
 import "../styles/tokens.css"
+import "../styles/bulb.css"
 import "../playground/style.css"
 import iconUrl from "../../../../assets/logo/kururi-icon.svg?url"
 import Logo from "../components/Logo.astro"
+import BulbSpinner from "../components/BulbSpinner.astro"
 
 const base = import.meta.env.BASE_URL
 const home = base.endsWith("/") ? base : `${base}/`
@@ -36,8 +38,8 @@ const home = base.endsWith("/") ? base : `${base}/`
   </head>
   <body class="playground">
     <div id="boot" role="status" aria-live="polite">
-      <Logo animated class="boot-logo" />
-      <div class="boot-bar" aria-hidden="true"><i></i></div>
+      <Logo class="boot-logo" />
+      <BulbSpinner class="boot-bulb" />
       <p>読み込み中…</p>
     </div>
     <header>
@@ -47,7 +49,7 @@ const home = base.endsWith("/") ? base : `${base}/`
       </nav>
       <label class="visually-hidden" for="samples">サンプル</label>
       <select id="samples" title="サンプルを選ぶと、エディタの中身が入れ替わります（元に戻せます）"></select>
-      <span id="status" role="status"></span>
+      <span id="status-wrap"><BulbSpinner id="busy" class="busy" hidden /><span id="status" role="status"></span></span>
       <div class="controls" role="group" aria-label="文字の大きさ">
         <button id="font-down" type="button" aria-label="文字を小さくする" title="文字を小さくする">A−</button>
         <span id="font-size" aria-live="polite"></span>

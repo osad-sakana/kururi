@@ -131,6 +131,7 @@ const pythonView = monaco.editor.create(element("python"), {
 })
 
 const status = element("status")
+const busy = element("busy")
 const openButton = element<HTMLButtonElement>("open-narapy")
 const runButton = element<HTMLButtonElement>("run")
 const stopButton = element<HTMLButtonElement>("stop")
@@ -376,6 +377,8 @@ const runner = createRunner({
   },
   onStatus: (text) => {
     status.textContent = text
+    // 準備中・実行中は、電球がピカッと光る印を出す
+    busy.toggleAttribute("hidden", text === "")
   },
   onError: (traceback) => {
     const error = mapRuntimeError(traceback, currentAnalysis.lineMap)
