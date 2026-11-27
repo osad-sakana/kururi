@@ -26,12 +26,11 @@ const codeBars = [70, 120, 96, 58, 132, 84, 110, 46]
 
 // ---- 本物のエラー（コンパイラが出したものをそのまま見せる）----
 const badSource = `function main = () {
-    let count: int = 3
+    var count: int = "three"
     print(count)
 }
 `
 const badDiagnostics = compile(badSource).diagnostics
-const fixTitle = badDiagnostics.find((diagnostic) => diagnostic.fix !== undefined)?.fix?.title ?? "直す"
 const errorText = formatDiagnostics(badDiagnostics, { source: badSource, fileName: "main.kururi" }).trim()
 const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 const errorHtml = escapeHtml(errorText)
@@ -337,19 +336,13 @@ const errorHtml = escapeHtml(errorText)
           <p class="body">
             「なぜ弾かれたか分からない」を、なくします。何が、どこで、なぜ間違いで、どう直せばよいか。<strong>必ず、直し方を添えて</strong>教えます。
           </p>
-          <p class="body">直し方が分かるものは、ボタンを 1 回押すだけで直せます。</p>
         </div>
         <div class="terminal" data-reveal id="term" aria-label="Kururi が実際に出すエラーの例">
           <div class="bar"><i></i><i></i><i></i><span style="margin-left: 0.4rem">main.kururi</span></div>
           <div class="screen">
             <pre set:html={errorHtml} />
-            <div class="ok">
-              <svg viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="24" fill="none" stroke="var(--color-success)" stroke-width="3" /><path d="M17 29 l8 8 l15 -17" fill="none" stroke="var(--color-success)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" /></svg>
-              <b>エラーは 0 件です</b>
-              <span>2 行目：var count: int = 3</span>
-            </div>
           </div>
-          <div class="fix">これは実際に Kururi が出すエラーです<button type="button" tabindex="-1" aria-hidden="true">{fixTitle}</button></div>
+          <div class="fix">これは実際に Kururi が出すエラーです</div>
         </div>
       </div>
     </section>
@@ -509,24 +502,6 @@ const errorHtml = escapeHtml(errorText)
         if (index > 0) press(demo.next)
         show(index)
       }, 1500)
-    }
-
-    // ---- エラーが直るデモ（エラー → 直すを押す → 0 件 → もとに戻る）----
-    const terminal = document.getElementById("term")
-    const fixButton = terminal?.querySelector("button")
-    if (terminal && !reduced) {
-      let visible = false
-      new IntersectionObserver((entries) => { visible = entries.some((e) => e.isIntersecting) }, { threshold: 0.5 }).observe(terminal)
-      let phase = 0
-      setInterval(() => {
-        if (!visible) return
-        phase = (phase + 1) % 4
-        if (phase === 2) {
-          fixButton?.classList.add("press")
-          setTimeout(() => { fixButton?.classList.remove("press"); terminal.classList.add("fixed") }, 260)
-        }
-        if (phase === 0) terminal.classList.remove("fixed")
-      }, 2400)
     }
   </script>
 </Base>
