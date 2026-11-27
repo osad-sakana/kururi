@@ -44,8 +44,8 @@ const heroPythonLines = heroPython.split("\n").map(highlight)
 
 // ---- 学び方：画面図の番号と、説明（番号の位置から線を伸ばす）----
 const flowItems = [
-  { n: 1, title: "読む", text: "チュートリアルで、概念を1つずつ。コードはボタン1つで、横のプレイグラウンドに届きます。", x: 11, y: 17.75, width: 26 },
-  { n: 2, title: "書く", text: "書くそばから、エラーと直し方が出ます。変換後のPythonも、横に並べて見られます。", x: 38.4, y: 17.75, width: 28 },
+  { n: 1, title: "読む", text: "チュートリアルで、概念を1つずつ学びます。コードはボタン1つで、横のプレイグラウンドに届きます。", x: 11, y: 17.75, width: 26 },
+  { n: 2, title: "書く", text: "リアルタイムで、エラーが出て、直し方も添えられます。変換後のPythonも、横に並べて見られます。", x: 38.4, y: 17.75, width: 28 },
   { n: 3, title: "確かめる", text: "ステップ実行で、1行ずつ進めながら、変数の値が変わる様子を目で追えます。", x: 68.4, y: 17.75, width: 30 },
 ]
 
@@ -82,13 +82,10 @@ const errorHtml = escapeHtml(errorText)
             <span class="line"><span style="--i: 1">最初に学ぶ</span></span>
             <span class="line"><span style="--i: 2"><em>プログラミング言語</em></span></span>
           </h1>
-          <p class="lead fade-up" style="--i: 5">生成AIの登場で、プログラムを書く作業の多くを、AIが担うようになりました。それでも、人がプログラムを理解する必要は、なくなっていません。</p>
-          <p class="lead fade-up" style="--i: 6"><LogoInline />は、AI時代にも欠かせない<strong>プログラミングの概念の理解</strong>に特化したプログラミング言語です。</p>
-          <p class="lead fade-up" style="--i: 7">ここで身につけたことは、多くの言語への入り口になります。</p>
-          <div class="actions fade-up" style="--i: 8">
+          <div class="actions fade-up" style="--i: 5">
             <a class="button primary" href={`${home}tutorials`}>チュートリアルをはじめる</a>
           </div>
-          <p class="official fade-up" style="--i: 9">「<LogoInline />」は学習用プログラミング言語！</p>
+          <p class="official fade-up" style="--i: 6">「<LogoInline />」は学習用プログラミング言語！</p>
         </div>
         <div class="hero-code" aria-label="Kururiのコードと、変換後のPythonの例">
           <div class="hc-card">
@@ -117,8 +114,9 @@ const errorHtml = escapeHtml(errorText)
           <div data-reveal>
             <p class="kicker">Why concepts</p>
             <h2>なぜ、概念なのか</h2>
-            <p class="body">書き方の暗記より、概念の理解が、ますます大切になっています。AIが出したものを、理解して使いこなすために必要だからです。</p>
-            <p class="body">概念とは、型、名前、分岐、繰り返し、関数、データのまとまり、「値がない」こと。中心にこれらがあり、まわりに、いろいろな言語があります。</p>
+            <p class="body">生成AIの登場で、プログラムを書く作業の多くを、AIが担うようになりました。それでも、人がプログラムを理解するということは未だ大切な要素としてあります。</p>
+            <p class="body"><LogoInline />は、AI時代にも欠かせない<strong>プログラミングの概念の理解</strong>に特化したプログラミング言語です。</p>
+            <p class="body">ここで身につけたことは、多くの言語への入り口になります。</p>
           </div>
         <div class="orbit-wrap" data-reveal="200">
           <svg class="orbit" viewBox="0 0 520 520" role="img" aria-label="中心のKururiが、型・名前・分岐などの概念と、PythonやTypeScriptなどの言語をつないでいる図">
@@ -167,9 +165,9 @@ const errorHtml = escapeHtml(errorText)
         <div class="reason" data-reveal>
           <div class="reason-text">
             <div class="no">01</div>
-            <h3>書くのはAIの得意技になった。</h3>
-            <p><strong>人に求められるのは、出てきたコードを読み、直し、指示する力です。</strong></p>
-            <p>動くコードを書く作業を、AIに任せられる場面が増えました。でも、それが正しいか、意図に合っているかを決めるのは、人です。</p>
+            <h3>コードを書くのはAIが得意になった</h3>
+            <p>出てきたコードを読むこと、直すこと、指示すること。この力が、人には求められます。</p>
+            <p>動くコードを書く作業を、AIに任せられる場面が増えましたが、それが本当に正しいか、本当に意図に合っているかを決めるのは、私たち人間です。</p>
           </div>
           <figure>
             <svg viewBox="0 0 540 330" role="img" aria-label="AIが書いたコードを、人が読み、直し、指示する図">
@@ -206,9 +204,9 @@ const errorHtml = escapeHtml(errorText)
         <div class="reason" data-reveal>
           <div class="reason-text">
             <div class="no">02</div>
-            <h3>その力の土台は、文法ではなく概念。</h3>
-            <p><strong>型、名前、分岐、繰り返し、関数、データのまとまり、「値がない」こと。</strong></p>
-            <p>書き方は言語ごとに違います。でも、その下にある概念は、言語が変わってもほぼそのまま通じます。</p>
+            <h3>その力の元になるのは、文法ではなく概念</h3>
+            <p>プログラミングには、型、名前、分岐、繰り返し、関数、データのまとまり、「値がない」そんな概念があります。</p>
+            <p>書き方は言語ごとに違います。しかし、概念は言語が変わっても共通していることが多いです。</p>
           </div>
           <figure>
             <svg viewBox="0 0 540 330" role="img" aria-label="言語ごとに違う書き方が、共通の概念「関数」に集まる図">
@@ -241,9 +239,10 @@ const errorHtml = escapeHtml(errorText)
         <div class="reason" data-reveal>
           <div class="reason-text">
             <div class="no">03</div>
-            <h3>だから、概念に集中できる言語を最初に。</h3>
-            <p><strong><LogoInline />は文法を最小にして、1つの概念を1つの形で見せます。</strong></p>
-            <p>間違えたときは、直し方を添えたエラーで教えます。概念に向き合いやすくなります。</p>
+            <h3>概念に集中できる言語を最初に</h3>
+            <p><LogoInline />はそんな概念を学びやすい言語です。</p>
+            <p>多くの言語は、用途や実務に合わせて、書き方の選択肢や例外を増やしてきました。<LogoInline />は、学習で概念を学ぶことを主軸に置き、それらを極力そぎ落としています。</p>
+            <p>また、間違えたときは、直し方を添えたエラーで教えます。概念に向き合いやすくなります。</p>
           </div>
           <figure>
             <svg viewBox="0 0 540 330" role="img" aria-label="値の種類、分岐、繰り返し、関数が、それぞれ1つの形に対応している図">
@@ -278,7 +277,7 @@ const errorHtml = escapeHtml(errorText)
       <div class="wrap">
         <div class="head" data-reveal>
           <p class="kicker">Same idea, any language</p>
-          <h2>書き方は違っても、<br />考え方は通じる。</h2>
+          <h2>書き方は違えども、<br />考え方は多くの言語で共通しています</h2>
           <p class="body">「関数」を、4つの言語で書いてみます。色が付いた部分が、共通する概念の部品です。</p>
         </div>
         <div class="snippets" data-reveal>
@@ -308,7 +307,7 @@ const errorHtml = escapeHtml(errorText)
       <div class="wrap">
         <div class="head" data-reveal>
           <p class="kicker">How you learn</p>
-          <h2>読んで、書いて、<br />動きを目で確かめる。</h2>
+          <h2>どのように学ぶか</h2>
           <p class="body">ブラウザだけで、書く・動かす・確かめるまでできます。インストールは要りません。</p>
         </div>
         <div class="window annot" data-reveal>
@@ -408,9 +407,9 @@ const errorHtml = escapeHtml(errorText)
       <div class="wrap">
         <div data-reveal>
           <p class="kicker">Errors that teach</p>
-          <h2>エラーは、<br />先生になる。</h2>
+          <h2>エラーは、<br />先生になる</h2>
           <p class="body">
-            「なぜ弾かれたか分からない」を、なくします。何が、どこで、なぜ間違いで、どう直せばよいか。<strong>直し方を添えて</strong>教えます。
+            「なぜ実行できないのか分からない」を、なくします。何がどのように問題で、どのように直せば良いのか、それを丁寧に教えます。
           </p>
         </div>
         <div class="terminal" data-reveal id="term" aria-label="Kururiが実際に出すエラーの例">
@@ -428,7 +427,7 @@ const errorHtml = escapeHtml(errorText)
       <div class="wrap">
         <div class="head" data-reveal>
           <p class="kicker">Course</p>
-          <h2>8回で、概念をひとまわり。</h2>
+          <h2>8回で、概念をひとまわり</h2>
           <p class="body">手順から始めて、値と型、分岐、繰り返し、関数、配列、クラス、そして「値がない」こと。順番に進めば、プログラミングの土台がそろいます。</p>
         </div>
         <nav class="path" data-reveal aria-label="チュートリアルの一覧">
@@ -447,7 +446,7 @@ const errorHtml = escapeHtml(errorText)
       <div class="wrap">
         <div class="head" data-reveal>
           <p class="kicker">Where it helps</p>
-          <h2>どの言語で、役立つか。</h2>
+          <h2>どの言語で、役立つか</h2>
           <p class="body">多くの言語で変わらないのは「考え方」の部分です。書き方（記号や語順）は言語ごとに違うので、そこは新しい言語で改めて覚えます。</p>
         </div>
         <div class="table-scroll">
@@ -473,7 +472,7 @@ const errorHtml = escapeHtml(errorText)
     <section>
       <div class="wrap scope" data-reveal>
         <p class="kicker">Scope</p>
-        <h2>「入り口」であって、「全部」ではない。</h2>
+        <h2>「入り口」であって、「全部」ではない</h2>
         <p class="body"><LogoInline />が扱うのは、多くの言語に共通する、土台の概念です。次のものは、扱いません。</p>
         <ul>
           <li>ラムダ・クロージャ（関数を値として扱うこと）、ジェネリクス</li>
@@ -504,7 +503,7 @@ const errorHtml = escapeHtml(errorText)
               </g>
             </svg>
           </div>
-          <h2>最初の1行で、灯りをつけよう。</h2>
+          <h2>最初の1行で、灯りをつけよう</h2>
           <p class="body">ブラウザだけで、いますぐ始められます。</p>
           <div class="actions">
             <a class="button primary" href={`${home}tutorials`}>チュートリアルをはじめる</a>
