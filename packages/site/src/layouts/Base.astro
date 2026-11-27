@@ -3,6 +3,7 @@ import "../styles/tokens.css"
 import "../styles/site.css"
 import iconUrl from "../../../../assets/logo/kururi-icon.svg?url"
 import Logo from "../components/Logo.astro"
+import LogoInline from "../components/LogoInline.astro"
 
 interface Props {
   title?: string
@@ -56,7 +57,7 @@ const pageTitle = title === undefined ? "「Kururi」は学習用プログラミ
     <slot />
     <footer class="site-footer">
       <div class="wrap">
-        <span>「Kururi」は学習用プログラミング言語！</span>
+        <span>「<LogoInline />」は学習用プログラミング言語！</span>
         <a href={`${home}tutorials`}>チュートリアル</a>
         <a href={`${home}playground`}>プレイグラウンド</a>
         <a href="https://github.com/osad-sakana/kururi">GitHub</a>

@@ -83,7 +83,7 @@ svg .bar-sp { fill: var(--color-spark); }
 .reason p { color: var(--color-muted); margin: 0 0 0.6rem; max-width: 30rem; }
 .reason p strong { color: var(--color-ink); }
 .reason figure { margin: 0; }
-.reason svg { width: 100%; height: auto; display: block; overflow: visible; }
+.reason figure svg { width: 100%; height: auto; display: block; overflow: visible; }
 
 /* 図の中の動き：親が .in になると、順番に描かれる */
 .js .draw { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.9s ease calc(var(--base, 0) * 1ms + var(--i, 0) * 120ms); }

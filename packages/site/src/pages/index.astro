@@ -4,6 +4,7 @@ import { compile, formatDiagnostics } from "@kururi/compiler"
 import { getCollection } from "astro:content"
 import Base from "../layouts/Base.astro"
 import Logo from "../components/Logo.astro"
+import LogoInline from "../components/LogoInline.astro"
 import { LANGUAGES } from "../data/languages"
 import { renderInline } from "../data/inline"
 
@@ -57,13 +58,13 @@ const errorHtml = escapeHtml(errorText)
           </h1>
           <p class="lead fade-up" style="--i: 5">
             AI がコードを書く時代に、人に残るのは<strong>概念を理解する力</strong>です。
-            Kururi は、プログラミングの概念を学ぶことに特化した、最初の言語。ここで身につければ、どの言語への入り口にもなります。
+            <LogoInline /> は、プログラミングの概念を学ぶことに特化した、最初の言語。ここで身につければ、どの言語への入り口にもなります。
           </p>
           <div class="actions fade-up" style="--i: 6">
             <a class="button primary" href={`${home}tutorials`}>チュートリアルをはじめる</a>
             <a class="button" href={`${home}playground`}>プレイグラウンドで書く</a>
           </div>
-          <p class="official fade-up" style="--i: 7">「Kururi」は学習用プログラミング言語！</p>
+          <p class="official fade-up" style="--i: 7">「<LogoInline />」は学習用プログラミング言語！</p>
         </div>
         <div class="orbit-wrap">
           <svg class="orbit" viewBox="0 0 520 520" role="img" aria-label="中心の Kururi が、型・名前・分岐などの概念と、Python や TypeScript などの言語をつないでいる図">
@@ -197,7 +198,7 @@ const errorHtml = escapeHtml(errorText)
           <div class="reason-text">
             <div class="no">03</div>
             <h3>だから、概念に集中できる言語を最初に。</h3>
-            <p><strong>Kururi は文法を最小にして、1 つの概念を 1 つの形で見せます。</strong></p>
+            <p><strong><LogoInline /> は文法を最小にして、1 つの概念を 1 つの形で見せます。</strong></p>
             <p>間違えたときは、必ず直し方を添えたエラーで教えます。迷わず、概念だけに向き合えます。</p>
           </div>
           <figure>
@@ -398,7 +399,7 @@ const errorHtml = escapeHtml(errorText)
       <div class="wrap scope" data-reveal>
         <p class="kicker">Scope</p>
         <h2>「入り口」であって、「全部」ではない。</h2>
-        <p class="body">Kururi が扱うのは、多くの言語に共通する、土台の概念です。次のものは、扱いません。</p>
+        <p class="body"><LogoInline /> が扱うのは、多くの言語に共通する、土台の概念です。次のものは、扱いません。</p>
         <ul>
           <li>ラムダ・クロージャ（関数を値として扱うこと）、ジェネリクス</li>
           <li>非同期・並行処理、メモリ管理</li>

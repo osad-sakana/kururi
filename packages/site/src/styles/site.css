@@ -138,3 +138,6 @@ ul.plain li { margin: 0.3rem 0; }
   .reader.open .side { transform: none; }
   .side-resize { display: none; }
 }
+
+/* 文章の中のロゴ */
+.logo-inline { height: 1.2em; width: auto; vertical-align: -0.22em; overflow: visible; margin-inline: 0.05em; }
