@@ -1,139 +1,339 @@
 ---
-import { compile } from "@kururi/compiler"
+import "../styles/landing.css"
+import { compile, formatDiagnostics } from "@kururi/compiler"
+import { getCollection } from "astro:content"
 import Base from "../layouts/Base.astro"
 import { LANGUAGES } from "../data/languages"
 import { renderInline } from "../data/inline"
-import { codeHash } from "../playground/share"
 
 const base = import.meta.env.BASE_URL
 const home = base.endsWith("/") ? base : `${base}/`
+const slugOf = (id: string) => id.replace(/^\d+-/, "")
+const lessons = (await getCollection("tutorials")).sort((a, b) => a.data.order - b.data.order)
 
-const example = `const GREETING: string = "こんにちは"
+// ---- ヒーローの図：中心の「概念」を、内側の概念と外側の言語がつなぐ ----
+const CENTER = 260
+const polar = (radius: number, angle: number): [number, number] => [CENTER + radius * Math.cos(angle), CENTER + radius * Math.sin(angle)]
+const concepts = ["型", "名前", "分岐", "繰り返し", "関数", "配列", "null"]
+const languages = ["Python", "TypeScript", "Java", "Rust", "Go", "Swift", "C#", "Kotlin"]
+const conceptNodes = concepts.map((label, i) => ({ label, at: polar(118, -Math.PI / 2 + (i * 2 * Math.PI) / concepts.length), label_at: polar(150, -Math.PI / 2 + (i * 2 * Math.PI) / concepts.length) }))
+const languageNodes = languages.map((label, i) => ({ label, at: polar(214, -Math.PI / 2 + Math.PI / languages.length + (i * 2 * Math.PI) / languages.length), width: 26 + label.length * 8.6 }))
+const links = languageNodes.flatMap((language, i) => [conceptNodes[i % concepts.length], conceptNodes[(i + 3) % concepts.length]].map((concept) => ({ from: language.at, to: concept!.at })))
 
-class Dog = {
-    fields = {
-        private name: string
-    }
+// ---- 理由 1 の図：AI が書き、人が読んで直す ----
+const codeBars = [70, 120, 96, 58, 132, 84, 110, 46]
 
-    constructor = (name: string) {
-        self.name = name
-    }
-
-    public method bark = () {
-        print(\`\${GREETING}、\${self.name} です\`)
-    }
-}
-
-function main = () {
-    var dog: Dog = new Dog("ポチ")
-    for i in 0..3 {
-        dog.bark()
-    }
+// ---- 本物のエラー（コンパイラが出したものをそのまま見せる）----
+const badSource = `function main = () {
+    let count: int = 3
+    print(count)
 }
 `
-const python = compile(example).python
-
-const concepts = [
-  { title: "値と型", text: "数・文字・真偽。値には「種類」があり、種類が合わないと弾かれる。", slug: "values" },
-  { title: "分岐", text: "条件によって、進む道を分ける。", slug: "branch" },
-  { title: "繰り返し", text: "同じことを、決めた回数や条件が続くあいだ繰り返す。", slug: "loop" },
-  { title: "関数", text: "手順に名前を付け、引数を渡して、結果を受け取る。", slug: "function" },
-  { title: "データの並び", text: "配列で、同じ種類の値をまとめて扱う。", slug: "array" },
-  { title: "クラス", text: "データと動きをひとまとめにして、外から守る。", slug: "class" },
-  { title: "値がない", text: "「ない」かもしれない値を、型で意識する（null）。", slug: "null" },
-  { title: "エラーを読む", text: "何が・どこで・なぜ・どう直すか。エラーは先生になる。", slug: "hello" },
-]
-
-const tools = [
-  { title: "ステップ実行", text: "1 行ずつ進めて、変数の値の変わり方を目で追える。戻ることもできる。" },
-  { title: "直すボタン", text: "エラーの直し方が分かるときは、1 クリックで直せる。何が変わったかも残る。" },
-  { title: "Python との対応", text: "Kururi の行にカーソルを置くと、変換後の Python の対応する行が光る。" },
-  { title: "補完とホバー", text: "名前にカーソルを置くと、型や説明が出る。補完で書き方を思い出せる。" },
-]
+const badDiagnostics = compile(badSource).diagnostics
+const fixTitle = badDiagnostics.find((diagnostic) => diagnostic.fix !== undefined)?.fix?.title ?? "直す"
+const errorText = formatDiagnostics(badDiagnostics, { source: badSource, fileName: "main.kururi" }).trim()
+const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+const errorHtml = escapeHtml(errorText)
+  .replace(/^(error\[[A-Z0-9]+\])/m, '<span class="e">$1</span>')
+  .replace(/^(help:)/m, '<span class="h">$1</span>')
 ---
 
-<Base current="home">
-  <main>
-    <div class="wrap hero">
-      <p class="eyebrow">KURURI</p>
-      <h1>「Kururi」は<br />学習用プログラミング言語！</h1>
-      <p class="lead">
-        AI がコードを書く時代に必要なのは、書き方の暗記ではなく、プログラミングの<strong>概念</strong>を理解することです。
-        Kururi は、概念を学ぶことに特化した、最初の言語。ここで身につければ、どの言語への入り口にもなります。
-      </p>
-      <div class="actions">
-        <a class="button primary" href={`${home}playground`}>プレイグラウンドで書いてみる</a>
-        <a class="button" href={`${home}tutorials`}>チュートリアルを読む</a>
-      </div>
-    </div>
-
-    <section class="block">
+<Base current="home" description="AI がコードを書く時代の、新しいプログラミング入門。Kururi は、プログラミングの概念を学ぶことに特化した最初の言語です。">
+  <main class="lp">
+    <!-- ヒーロー -->
+    <section class="lp-hero">
       <div class="wrap">
-        <h2>こんなふうに書きます</h2>
-        <p class="sub">左が Kururi、右が変換後の Python。書いたコードは、そのまま読める Python になります。</p>
-        <div class="compare">
+        <div>
+          <p class="pill"><i></i>AI 時代の、新しいプログラミング入門</p>
+          <h1>書くのは <em>AI</em>。<br />読んで、直して、<br />決めるのは あなた。</h1>
+          <p class="lead">
+            AI がコードを書く時代に、人に残るのは<strong>概念を理解する力</strong>です。
+            Kururi は、プログラミングの概念を学ぶことに特化した、最初の言語。ここで身につければ、どの言語への入り口にもなります。
+          </p>
+          <div class="actions">
+            <a class="button primary" href={`${home}tutorials`}>チュートリアルをはじめる</a>
+            <a class="button" href={`${home}playground`}>プレイグラウンドで書く</a>
+          </div>
+          <p class="official">「Kururi」は学習用プログラミング言語！</p>
+        </div>
+        <svg class="orbit" viewBox="0 0 520 520" role="img" aria-label="中心の「概念」を、型・名前・分岐などの概念と、Python や TypeScript などの言語がつないでいる図">
+          <circle class="stroke ring" cx={CENTER} cy={CENTER} r="118" />
+          <circle class="stroke ring slow" cx={CENTER} cy={CENTER} r="214" />
+          {links.map((link) => (
+            <line class="stroke" x1={link.from[0]} y1={link.from[1]} x2={link.to[0]} y2={link.to[1]} style="stroke-opacity: 0.7" />
+          ))}
+          <g transform={`translate(${CENTER} ${CENTER})`} opacity="0.16">
+            <path class="stroke-ac" stroke-width="2" d="M0 0 a8 8 0 0 1 8 8 a16 16 0 0 1 -16 16 a24 24 0 0 1 -24 -24 a32 32 0 0 1 32 -32 a40 40 0 0 1 40 40 a48 48 0 0 1 -48 48 a56 56 0 0 1 -56 -56" />
+          </g>
+          <circle cx={CENTER} cy={CENTER} r="56" class="panel" style="stroke: var(--color-accent); stroke-width: 2" />
+          <text class="t" x={CENTER} y={CENTER + 9} text-anchor="middle" font-size="26" font-weight="800">概念</text>
+          {conceptNodes.map((node) => (
+            <g>
+              <circle cx={node.at[0]} cy={node.at[1]} r="6" class="ac" />
+              <text class="t" x={node.label_at[0]} y={node.label_at[1] + 5} text-anchor="middle" font-size="14" font-weight="700">{node.label}</text>
+            </g>
+          ))}
+          {languageNodes.map((node) => (
+            <g>
+              <rect x={node.at[0] - node.width / 2} y={node.at[1] - 15} width={node.width} height="30" rx="15" class="panel" />
+              <text class="m" x={node.at[0]} y={node.at[1] + 5} text-anchor="middle" font-size="13">{node.label}</text>
+            </g>
+          ))}
+        </svg>
+      </div>
+    </section>
+
+    <!-- なぜ、概念なのか -->
+    <section class="why" id="why">
+      <div class="wrap">
+        <div class="intro">
+          <p class="kicker">Why concepts</p>
+          <h2>なぜ、概念なのか</h2>
+          <p class="body">文法を覚える時代は、終わりつつあります。これから必要なのは、AI が出したものを、理解して使いこなす力です。</p>
+        </div>
+
+        <div class="reason">
+          <div class="reason-text">
+            <div class="no">01</div>
+            <h3>書くのは AI の得意技になった。</h3>
+            <p><strong>人に残るのは、出てきたコードを読み、直し、指示する力です。</strong></p>
+            <p>動くコードを書く作業は、AI に任せられます。でも、それが正しいか、意図に合っているかを決めるのは、人です。</p>
+          </div>
           <figure>
-            <figcaption>KURURI</figcaption>
-            <pre class="code"><code>{example}</code></pre>
-          </figure>
-          <figure>
-            <figcaption>PYTHON</figcaption>
-            <pre class="code"><code>{python}</code></pre>
+            <svg viewBox="0 0 540 330" role="img" aria-label="AI が書いたコードを、人が読み、直し、指示する図">
+              <g>
+                <rect x="0" y="52" width="210" height="238" rx="16" class="editor" />
+                <rect x="14" y="68" width="8" height="8" rx="4" class="bar" /><rect x="28" y="68" width="8" height="8" rx="4" class="bar" /><rect x="42" y="68" width="8" height="8" rx="4" class="bar" />
+                {codeBars.map((width, i) => (
+                  <rect x={i % 3 === 1 ? 44 : 28} y={100 + i * 22} width={width} height="9" rx="4.5" class={i === 4 ? "bar-ac" : "bar"} />
+                ))}
+                <rect x="0" y="0" width="116" height="34" rx="17" class="panel" style="stroke: var(--color-accent)" />
+                <text class="t" x="58" y="22" text-anchor="middle" font-size="14" font-weight="700">AI が書く</text>
+              </g>
+              <path class="stroke-ac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M228 170 H292 M278 156 L292 170 L278 184" />
+              <g transform="translate(330 0)">
+                <rect x="0" y="52" width="210" height="238" rx="16" class="editor" />
+                <rect x="14" y="68" width="8" height="8" rx="4" class="bar" /><rect x="28" y="68" width="8" height="8" rx="4" class="bar" /><rect x="42" y="68" width="8" height="8" rx="4" class="bar" />
+                {codeBars.map((width, i) => (
+                  <rect x={i % 3 === 1 ? 44 : 28} y={100 + i * 22} width={width} height="9" rx="4.5" class={i === 4 ? "bar-ac" : "bar"} />
+                ))}
+                <rect x="14" y="192" width="182" height="24" rx="6" fill="none" style="stroke: var(--color-accent); stroke-width: 1.6; stroke-dasharray: 4 4" />
+                <circle cx="176" cy="252" r="20" class="panel" style="stroke: var(--color-accent); stroke-width: 2" />
+                <path class="stroke-ac" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M167 252 l7 7 l13 -15" />
+                <rect x="0" y="0" width="210" height="34" rx="17" class="panel" style="stroke: var(--color-accent)" />
+                <text class="t" x="105" y="22" text-anchor="middle" font-size="14" font-weight="700">読む・直す・指示する</text>
+              </g>
+            </svg>
           </figure>
         </div>
-        <div class="actions">
-          <a class="button" href={`${home}playground${codeHash(example)}`}>このコードを動かす</a>
+
+        <div class="reason">
+          <div class="reason-text">
+            <div class="no">02</div>
+            <h3>その力の土台は、文法ではなく概念。</h3>
+            <p><strong>型、名前、分岐、繰り返し、関数、データのまとまり、「値がない」こと。</strong></p>
+            <p>書き方は言語ごとに違います。でも、その下にある概念は、言語が変わってもほぼそのまま通じます。</p>
+          </div>
+          <figure>
+            <svg viewBox="0 0 540 330" role="img" aria-label="言語ごとに違う書き方が、共通の概念「関数」に集まる図">
+              <text class="t dim" x="0" y="14" font-size="12" letter-spacing="2">文法 — 言語ごとに違う</text>
+              {[
+                { name: "Python", code: "def add(a, b):", x: 0 },
+                { name: "Java", code: "int add(int a)", x: 136 },
+                { name: "TypeScript", code: "add(a: number)", x: 272 },
+                { name: "Rust", code: "fn add(a: i32)", x: 408 },
+              ].map((chip) => (
+                <g>
+                  <rect x={chip.x} y="26" width="128" height="62" rx="12" class="editor" />
+                  <text class="m dim" x={chip.x + 12} y="46" font-size="10">{chip.name}</text>
+                  <text class="m" x={chip.x + 12} y="70" font-size="9.5">{chip.code}</text>
+                  <path class="stroke-ac" stroke-width="1.5" style="stroke-opacity: 0.6" d={`M${chip.x + 64} 88 C ${chip.x + 64} 150, 270 150, 270 196`} />
+                </g>
+              ))}
+              <text class="t dim" x="0" y="190" font-size="12" letter-spacing="2">概念 — 共通</text>
+              <rect x="100" y="204" width="340" height="68" rx="16" class="panel" style="stroke: var(--color-accent); stroke-width: 2" />
+              <text class="t" x="270" y="232" text-anchor="middle" font-size="17" font-weight="800">関数</text>
+              <text class="t dim" x="270" y="256" text-anchor="middle" font-size="13">入力を受け取り、結果を返す</text>
+            </svg>
+          </figure>
+        </div>
+
+        <div class="reason">
+          <div class="reason-text">
+            <div class="no">03</div>
+            <h3>だから、概念に集中できる言語を最初に。</h3>
+            <p><strong>Kururi は文法を最小にして、1 つの概念を 1 つの形で見せます。</strong></p>
+            <p>間違えたときは、必ず直し方を添えたエラーで教えます。迷わず、概念だけに向き合えます。</p>
+          </div>
+          <figure>
+            <svg viewBox="0 0 540 330" role="img" aria-label="値の種類、分岐、繰り返し、関数が、それぞれ 1 つの形に対応している図">
+              <text class="t dim" x="0" y="14" font-size="12" letter-spacing="2">1 つの概念 ＝ 1 つの形</text>
+              {[
+                { concept: "値の種類", code: "var age: int = 12" },
+                { concept: "分岐", code: "if age >= 20 { … }" },
+                { concept: "繰り返し", code: "for i in 0..3 { … }" },
+                { concept: "関数", code: "function f = () { … }" },
+              ].map((row, i) => (
+                <g transform={`translate(0 ${34 + i * 70})`}>
+                  <rect x="0" y="0" width="150" height="52" rx="26" class="panel" style="stroke: var(--color-accent)" />
+                  <text class="t" x="75" y="32" text-anchor="middle" font-size="16" font-weight="700">{row.concept}</text>
+                  <path class="stroke-ac" stroke-width="2" stroke-linecap="round" d="M158 26 H214" />
+                  <circle cx="218" cy="26" r="4" class="ac" />
+                  <rect x="228" y="0" width="300" height="52" rx="14" class="editor" />
+                  <text class="m" x="248" y="31" font-size="15">{row.code}</text>
+                </g>
+              ))}
+            </svg>
+          </figure>
         </div>
       </div>
     </section>
 
-    <section class="block">
+    <!-- 同じ概念、どの言語でも -->
+    <section class="same">
       <div class="wrap">
-        <h2>なぜ、概念なのか</h2>
-        <ul class="plain">
-          <li><strong>書くのは AI の得意技になった。</strong>人に残るのは、出てきたコードを読み、直し、指示する力です。</li>
-          <li><strong>その力の土台は、文法ではなく概念。</strong>型、名前、分岐、繰り返し、関数、データのまとまり、「値がない」こと。これらは言語が変わってもほぼそのまま通じます。</li>
-          <li><strong>だから、概念に集中できる言語を最初に。</strong>Kururi は文法を最小にして、1 つの概念を 1 つの形で見せます。間違えたときは、必ず直し方を添えたエラーで教えます。</li>
-        </ul>
+        <div class="head">
+          <p class="kicker">Same idea, any language</p>
+          <h2>書き方は違っても、<br />考え方は同じ。</h2>
+          <p class="body">「関数」を、4 つの言語で書いてみます。色が付いた部分が、共通する概念の部品です。</p>
+        </div>
+        <div class="snippets">
+          <div class="snippet kururi">
+            <h4>KURURI</h4>
+            <pre set:html={`function <mark>add</mark> = (<mark>a: int, b: int</mark>) -> <mark>int</mark> {\n    return a + b\n}`} />
+          </div>
+          <div class="snippet">
+            <h4>PYTHON</h4>
+            <pre set:html={`def <mark>add</mark>(<mark>a: int, b: int</mark>) -> <mark>int</mark>:\n    return a + b`} />
+          </div>
+          <div class="snippet">
+            <h4>TYPESCRIPT</h4>
+            <pre set:html={`function <mark>add</mark>(<mark>a: number, b: number</mark>): <mark>number</mark> {\n  return a + b\n}`} />
+          </div>
+          <div class="snippet">
+            <h4>JAVA</h4>
+            <pre set:html={`static <mark>int</mark> <mark>add</mark>(<mark>int a, int b</mark>) {\n    return a + b;\n}`} />
+          </div>
+        </div>
+        <p class="legend"><span><mark>名前</mark> add</span><span><mark>引数</mark> 受け取る値と、その型</span><span><mark>戻り値</mark> 返す値の型</span></p>
       </div>
     </section>
 
-    <section class="block">
+    <!-- 学び方 -->
+    <section class="how">
       <div class="wrap">
-        <h2>Kururi で学ぶ概念</h2>
-        <p class="sub">順番に進めるチュートリアルがあります。どれも、その場で動かせます。</p>
-        <div class="cards">
-          {concepts.map((concept, index) => (
-            <a class="card" href={`${home}tutorials/${concept.slug}`}>
-              <span class="num">{String(index + 1).padStart(2, "0")}</span>
-              <h3>{concept.title}</h3>
-              <p>{concept.text}</p>
+        <div class="head">
+          <p class="kicker">How you learn</p>
+          <h2>読んで、書いて、<br />動きを目で確かめる。</h2>
+          <p class="body">ブラウザだけで、書く・動かす・確かめるまでできます。インストールは要りません。</p>
+        </div>
+        <div class="window">
+          <svg viewBox="0 0 960 400" role="img" aria-label="ステップ実行の画面。コードの 1 行が光り、そのときの変数の値が右に表示されている">
+            <rect x="1" y="1" width="958" height="398" rx="18" class="editor" />
+            <rect x="1" y="1" width="958" height="44" rx="18" class="panel" />
+            <rect x="1" y="30" width="958" height="15" class="panel" style="stroke: none" />
+            <line x1="1" y1="45" x2="959" y2="45" class="stroke" />
+            <circle cx="26" cy="23" r="6" class="bar" /><circle cx="46" cy="23" r="6" class="bar" /><circle cx="66" cy="23" r="6" class="bar" />
+            <text class="t dim" x="480" y="28" text-anchor="middle" font-size="13">プレイグラウンド</text>
+            <line x1="500" y1="45" x2="500" y2="399" class="stroke" />
+            <text class="m dim" x="28" y="76" font-size="11" letter-spacing="2">KURURI</text>
+            {[
+              "function main = () {",
+              "    var total: int = 0",
+              "    for i in 0..4 {",
+              "        total = total + i",
+              "    }",
+              "    print(total)",
+              "}",
+            ].map((line, i) => (
+              <g>
+                {i === 3 && <rect x="2" y={98 + i * 36 - 10} width="497" height="32" style="fill: var(--color-accent); fill-opacity: 0.2" />}
+                <text class="m dim" x="28" y={98 + i * 36 + 12} font-size="13">{i + 1}</text>
+                <text class="m" x="64" y={98 + i * 36 + 12} font-size="16">{line}</text>
+              </g>
+            ))}
+            <text class="m dim" x="528" y="76" font-size="11" letter-spacing="2">ステップ実行</text>
+            {["最初へ", "戻る", "進む", "最後へ"].map((label, i) => (
+              <g>
+                <rect x={528 + i * 78} y="92" width="68" height="30" rx="8" class="panel" style={i === 2 ? "stroke: var(--color-accent)" : ""} />
+                <text class="t" x={528 + i * 78 + 34} y="112" text-anchor="middle" font-size="12">{label}</text>
+              </g>
+            ))}
+            <text class="m dim" x="528" y="158" font-size="13">4 / 12　main　4 行目（この行を実行する前）</text>
+            <text class="m dim" x="528" y="200" font-size="12">変数</text><text class="m dim" x="650" y="200" font-size="12">型</text><text class="m dim" x="730" y="200" font-size="12">値</text>
+            <line x1="528" y1="210" x2="930" y2="210" class="stroke" />
+            <text class="m ac" x="528" y="238" font-size="16">total</text><text class="m" x="650" y="238" font-size="16">int</text><text class="m" x="730" y="238" font-size="16" font-weight="700">1</text>
+            <text class="m ac" x="528" y="274" font-size="16">i</text><text class="m" x="650" y="274" font-size="16">int</text><text class="m" x="730" y="274" font-size="16" font-weight="700">2</text>
+            <text class="m dim" x="528" y="338" font-size="11" letter-spacing="2">出力</text>
+            <text class="m" x="528" y="364" font-size="14">（まだ何も出ていません）</text>
+          </svg>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z" /><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z" /></svg>
+            <h3>読む</h3>
+            <p>チュートリアルで、概念を 1 つずつ。コードはボタン 1 つで、そのまま動かせます。</p>
+          </div>
+          <div class="step">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3l4 4L8 20l-5 1 1-5z" /></svg>
+            <h3>書く</h3>
+            <p>書くそばから、エラーと直し方が出ます。変換後の Python も、横に並べて見られます。</p>
+          </div>
+          <div class="step">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M10 8l6 4-6 4z" /></svg>
+            <h3>確かめる</h3>
+            <p>ステップ実行で、1 行ずつ進めながら、変数の値が変わる様子を目で追えます。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- エラーは先生 -->
+    <section class="teach">
+      <div class="wrap">
+        <div>
+          <p class="kicker">Errors that teach</p>
+          <h2>エラーは、<br />先生になる。</h2>
+          <p class="body">
+            「なぜ弾かれたか分からない」を、なくします。何が、どこで、なぜ間違いで、どう直せばよいか。<strong>必ず、直し方を添えて</strong>教えます。
+          </p>
+          <p class="body">直し方が分かるものは、ボタンを 1 回押すだけで直せます。</p>
+        </div>
+        <div class="terminal" aria-label="Kururi が実際に出すエラーの例">
+          <div class="bar"><i></i><i></i><i></i><span style="margin-left: 0.4rem">main.kururi</span></div>
+          <pre set:html={errorHtml} />
+          <div class="fix">これは実際に Kururi が出すエラーです<span>{fixTitle}</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 回のコース -->
+    <section class="course">
+      <div class="wrap">
+        <div class="head">
+          <p class="kicker">Course</p>
+          <h2>8 回で、概念をひとまわり。</h2>
+          <p class="body">手順から始めて、値と型、分岐、繰り返し、関数、配列、クラス、そして「値がない」こと。順番に進めば、プログラミングの土台がそろいます。</p>
+        </div>
+        <nav class="path" aria-label="チュートリアルの一覧">
+          {lessons.map((lesson) => (
+            <a href={`${home}tutorials/${slugOf(lesson.id)}`}>
+              {lesson.data.title}
+              <small>{lesson.data.concept}</small>
             </a>
           ))}
-        </div>
+        </nav>
       </div>
     </section>
 
-    <section class="block">
+    <!-- どの言語で役立つか -->
+    <section class="langs-sec" id="languages">
       <div class="wrap">
-        <h2>学びを助ける道具</h2>
-        <div class="cards">
-          {tools.map((tool) => (
-            <div class="card">
-              <h3>{tool.title}</h3>
-              <p>{tool.text}</p>
-            </div>
-          ))}
+        <div class="head">
+          <p class="kicker">Where it helps</p>
+          <h2>どの言語で、役立つか。</h2>
+          <p class="body">どの言語でも変わらないのは「考え方」の部分です。書き方（記号や語順）は言語ごとに違うので、そこは新しい言語で改めて覚えます。</p>
         </div>
-      </div>
-    </section>
-
-    <section class="block" id="languages">
-      <div class="wrap">
-        <h2>どの言語で役立つか</h2>
-        <p class="sub">
-          どの言語でも変わらないのは「考え方」の部分です。書き方（記号や語順）は言語ごとに違うので、そこは新しい言語で改めて覚えます。
-        </p>
         <div class="table-scroll">
           <table class="langs">
             <thead>
@@ -153,15 +353,30 @@ const tools = [
       </div>
     </section>
 
-    <section class="block">
+    <!-- 扱わないこと -->
+    <section>
+      <div class="wrap scope">
+        <p class="kicker">Scope</p>
+        <h2>「入り口」であって、「全部」ではない。</h2>
+        <p class="body">Kururi が扱うのは、多くの言語に共通する、土台の概念です。次のものは、扱いません。</p>
+        <ul>
+          <li>ラムダ・クロージャ（関数を値として扱うこと）、ジェネリクス</li>
+          <li>非同期・並行処理、メモリ管理</li>
+          <li>継承・ポリモーフィズム（入り口としては、カプセル化まで）</li>
+        </ul>
+        <p class="body" style="margin-top: 1.2rem">実用言語になることは目指さない、学習用の言語です。</p>
+      </div>
+    </section>
+
+    <!-- 終わりに -->
+    <section class="cta">
       <div class="wrap">
-        <h2>扱わないこと</h2>
-        <p class="sub">Kururi は「入り口」です。全部を教える言語ではありません。</p>
-        <p class="sub">
-          ラムダ・クロージャ、ジェネリクス、非同期・並行処理、メモリ管理、継承などは扱いません。実用言語になることは目指さない、学習用の言語です。
-        </p>
+        <svg class="swirl" viewBox="-40 -40 80 80" aria-hidden="true"><path class="stroke-ac" stroke-width="3.5" stroke-linecap="round" fill="none" d="M0 0 a5 5 0 0 1 5 5 a10 10 0 0 1 -10 10 a15 15 0 0 1 -15 -15 a20 20 0 0 1 20 -20 a25 25 0 0 1 25 25 a30 30 0 0 1 -30 30" /></svg>
+        <h2>まず、1 行、書いてみよう。</h2>
+        <p class="body" style="margin-inline: auto">ブラウザだけで、いますぐ始められます。</p>
         <div class="actions">
-          <a class="button primary" href={`${home}tutorials`}>はじめる</a>
+          <a class="button primary" href={`${home}tutorials`}>チュートリアルをはじめる</a>
+          <a class="button" href={`${home}playground`}>プレイグラウンドで書く</a>
         </div>
       </div>
     </section>

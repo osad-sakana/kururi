@@ -1,0 +1,124 @@
+/* トップページ（LP）専用の見た目。色・書体の変数は tokens.css */
+.lp { overflow-x: clip; }
+.lp section { position: relative; padding: clamp(4rem, 9vw, 7.5rem) 0; }
+.lp .wrap { width: min(100% - 2.5rem, 70rem); }
+.lp h1, .lp h2, .lp h3 { text-wrap: balance; word-break: auto-phrase; }
+.lp h2 { font-size: clamp(1.7rem, 3.6vw, 2.6rem); line-height: 1.35; letter-spacing: -0.015em; margin: 0 0 1rem; font-weight: 700; }
+.lp .kicker { font: 700 12px var(--font-mono); letter-spacing: 0.18em; color: var(--color-accent); text-transform: uppercase; margin: 0 0 1rem; }
+.lp p.body { color: var(--color-muted); font-size: 1.05rem; max-width: 36rem; margin: 0 0 1rem; }
+.lp p.body strong { color: var(--color-ink); }
+.lp .accent { color: var(--color-accent); }
+
+/* ---- ヒーロー ---- */
+.lp-hero { padding-top: clamp(3rem, 7vw, 6rem); padding-bottom: clamp(3rem, 6vw, 5rem); }
+.lp-hero::before { content: ""; position: absolute; inset: -10% -10% auto auto; width: 70vmax; height: 70vmax; max-width: 900px; max-height: 900px; background: radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 22%, transparent), transparent 70%); transform: translate(20%, -30%); pointer-events: none; }
+.lp-hero .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 2rem; align-items: center; position: relative; }
+.lp-hero h1 { font-size: clamp(2.2rem, 5.4vw, 4rem); line-height: 1.22; letter-spacing: -0.025em; margin: 0 0 1.4rem; font-weight: 800; }
+.lp-hero h1 em { font-style: normal; color: var(--color-accent); }
+.lp-hero .lead { font-size: clamp(1rem, 1.6vw, 1.2rem); color: var(--color-muted); max-width: 33rem; margin: 0 0 0.6rem; }
+.lp-hero .lead strong { color: var(--color-ink); }
+.lp-hero .official { font-size: 0.85rem; color: var(--color-muted); margin: 1.6rem 0 0; }
+.lp-hero svg.orbit { width: 100%; height: auto; display: block; }
+.pill { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.9rem; border: 1px solid var(--color-line); border-radius: 999px; font-size: 0.82rem; color: var(--color-muted); background: color-mix(in srgb, var(--color-panel) 70%, transparent); margin-bottom: 1.4rem; }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 25%, transparent); }
+
+/* ---- 図（SVG）の共通部品 ---- */
+svg .t { font-family: var(--font-sans); fill: var(--color-ink); }
+svg .m { font-family: var(--font-mono); fill: var(--color-code); }
+svg .dim { fill: var(--color-muted); }
+svg .ac { fill: var(--color-accent); }
+svg .stroke { stroke: var(--color-line); fill: none; }
+svg .stroke-ac { stroke: var(--color-accent); fill: none; }
+svg .panel { fill: var(--color-panel); stroke: var(--color-line); }
+svg .editor { fill: var(--color-editor); stroke: var(--color-line); }
+svg .bar { fill: var(--color-line); }
+svg .bar-ac { fill: var(--color-accent); }
+.orbit .ring { stroke-dasharray: 3 7; animation: drift 40s linear infinite; }
+.orbit .ring.slow { animation-duration: 70s; animation-direction: reverse; }
+@keyframes drift { to { stroke-dashoffset: -200; } }
+@media (prefers-reduced-motion: reduce) { .orbit .ring { animation: none; } }
+
+/* ---- なぜ、概念なのか ---- */
+.why { background: var(--color-panel); border-block: 1px solid var(--color-line); }
+.why .intro { max-width: 46rem; margin-bottom: clamp(3rem, 6vw, 5rem); }
+.reason { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(1.5rem, 5vw, 4.5rem); align-items: center; padding: clamp(2rem, 4vw, 3.2rem) 0; border-top: 1px solid var(--color-line); }
+.reason:nth-of-type(odd) .reason-text { order: 2; }
+.reason .no { font: 800 clamp(3rem, 7vw, 5rem)/1 var(--font-mono); color: transparent; -webkit-text-stroke: 1.5px var(--color-accent); margin-bottom: 0.6rem; letter-spacing: -0.04em; }
+.reason h3 { font-size: clamp(1.3rem, 2.4vw, 1.8rem); line-height: 1.45; margin: 0 0 0.8rem; }
+.reason p { color: var(--color-muted); margin: 0 0 0.6rem; max-width: 30rem; }
+.reason p strong { color: var(--color-ink); }
+.reason figure { margin: 0; }
+.reason svg { width: 100%; height: auto; display: block; }
+
+/* ---- 同じ概念、どの言語でも ---- */
+.same .head { max-width: 44rem; margin-bottom: 2.5rem; }
+.snippets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid var(--color-line); border-radius: 16px; overflow: hidden; background: var(--color-editor); }
+.snippet { padding: 1.2rem 1.5rem 1.4rem; border-right: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); min-width: 0; }
+.snippet:nth-child(even) { border-right: 0; }
+.snippet:nth-child(n + 3) { border-bottom: 0; }
+.snippet h4 { margin: 0 0 0.7rem; font: 700 11px var(--font-mono); letter-spacing: 0.14em; color: var(--color-muted); }
+.snippet.kururi h4 { color: var(--color-accent); }
+.snippet pre { margin: 0; font-size: 13.5px; line-height: 1.8; color: var(--color-code); overflow-x: auto; }
+.snippet mark { background: color-mix(in srgb, var(--color-accent) 22%, transparent); color: inherit; border-radius: 4px; padding: 0 2px; }
+.legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; margin-top: 1.1rem; font-size: 0.88rem; color: var(--color-muted); }
+.legend mark { background: color-mix(in srgb, var(--color-accent) 22%, transparent); color: var(--color-ink); border-radius: 4px; padding: 0 6px; }
+
+/* ---- 学び方 ---- */
+.how { background: var(--color-panel); border-block: 1px solid var(--color-line); }
+.how .head { max-width: 40rem; margin-bottom: 2.5rem; }
+.how .window { margin: 0 0 3rem; }
+.how .window svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 24px 40px color-mix(in srgb, var(--color-ink) 12%, transparent)); }
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1.5rem, 4vw, 3rem); }
+.step h3 { margin: 0.8rem 0 0.4rem; font-size: 1.15rem; }
+.step p { margin: 0; color: var(--color-muted); font-size: 0.95rem; }
+.step svg { width: 44px; height: 44px; }
+.step svg * { stroke: var(--color-accent); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---- エラーは先生 ---- */
+.teach .wrap { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+.terminal { border: 1px solid var(--color-line); border-radius: 16px; background: var(--color-editor); overflow: hidden; }
+.terminal .bar { display: flex; align-items: center; gap: 6px; padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--color-line); background: var(--color-panel); font: 11px var(--font-mono); color: var(--color-muted); }
+.terminal .bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--color-line); }
+.terminal pre { margin: 0; padding: 1.1rem 1.3rem; font-size: 13px; line-height: 1.8; color: var(--color-code); overflow-x: auto; }
+.terminal pre .e { color: var(--color-danger); font-weight: 700; }
+.terminal pre .h { color: var(--color-accent); font-weight: 700; }
+.terminal .fix { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem 1.3rem; border-top: 1px solid var(--color-line); font-size: 0.85rem; color: var(--color-muted); }
+.terminal .fix span { margin-left: auto; padding: 0.25rem 0.8rem; border-radius: 8px; background: var(--color-accent); color: var(--color-accent-ink); font-weight: 700; font-size: 0.8rem; }
+
+/* ---- 8 回のコース ---- */
+.course .head { max-width: 40rem; margin-bottom: 3rem; }
+.path { position: relative; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 0.6rem; counter-reset: lesson; }
+.path::before { content: ""; position: absolute; left: 4%; right: 4%; top: 17px; height: 2px; background: repeating-linear-gradient(90deg, var(--color-line) 0 6px, transparent 6px 12px); }
+.path a { position: relative; display: block; text-align: center; text-decoration: none; color: var(--color-ink); font-size: 0.85rem; line-height: 1.5; padding-top: 3rem; }
+.path a::before { content: counter(lesson, decimal-leading-zero); counter-increment: lesson; position: absolute; top: 0; left: 50%; translate: -50% 0; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 700 11px var(--font-mono); background: var(--color-canvas); border: 2px solid var(--color-accent); color: var(--color-accent); transition: background 0.15s, color 0.15s; }
+.path a:hover::before { background: var(--color-accent); color: var(--color-accent-ink); }
+.path small { display: block; color: var(--color-muted); font-size: 0.72rem; }
+
+/* ---- 言語の表 ---- */
+.langs-sec { background: var(--color-panel); border-block: 1px solid var(--color-line); }
+.langs-sec .head { max-width: 42rem; margin-bottom: 2rem; }
+.lp table.langs th { text-transform: none; }
+
+/* ---- 終わりに ---- */
+.scope { max-width: 46rem; }
+.scope ul { margin: 1rem 0 0; padding-left: 1.2rem; color: var(--color-muted); }
+.cta { text-align: center; overflow: hidden; }
+.cta::before { content: ""; position: absolute; inset: 0; background: radial-gradient(closest-side at 50% 60%, color-mix(in srgb, var(--color-accent) 20%, transparent), transparent 75%); pointer-events: none; }
+.cta .wrap { position: relative; }
+.cta h2 { font-size: clamp(1.9rem, 4.4vw, 3.2rem); }
+.cta .actions { justify-content: center; }
+.cta svg.swirl { width: 76px; height: 76px; margin: 0 auto 1.4rem; display: block; }
+
+@media (max-width: 900px) {
+  .lp-hero .wrap, .reason, .teach .wrap { grid-template-columns: 1fr; }
+  .reason:nth-of-type(odd) .reason-text { order: 0; }
+  .lp-hero svg.orbit { max-width: 28rem; margin-inline: auto; }
+  .steps { grid-template-columns: 1fr; }
+  .path { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 1.6rem; }
+  .path::before { display: none; }
+}
+@media (max-width: 520px) {
+  .snippets { grid-template-columns: 1fr; }
+  .snippet { border-right: 0; border-bottom: 1px solid var(--color-line) !important; }
+  .snippet:last-child { border-bottom: 0 !important; }
+}
