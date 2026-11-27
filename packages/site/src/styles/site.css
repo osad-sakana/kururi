@@ -12,8 +12,19 @@ code, pre { font-family: var(--font-mono); }
 .site-header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--color-panel) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--color-line); }
 .site-header .wrap { display: flex; align-items: center; gap: 1.2rem; padding-block: 0.6rem; }
 .site-header .brand { display: block; color: var(--color-ink); line-height: 0; }
-.site-header .brand svg { height: 26px; width: auto; }
-.site-header nav { display: flex; gap: 1.1rem; margin-left: auto; align-items: center; font-size: 14px; }
+.site-header .brand svg { height: 40px; width: auto; overflow: visible; }
+.site-header { transition: box-shadow 0.25s, background 0.25s; }
+.site-header.scrolled { box-shadow: 0 8px 30px color-mix(in srgb, #000 22%, transparent); }
+.scroll-progress { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 20; transform-origin: left; transform: scaleX(var(--p, 0)); background: linear-gradient(90deg, var(--color-accent), var(--color-spark)); pointer-events: none; }
+/* ロゴの電球：ほんのり脈打つ */
+.logo-bulb { transform-box: fill-box; }
+.logo-animated .logo-bulb { animation: bulb-glow 3.6s ease-in-out infinite; }
+.logo-animated .logo-rays { animation: rays 3.6s ease-in-out infinite; }
+@keyframes bulb-glow { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 45% { filter: drop-shadow(0 0 7px var(--color-spark)); } }
+@keyframes rays { 0%, 100% { opacity: 0; } 45% { opacity: 1; } 60% { opacity: 0.4; } }
+.logo-rays { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .logo-animated .logo-bulb, .logo-animated .logo-rays { animation: none; } }
+.site-header nav { display: flex; gap: 1.4rem; margin-left: auto; align-items: center; font-size: 14px; }
 .site-header nav a { color: var(--color-muted); text-decoration: none; white-space: nowrap; }
 .site-header nav a:hover, .site-header nav a[aria-current="page"] { color: var(--color-ink); }
 
@@ -70,7 +81,7 @@ ul.plain li { margin: 0.3rem 0; }
 .prose .crumb a { color: inherit; }
 .code-block { position: relative; margin: 1rem 0; }
 .code-block .try { position: absolute; top: 0.5rem; right: 0.6rem; font-size: 12px; padding: 0.2rem 0.6rem; border-radius: 8px; text-decoration: none; background: var(--color-accent); color: var(--color-accent-ink); font-weight: 700; }
-.callout { margin: 1.2rem 0; padding: 0.9rem 1.1rem; border-left: 4px solid var(--color-accent); background: var(--color-panel); border-radius: 0 10px 10px 0; }
+.callout { margin: 1.2rem 0; padding: 0.9rem 1.1rem; background: color-mix(in srgb, var(--color-accent) 9%, var(--color-panel)); border-radius: 12px; }
 .callout > :first-child { margin-top: 0; }
 .callout > :last-child { margin-bottom: 0; }
 .pager { display: flex; justify-content: space-between; gap: 1rem; margin-top: 3rem; }
@@ -90,3 +101,6 @@ ul.plain li { margin: 0.3rem 0; }
   .site-header .wrap { gap: 0.8rem; }
 }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.site-footer a { color: var(--color-muted); text-decoration: none; }
+.site-footer a:hover { color: var(--color-ink); }

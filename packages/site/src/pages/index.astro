@@ -3,6 +3,7 @@ import "../styles/landing.css"
 import { compile, formatDiagnostics } from "@kururi/compiler"
 import { getCollection } from "astro:content"
 import Base from "../layouts/Base.astro"
+import Logo from "../components/Logo.astro"
 import { LANGUAGES } from "../data/languages"
 import { renderInline } from "../data/inline"
 
@@ -11,12 +12,12 @@ const home = base.endsWith("/") ? base : `${base}/`
 const slugOf = (id: string) => id.replace(/^\d+-/, "")
 const lessons = (await getCollection("tutorials")).sort((a, b) => a.data.order - b.data.order)
 
-// ---- ヒーローの図：中心の「概念」を、内側の概念と外側の言語がつなぐ ----
+// ---- ヒーローの図：中心のロゴ（概念）を、内側の概念と外側の言語がつなぐ ----
 const CENTER = 260
 const polar = (radius: number, angle: number): [number, number] => [CENTER + radius * Math.cos(angle), CENTER + radius * Math.sin(angle)]
 const concepts = ["型", "名前", "分岐", "繰り返し", "関数", "配列", "null"]
 const languages = ["Python", "TypeScript", "Java", "Rust", "Go", "Swift", "C#", "Kotlin"]
-const conceptNodes = concepts.map((label, i) => ({ label, at: polar(118, -Math.PI / 2 + (i * 2 * Math.PI) / concepts.length), label_at: polar(150, -Math.PI / 2 + (i * 2 * Math.PI) / concepts.length) }))
+const conceptNodes = concepts.map((label, i) => ({ label, at: polar(118, -Math.PI / 2 + (i * 2 * Math.PI) / concepts.length), width: label === "null" ? 52 : 22 + label.length * 15 }))
 const languageNodes = languages.map((label, i) => ({ label, at: polar(214, -Math.PI / 2 + Math.PI / languages.length + (i * 2 * Math.PI) / languages.length), width: 26 + label.length * 8.6 }))
 const links = languageNodes.flatMap((language, i) => [conceptNodes[i % concepts.length], conceptNodes[(i + 3) % concepts.length]].map((concept) => ({ from: language.at, to: concept!.at })))
 
@@ -36,63 +37,90 @@ const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "
 const errorHtml = escapeHtml(errorText)
   .replace(/^(error\[[A-Z0-9]+\])/m, '<span class="e">$1</span>')
   .replace(/^(help:)/m, '<span class="h">$1</span>')
+  .split("\n")
+  .map((line, i) => `<span class="ln" style="--n:${i}">${line}</span>`)
+  .join("")
 ---
 
 <Base current="home" description="AI がコードを書く時代の、新しいプログラミング入門。Kururi は、プログラミングの概念を学ぶことに特化した最初の言語です。">
   <main class="lp">
     <!-- ヒーロー -->
     <section class="lp-hero">
+      <div class="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="dots"></div></div>
       <div class="wrap">
         <div>
-          <p class="pill"><i></i>AI 時代の、新しいプログラミング入門</p>
-          <h1>書くのは <em>AI</em>。<br />読んで、直して、<br />決めるのは あなた。</h1>
-          <p class="lead">
+          <Logo animated class="hero-logo fade-up" />
+          <p class="pill fade-up" style="--i: 1"><i></i>AI 時代の、新しいプログラミング入門</p>
+          <h1>
+            <span class="line"><span style="--i: 0">書くのは <em>AI</em>。</span></span>
+            <span class="line"><span style="--i: 1">読んで、直して、</span></span>
+            <span class="line"><span style="--i: 2">決めるのは あなた。</span></span>
+          </h1>
+          <p class="lead fade-up" style="--i: 5">
             AI がコードを書く時代に、人に残るのは<strong>概念を理解する力</strong>です。
             Kururi は、プログラミングの概念を学ぶことに特化した、最初の言語。ここで身につければ、どの言語への入り口にもなります。
           </p>
-          <div class="actions">
+          <div class="actions fade-up" style="--i: 6">
             <a class="button primary" href={`${home}tutorials`}>チュートリアルをはじめる</a>
             <a class="button" href={`${home}playground`}>プレイグラウンドで書く</a>
           </div>
-          <p class="official">「Kururi」は学習用プログラミング言語！</p>
+          <p class="official fade-up" style="--i: 7">「Kururi」は学習用プログラミング言語！</p>
         </div>
-        <svg class="orbit" viewBox="0 0 520 520" role="img" aria-label="中心の「概念」を、型・名前・分岐などの概念と、Python や TypeScript などの言語がつないでいる図">
-          <circle class="stroke ring" cx={CENTER} cy={CENTER} r="118" />
-          <circle class="stroke ring slow" cx={CENTER} cy={CENTER} r="214" />
-          {links.map((link) => (
-            <line class="stroke" x1={link.from[0]} y1={link.from[1]} x2={link.to[0]} y2={link.to[1]} style="stroke-opacity: 0.7" />
-          ))}
-          <g transform={`translate(${CENTER} ${CENTER})`} opacity="0.16">
-            <path class="stroke-ac" stroke-width="2" d="M0 0 a8 8 0 0 1 8 8 a16 16 0 0 1 -16 16 a24 24 0 0 1 -24 -24 a32 32 0 0 1 32 -32 a40 40 0 0 1 40 40 a48 48 0 0 1 -48 48 a56 56 0 0 1 -56 -56" />
-          </g>
-          <circle cx={CENTER} cy={CENTER} r="56" class="panel" style="stroke: var(--color-accent); stroke-width: 2" />
-          <text class="t" x={CENTER} y={CENTER + 9} text-anchor="middle" font-size="26" font-weight="800">概念</text>
-          {conceptNodes.map((node) => (
-            <g>
-              <circle cx={node.at[0]} cy={node.at[1]} r="6" class="ac" />
-              <text class="t" x={node.label_at[0]} y={node.label_at[1] + 5} text-anchor="middle" font-size="14" font-weight="700">{node.label}</text>
+        <div class="orbit-wrap">
+          <svg class="orbit" viewBox="0 0 520 520" role="img" aria-label="中心の Kururi が、型・名前・分岐などの概念と、Python や TypeScript などの言語をつないでいる図">
+            <defs>
+              <linearGradient id="core-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0e7490" /><stop offset="1" stop-color="#164e63" /></linearGradient>
+              <radialGradient id="halo-g"><stop offset="0" stop-color="#fbbf24" stop-opacity="0.45" /><stop offset="1" stop-color="#fbbf24" stop-opacity="0" /></radialGradient>
+            </defs>
+            <circle class="halo" cx={CENTER} cy={CENTER} r="120" fill="url(#halo-g)" />
+            <g class="spin">
+              <circle class="stroke ring" cx={CENTER} cy={CENTER} r="118" />
+              <circle class="stroke ring slow" cx={CENTER} cy={CENTER} r="214" />
+              {links.map((link) => (
+                <line class="stroke link" x1={link.from[0]} y1={link.from[1]} x2={link.to[0]} y2={link.to[1]} />
+              ))}
+              {conceptNodes.map((node) => (
+                <g transform={`translate(${node.at[0]} ${node.at[1]})`}>
+                  <g class="upright">
+                    <rect x={-node.width / 2} y="-15" width={node.width} height="30" rx="15" class="panel" style="stroke: var(--color-spark)" />
+                    <text class="t" y="5" text-anchor="middle" font-size="14" font-weight="700">{node.label}</text>
+                  </g>
+                </g>
+              ))}
+              {languageNodes.map((node) => (
+                <g transform={`translate(${node.at[0]} ${node.at[1]})`}>
+                  <g class="upright">
+                    <rect x={-node.width / 2} y="-15" width={node.width} height="30" rx="15" class="panel" />
+                    <text class="m" y="5" text-anchor="middle" font-size="13">{node.label}</text>
+                  </g>
+                </g>
+              ))}
             </g>
-          ))}
-          {languageNodes.map((node) => (
-            <g>
-              <rect x={node.at[0] - node.width / 2} y={node.at[1] - 15} width={node.width} height="30" rx="15" class="panel" />
-              <text class="m" x={node.at[0]} y={node.at[1] + 5} text-anchor="middle" font-size="13">{node.label}</text>
+            <g transform={`translate(${CENTER - 48} ${CENTER - 56}) scale(1.5)`}>
+              <rect width="64" height="64" rx="14" fill="url(#core-bg)" />
+              <g class="core-bulb" transform="translate(32 16) scale(1.2) rotate(180 0 7)">
+                <g fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M-6 0V4A11 11 0 1 0 6 4V0Z" />
+                  <path d="M-5 -5H5M-3 -10H3" />
+                </g>
+              </g>
             </g>
-          ))}
-        </svg>
+            <text class="t" x={CENTER} y={CENTER + 74} text-anchor="middle" font-size="15" font-weight="800" letter-spacing="3">概念</text>
+          </svg>
+        </div>
       </div>
     </section>
 
     <!-- なぜ、概念なのか -->
     <section class="why" id="why">
       <div class="wrap">
-        <div class="intro">
+        <div class="intro" data-reveal>
           <p class="kicker">Why concepts</p>
           <h2>なぜ、概念なのか</h2>
           <p class="body">文法を覚える時代は、終わりつつあります。これから必要なのは、AI が出したものを、理解して使いこなす力です。</p>
         </div>
 
-        <div class="reason">
+        <div class="reason" data-reveal>
           <div class="reason-text">
             <div class="no">01</div>
             <h3>書くのは AI の得意技になった。</h3>
@@ -105,29 +133,33 @@ const errorHtml = escapeHtml(errorText)
                 <rect x="0" y="52" width="210" height="238" rx="16" class="editor" />
                 <rect x="14" y="68" width="8" height="8" rx="4" class="bar" /><rect x="28" y="68" width="8" height="8" rx="4" class="bar" /><rect x="42" y="68" width="8" height="8" rx="4" class="bar" />
                 {codeBars.map((width, i) => (
-                  <rect x={i % 3 === 1 ? 44 : 28} y={100 + i * 22} width={width} height="9" rx="4.5" class={i === 4 ? "bar-ac" : "bar"} />
+                  <rect class="grow" style={`--i:${i}; --base:300`} x={i % 3 === 1 ? 44 : 28} y={100 + i * 22} width={width} height="9" rx="4.5" fill={i === 4 ? "var(--color-spark)" : "var(--color-line)"} />
                 ))}
-                <rect x="0" y="0" width="116" height="34" rx="17" class="panel" style="stroke: var(--color-accent)" />
-                <text class="t" x="58" y="22" text-anchor="middle" font-size="14" font-weight="700">AI が書く</text>
+                <g class="pop" style="--base: 100">
+                  <rect x="0" y="0" width="116" height="34" rx="17" class="panel" style="stroke: var(--color-spark)" />
+                  <text class="t" x="58" y="22" text-anchor="middle" font-size="14" font-weight="700">AI が書く</text>
+                </g>
               </g>
-              <path class="stroke-ac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M228 170 H292 M278 156 L292 170 L278 184" />
+              <path class="draw stroke-sp" pathLength="1" style="--base: 1200" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M228 170 H292 M278 156 L292 170 L278 184" />
               <g transform="translate(330 0)">
                 <rect x="0" y="52" width="210" height="238" rx="16" class="editor" />
                 <rect x="14" y="68" width="8" height="8" rx="4" class="bar" /><rect x="28" y="68" width="8" height="8" rx="4" class="bar" /><rect x="42" y="68" width="8" height="8" rx="4" class="bar" />
                 {codeBars.map((width, i) => (
-                  <rect x={i % 3 === 1 ? 44 : 28} y={100 + i * 22} width={width} height="9" rx="4.5" class={i === 4 ? "bar-ac" : "bar"} />
+                  <rect class="grow" style={`--i:${i}; --base:1500`} x={i % 3 === 1 ? 44 : 28} y={100 + i * 22} width={width} height="9" rx="4.5" fill={i === 4 ? "var(--color-spark)" : "var(--color-line)"} />
                 ))}
-                <rect x="14" y="192" width="182" height="24" rx="6" fill="none" style="stroke: var(--color-accent); stroke-width: 1.6; stroke-dasharray: 4 4" />
-                <circle cx="176" cy="252" r="20" class="panel" style="stroke: var(--color-accent); stroke-width: 2" />
-                <path class="stroke-ac" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M167 252 l7 7 l13 -15" />
-                <rect x="0" y="0" width="210" height="34" rx="17" class="panel" style="stroke: var(--color-accent)" />
-                <text class="t" x="105" y="22" text-anchor="middle" font-size="14" font-weight="700">読む・直す・指示する</text>
+                <rect class="pop scan" style="--base: 2300; fill: none; stroke: var(--color-spark); stroke-width: 1.6; stroke-dasharray: 4 4" x="14" y="192" width="182" height="24" rx="6" />
+                <circle class="pop" style="--base: 2700" cx="176" cy="252" r="20" fill="var(--color-panel)" stroke="var(--color-spark)" stroke-width="2" />
+                <path class="draw stroke-sp" pathLength="1" style="--base: 3000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M167 252 l7 7 l13 -15" />
+                <g class="pop" style="--base: 1400">
+                  <rect x="0" y="0" width="210" height="34" rx="17" class="panel" style="stroke: var(--color-spark)" />
+                  <text class="t" x="105" y="22" text-anchor="middle" font-size="14" font-weight="700">読む・直す・指示する</text>
+                </g>
               </g>
             </svg>
           </figure>
         </div>
 
-        <div class="reason">
+        <div class="reason" data-reveal>
           <div class="reason-text">
             <div class="no">02</div>
             <h3>その力の土台は、文法ではなく概念。</h3>
@@ -142,23 +174,27 @@ const errorHtml = escapeHtml(errorText)
                 { name: "Java", code: "int add(int a)", x: 136 },
                 { name: "TypeScript", code: "add(a: number)", x: 272 },
                 { name: "Rust", code: "fn add(a: i32)", x: 408 },
-              ].map((chip) => (
+              ].map((chip, i) => (
                 <g>
-                  <rect x={chip.x} y="26" width="128" height="62" rx="12" class="editor" />
-                  <text class="m dim" x={chip.x + 12} y="46" font-size="10">{chip.name}</text>
-                  <text class="m" x={chip.x + 12} y="70" font-size="9.5">{chip.code}</text>
-                  <path class="stroke-ac" stroke-width="1.5" style="stroke-opacity: 0.6" d={`M${chip.x + 64} 88 C ${chip.x + 64} 150, 270 150, 270 196`} />
+                  <g class="pop" style={`--i:${i}; --base:150`}>
+                    <rect x={chip.x} y="26" width="128" height="62" rx="12" class="editor" />
+                    <text class="m dim" x={chip.x + 12} y="46" font-size="10">{chip.name}</text>
+                    <text class="m" x={chip.x + 12} y="70" font-size="9.5">{chip.code}</text>
+                  </g>
+                  <path class="draw stroke-sp" pathLength="1" style={`--i:${i}; --base:700`} stroke-width="1.8" d={`M${chip.x + 64} 88 C ${chip.x + 64} 150, 270 150, 270 196`} />
                 </g>
               ))}
               <text class="t dim" x="0" y="190" font-size="12" letter-spacing="2">概念 — 共通</text>
-              <rect x="100" y="204" width="340" height="68" rx="16" class="panel" style="stroke: var(--color-accent); stroke-width: 2" />
-              <text class="t" x="270" y="232" text-anchor="middle" font-size="17" font-weight="800">関数</text>
-              <text class="t dim" x="270" y="256" text-anchor="middle" font-size="13">入力を受け取り、結果を返す</text>
+              <g class="pop glow-box" style="--base: 1700">
+                <rect x="100" y="204" width="340" height="68" rx="16" class="panel" style="stroke: var(--color-spark); stroke-width: 2" />
+                <text class="t" x="270" y="232" text-anchor="middle" font-size="17" font-weight="800">関数</text>
+                <text class="t dim" x="270" y="256" text-anchor="middle" font-size="13">入力を受け取り、結果を返す</text>
+              </g>
             </svg>
           </figure>
         </div>
 
-        <div class="reason">
+        <div class="reason" data-reveal>
           <div class="reason-text">
             <div class="no">03</div>
             <h3>だから、概念に集中できる言語を最初に。</h3>
@@ -175,12 +211,16 @@ const errorHtml = escapeHtml(errorText)
                 { concept: "関数", code: "function f = () { … }" },
               ].map((row, i) => (
                 <g transform={`translate(0 ${34 + i * 70})`}>
-                  <rect x="0" y="0" width="150" height="52" rx="26" class="panel" style="stroke: var(--color-accent)" />
-                  <text class="t" x="75" y="32" text-anchor="middle" font-size="16" font-weight="700">{row.concept}</text>
-                  <path class="stroke-ac" stroke-width="2" stroke-linecap="round" d="M158 26 H214" />
-                  <circle cx="218" cy="26" r="4" class="ac" />
-                  <rect x="228" y="0" width="300" height="52" rx="14" class="editor" />
-                  <text class="m" x="248" y="31" font-size="15">{row.code}</text>
+                  <g class="slide" style={`--i:${i}; --base:200`}>
+                    <rect x="0" y="0" width="150" height="52" rx="26" class="panel" style="stroke: var(--color-spark)" />
+                    <text class="t" x="75" y="32" text-anchor="middle" font-size="16" font-weight="700">{row.concept}</text>
+                  </g>
+                  <path class="draw stroke-sp" pathLength="1" style={`--i:${i}; --base:700`} stroke-width="2" stroke-linecap="round" d="M158 26 H214" />
+                  <circle class="pop sp" style={`--i:${i}; --base:1100`} cx="218" cy="26" r="4" />
+                  <g class="slide" style={`--i:${i}; --base:1200`}>
+                    <rect x="228" y="0" width="300" height="52" rx="14" class="editor" />
+                    <text class="m" x="248" y="31" font-size="15">{row.code}</text>
+                  </g>
                 </g>
               ))}
             </svg>
@@ -192,51 +232,52 @@ const errorHtml = escapeHtml(errorText)
     <!-- 同じ概念、どの言語でも -->
     <section class="same">
       <div class="wrap">
-        <div class="head">
+        <div class="head" data-reveal>
           <p class="kicker">Same idea, any language</p>
           <h2>書き方は違っても、<br />考え方は同じ。</h2>
           <p class="body">「関数」を、4 つの言語で書いてみます。色が付いた部分が、共通する概念の部品です。</p>
         </div>
-        <div class="snippets">
+        <div class="snippets" data-reveal>
           <div class="snippet kururi">
             <h4>KURURI</h4>
-            <pre set:html={`function <mark>add</mark> = (<mark>a: int, b: int</mark>) -> <mark>int</mark> {\n    return a + b\n}`} />
+            <pre set:html={`function <mark class="n" style="--k:0">add</mark> = (<mark class="a" style="--k:1">a: int, b: int</mark>) -> <mark class="r" style="--k:2">int</mark> {\n    return a + b\n}`} />
           </div>
           <div class="snippet">
             <h4>PYTHON</h4>
-            <pre set:html={`def <mark>add</mark>(<mark>a: int, b: int</mark>) -> <mark>int</mark>:\n    return a + b`} />
+            <pre set:html={`def <mark class="n" style="--k:0">add</mark>(<mark class="a" style="--k:1">a: int, b: int</mark>) -> <mark class="r" style="--k:2">int</mark>:\n    return a + b`} />
           </div>
           <div class="snippet">
             <h4>TYPESCRIPT</h4>
-            <pre set:html={`function <mark>add</mark>(<mark>a: number, b: number</mark>): <mark>number</mark> {\n  return a + b\n}`} />
+            <pre set:html={`function <mark class="n" style="--k:0">add</mark>(<mark class="a" style="--k:1">a: number, b: number</mark>): <mark class="r" style="--k:2">number</mark> {\n  return a + b\n}`} />
           </div>
           <div class="snippet">
             <h4>JAVA</h4>
-            <pre set:html={`static <mark>int</mark> <mark>add</mark>(<mark>int a, int b</mark>) {\n    return a + b;\n}`} />
+            <pre set:html={`static <mark class="r" style="--k:2">int</mark> <mark class="n" style="--k:0">add</mark>(<mark class="a" style="--k:1">int a, int b</mark>) {\n    return a + b;\n}`} />
           </div>
         </div>
-        <p class="legend"><span><mark>名前</mark> add</span><span><mark>引数</mark> 受け取る値と、その型</span><span><mark>戻り値</mark> 返す値の型</span></p>
+        <p class="legend" data-reveal="300"><span><mark class="n">名前</mark> 呼ぶときの名前</span><span><mark class="a">引数</mark> 受け取る値と、その型</span><span><mark class="r">戻り値</mark> 返す値の型</span></p>
       </div>
     </section>
 
     <!-- 学び方 -->
     <section class="how">
       <div class="wrap">
-        <div class="head">
+        <div class="head" data-reveal>
           <p class="kicker">How you learn</p>
           <h2>読んで、書いて、<br />動きを目で確かめる。</h2>
           <p class="body">ブラウザだけで、書く・動かす・確かめるまでできます。インストールは要りません。</p>
         </div>
-        <div class="window">
-          <svg viewBox="0 0 960 400" role="img" aria-label="ステップ実行の画面。コードの 1 行が光り、そのときの変数の値が右に表示されている">
+        <div class="window" data-reveal>
+          <svg id="demo" viewBox="0 0 960 400" role="img" aria-label="ステップ実行の画面。コードの 1 行が光り、そのときの変数の値が右に表示される">
             <rect x="1" y="1" width="958" height="398" rx="18" class="editor" />
             <rect x="1" y="1" width="958" height="44" rx="18" class="panel" />
             <rect x="1" y="30" width="958" height="15" class="panel" style="stroke: none" />
             <line x1="1" y1="45" x2="959" y2="45" class="stroke" />
-            <circle cx="26" cy="23" r="6" class="bar" /><circle cx="46" cy="23" r="6" class="bar" /><circle cx="66" cy="23" r="6" class="bar" />
+            <circle cx="26" cy="23" r="6" fill="#ed5350" /><circle cx="46" cy="23" r="6" fill="#fbbf24" /><circle cx="66" cy="23" r="6" fill="#45b164" />
             <text class="t dim" x="480" y="28" text-anchor="middle" font-size="13">プレイグラウンド</text>
             <line x1="500" y1="45" x2="500" y2="399" class="stroke" />
             <text class="m dim" x="28" y="76" font-size="11" letter-spacing="2">KURURI</text>
+            <rect id="demo-hl" class="demo-hl" x="2" y="0" width="497" height="32" style="transform: translateY(88px)" />
             {[
               "function main = () {",
               "    var total: int = 0",
@@ -247,40 +288,39 @@ const errorHtml = escapeHtml(errorText)
               "}",
             ].map((line, i) => (
               <g>
-                {i === 3 && <rect x="2" y={98 + i * 36 - 10} width="497" height="32" style="fill: var(--color-accent); fill-opacity: 0.2" />}
                 <text class="m dim" x="28" y={98 + i * 36 + 12} font-size="13">{i + 1}</text>
                 <text class="m" x="64" y={98 + i * 36 + 12} font-size="16">{line}</text>
               </g>
             ))}
             <text class="m dim" x="528" y="76" font-size="11" letter-spacing="2">ステップ実行</text>
             {["最初へ", "戻る", "進む", "最後へ"].map((label, i) => (
-              <g>
-                <rect x={528 + i * 78} y="92" width="68" height="30" rx="8" class="panel" style={i === 2 ? "stroke: var(--color-accent)" : ""} />
+              <g class="demo-btn" id={i === 2 ? "demo-next" : undefined}>
+                <rect x={528 + i * 78} y="92" width="68" height="30" rx="8" class="panel" style={i === 2 ? "stroke: var(--color-spark)" : ""} />
                 <text class="t" x={528 + i * 78 + 34} y="112" text-anchor="middle" font-size="12">{label}</text>
               </g>
             ))}
-            <text class="m dim" x="528" y="158" font-size="13">4 / 12　main　4 行目（この行を実行する前）</text>
+            <text id="demo-count" class="m dim" x="528" y="158" font-size="13">1 / 7　main　2 行目（この行を実行する前）</text>
             <text class="m dim" x="528" y="200" font-size="12">変数</text><text class="m dim" x="650" y="200" font-size="12">型</text><text class="m dim" x="730" y="200" font-size="12">値</text>
             <line x1="528" y1="210" x2="930" y2="210" class="stroke" />
-            <text class="m ac" x="528" y="238" font-size="16">total</text><text class="m" x="650" y="238" font-size="16">int</text><text class="m" x="730" y="238" font-size="16" font-weight="700">1</text>
-            <text class="m ac" x="528" y="274" font-size="16">i</text><text class="m" x="650" y="274" font-size="16">int</text><text class="m" x="730" y="274" font-size="16" font-weight="700">2</text>
+            <g id="demo-v1" class="demo-var" opacity="0"><text id="demo-n1" class="m sp" x="528" y="238" font-size="16">total</text><text class="m" x="650" y="238" font-size="16">int</text><text id="demo-x1" class="m demo-val" x="730" y="238" font-size="16" font-weight="700">0</text></g>
+            <g id="demo-v2" class="demo-var" opacity="0"><text id="demo-n2" class="m sp" x="528" y="274" font-size="16">i</text><text class="m" x="650" y="274" font-size="16">int</text><text id="demo-x2" class="m demo-val" x="730" y="274" font-size="16" font-weight="700">0</text></g>
             <text class="m dim" x="528" y="338" font-size="11" letter-spacing="2">出力</text>
-            <text class="m" x="528" y="364" font-size="14">（まだ何も出ていません）</text>
+            <text id="demo-out" class="m" x="528" y="364" font-size="14" opacity="0.6">（まだ何も出ていません）</text>
           </svg>
         </div>
         <div class="steps">
-          <div class="step">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z" /><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z" /></svg>
+          <div class="step" data-reveal>
+            <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z" /><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z" /></svg></span>
             <h3>読む</h3>
             <p>チュートリアルで、概念を 1 つずつ。コードはボタン 1 つで、そのまま動かせます。</p>
           </div>
-          <div class="step">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3l4 4L8 20l-5 1 1-5z" /></svg>
+          <div class="step" data-reveal>
+            <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3l4 4L8 20l-5 1 1-5z" /></svg></span>
             <h3>書く</h3>
             <p>書くそばから、エラーと直し方が出ます。変換後の Python も、横に並べて見られます。</p>
           </div>
-          <div class="step">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M10 8l6 4-6 4z" /></svg>
+          <div class="step" data-reveal>
+            <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M10 8l6 4-6 4z" /></svg></span>
             <h3>確かめる</h3>
             <p>ステップ実行で、1 行ずつ進めながら、変数の値が変わる様子を目で追えます。</p>
           </div>
@@ -291,7 +331,7 @@ const errorHtml = escapeHtml(errorText)
     <!-- エラーは先生 -->
     <section class="teach">
       <div class="wrap">
-        <div>
+        <div data-reveal>
           <p class="kicker">Errors that teach</p>
           <h2>エラーは、<br />先生になる。</h2>
           <p class="body">
@@ -299,10 +339,17 @@ const errorHtml = escapeHtml(errorText)
           </p>
           <p class="body">直し方が分かるものは、ボタンを 1 回押すだけで直せます。</p>
         </div>
-        <div class="terminal" aria-label="Kururi が実際に出すエラーの例">
+        <div class="terminal" data-reveal id="term" aria-label="Kururi が実際に出すエラーの例">
           <div class="bar"><i></i><i></i><i></i><span style="margin-left: 0.4rem">main.kururi</span></div>
-          <pre set:html={errorHtml} />
-          <div class="fix">これは実際に Kururi が出すエラーです<span>{fixTitle}</span></div>
+          <div class="screen">
+            <pre set:html={errorHtml} />
+            <div class="ok">
+              <svg viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="24" fill="none" stroke="var(--color-success)" stroke-width="3" /><path d="M17 29 l8 8 l15 -17" fill="none" stroke="var(--color-success)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <b>エラーは 0 件です</b>
+              <span>2 行目：var count: int = 3</span>
+            </div>
+          </div>
+          <div class="fix">これは実際に Kururi が出すエラーです<button type="button" tabindex="-1" aria-hidden="true">{fixTitle}</button></div>
         </div>
       </div>
     </section>
@@ -310,14 +357,14 @@ const errorHtml = escapeHtml(errorText)
     <!-- 8 回のコース -->
     <section class="course">
       <div class="wrap">
-        <div class="head">
+        <div class="head" data-reveal>
           <p class="kicker">Course</p>
           <h2>8 回で、概念をひとまわり。</h2>
           <p class="body">手順から始めて、値と型、分岐、繰り返し、関数、配列、クラス、そして「値がない」こと。順番に進めば、プログラミングの土台がそろいます。</p>
         </div>
-        <nav class="path" aria-label="チュートリアルの一覧">
-          {lessons.map((lesson) => (
-            <a href={`${home}tutorials/${slugOf(lesson.id)}`}>
+        <nav class="path" data-reveal aria-label="チュートリアルの一覧">
+          {lessons.map((lesson, i) => (
+            <a style={`--i:${i}`} href={`${home}tutorials/${slugOf(lesson.id)}`}>
               {lesson.data.title}
               <small>{lesson.data.concept}</small>
             </a>
@@ -329,7 +376,7 @@ const errorHtml = escapeHtml(errorText)
     <!-- どの言語で役立つか -->
     <section class="langs-sec" id="languages">
       <div class="wrap">
-        <div class="head">
+        <div class="head" data-reveal>
           <p class="kicker">Where it helps</p>
           <h2>どの言語で、役立つか。</h2>
           <p class="body">どの言語でも変わらないのは「考え方」の部分です。書き方（記号や語順）は言語ごとに違うので、そこは新しい言語で改めて覚えます。</p>
@@ -355,7 +402,7 @@ const errorHtml = escapeHtml(errorText)
 
     <!-- 扱わないこと -->
     <section>
-      <div class="wrap scope">
+      <div class="wrap scope" data-reveal>
         <p class="kicker">Scope</p>
         <h2>「入り口」であって、「全部」ではない。</h2>
         <p class="body">Kururi が扱うのは、多くの言語に共通する、土台の概念です。次のものは、扱いません。</p>
@@ -370,15 +417,116 @@ const errorHtml = escapeHtml(errorText)
 
     <!-- 終わりに -->
     <section class="cta">
+      <div class="bg" aria-hidden="true"></div>
+      <svg class="swirl" viewBox="-40 -40 80 80" aria-hidden="true"><path class="stroke-ac" stroke-width="1.2" stroke-linecap="round" fill="none" d="M0 0 a5 5 0 0 1 5 5 a10 10 0 0 1 -10 10 a15 15 0 0 1 -15 -15 a20 20 0 0 1 20 -20 a25 25 0 0 1 25 25 a30 30 0 0 1 -30 30 a35 35 0 0 1 -35 -35" /></svg>
       <div class="wrap">
-        <svg class="swirl" viewBox="-40 -40 80 80" aria-hidden="true"><path class="stroke-ac" stroke-width="3.5" stroke-linecap="round" fill="none" d="M0 0 a5 5 0 0 1 5 5 a10 10 0 0 1 -10 10 a15 15 0 0 1 -15 -15 a20 20 0 0 1 20 -20 a25 25 0 0 1 25 25 a30 30 0 0 1 -30 30" /></svg>
-        <h2>まず、1 行、書いてみよう。</h2>
-        <p class="body" style="margin-inline: auto">ブラウザだけで、いますぐ始められます。</p>
-        <div class="actions">
-          <a class="button primary" href={`${home}tutorials`}>チュートリアルをはじめる</a>
-          <a class="button" href={`${home}playground`}>プレイグラウンドで書く</a>
+        <div data-reveal>
+          <Logo animated class="cta-logo" />
+          <h2>まず、1 行、書いてみよう。</h2>
+          <p class="body" style="margin-inline: auto">ブラウザだけで、いますぐ始められます。</p>
+          <div class="actions">
+            <a class="button primary" href={`${home}tutorials`}>チュートリアルをはじめる</a>
+            <a class="button" href={`${home}playground`}>プレイグラウンドで書く</a>
+          </div>
         </div>
       </div>
     </section>
   </main>
+  <script>
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches
+
+    // ---- スクロールで現れる ----
+    const reveals = document.querySelectorAll<HTMLElement>("[data-reveal]")
+    reveals.forEach((el) => {
+      const delay = Number(el.dataset.reveal)
+      if (Number.isFinite(delay) && delay > 0) el.style.setProperty("--d", String(delay))
+    })
+    const reveal = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          entry.target.classList.add("in")
+          reveal.unobserve(entry.target)
+        }
+      },
+      { threshold: 0.16, rootMargin: "0px 0px -6% 0px" },
+    )
+    reveals.forEach((el) => reveal.observe(el))
+
+    // ---- ステップ実行のデモ（見えているあいだ、1 歩ずつ進める）----
+    type Row = readonly [string, string]
+    interface Step { readonly line: number; readonly vars: readonly Row[]; readonly out?: string }
+    const steps: readonly Step[] = [
+      { line: 2, vars: [] },
+      { line: 3, vars: [["total", "0"]] },
+      { line: 4, vars: [["total", "0"], ["i", "0"]] },
+      { line: 4, vars: [["total", "0"], ["i", "1"]] },
+      { line: 4, vars: [["total", "1"], ["i", "2"]] },
+      { line: 4, vars: [["total", "3"], ["i", "3"]] },
+      { line: 6, vars: [["total", "6"], ["i", "3"]], out: "6" },
+    ]
+    const q = <T extends Element>(id: string) => document.getElementById(id) as unknown as T | null
+    const demo = { hl: q<SVGElement>("demo-hl"), count: q<SVGTextElement>("demo-count"), next: q<SVGElement>("demo-next"), out: q<SVGTextElement>("demo-out") }
+    const slots = [1, 2].map((n) => ({ group: q<SVGElement>(`demo-v${n}`), name: q<SVGTextElement>(`demo-n${n}`), value: q<SVGTextElement>(`demo-x${n}`) }))
+    let previous: Step | undefined
+    const show = (index: number) => {
+      const step = steps[index]
+      if (step === undefined) return
+      demo.hl?.setAttribute("style", `transform: translateY(${88 + (step.line - 1) * 36}px)`)
+      if (demo.count) demo.count.textContent = `${index + 1} / ${steps.length}　main　${step.line} 行目（この行を実行する前）`
+      slots.forEach((slot, i) => {
+        const row = step.vars[i]
+        slot.group?.setAttribute("opacity", row === undefined ? "0" : "1")
+        if (row === undefined || !slot.name || !slot.value) return
+        slot.name.textContent = row[0]
+        const changed = previous?.vars[i]?.[1] !== row[1]
+        slot.value.textContent = row[1]
+        if (changed) {
+          slot.value.classList.remove("flash")
+          void slot.value.getBoundingClientRect()
+          slot.value.classList.add("flash")
+        }
+      })
+      if (demo.out) {
+        demo.out.textContent = step.out ?? "（まだ何も出ていません）"
+        demo.out.setAttribute("opacity", step.out === undefined ? "0.6" : "1")
+      }
+      previous = step
+    }
+    const press = (el: Element | null) => {
+      el?.classList.add("press")
+      setTimeout(() => el?.classList.remove("press"), 220)
+    }
+    const demoSvg = document.getElementById("demo")
+    if (demoSvg && !reduced) {
+      let index = 0
+      let visible = false
+      new IntersectionObserver((entries) => { visible = entries.some((e) => e.isIntersecting) }, { threshold: 0.4 }).observe(demoSvg)
+      show(0)
+      setInterval(() => {
+        if (!visible) return
+        index = (index + 1) % steps.length
+        if (index > 0) press(demo.next)
+        show(index)
+      }, 1500)
+    }
+
+    // ---- エラーが直るデモ（エラー → 直すを押す → 0 件 → もとに戻る）----
+    const terminal = document.getElementById("term")
+    const fixButton = terminal?.querySelector("button")
+    if (terminal && !reduced) {
+      let visible = false
+      new IntersectionObserver((entries) => { visible = entries.some((e) => e.isIntersecting) }, { threshold: 0.5 }).observe(terminal)
+      let phase = 0
+      setInterval(() => {
+        if (!visible) return
+        phase = (phase + 1) % 4
+        if (phase === 2) {
+          fixButton?.classList.add("press")
+          setTimeout(() => { fixButton?.classList.remove("press"); terminal.classList.add("fixed") }, 260)
+        }
+        if (phase === 0) terminal.classList.remove("fixed")
+      }, 2400)
+    }
+  </script>
 </Base>
