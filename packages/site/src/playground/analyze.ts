@@ -9,6 +9,10 @@ export interface EditorMarker {
   readonly endLineNumber: number
   readonly endColumn: number
   readonly message: string
+  /** 下線の横に出す短い説明 */
+  readonly label?: string
+  /** 直し方（メッセージにも含まれる） */
+  readonly hint?: string
   readonly severity: "error" | "warning"
   readonly code: string
   /** 1 クリックで直せるときの直し方 */
@@ -34,6 +38,8 @@ function toMarker(diagnostic: Diagnostic, lines: readonly string[]): EditorMarke
     message: diagnosticText(diagnostic),
     severity: diagnostic.severity,
     code: diagnostic.code,
+    ...(diagnostic.label === undefined ? {} : { label: diagnostic.label }),
+    ...(diagnostic.hint === undefined ? {} : { hint: diagnostic.hint }),
     ...(diagnostic.fix === undefined ? {} : { fix: diagnostic.fix }),
   }
 }

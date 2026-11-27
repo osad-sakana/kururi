@@ -42,6 +42,13 @@ const highlight = (code: string) =>
 const heroKururiLines = heroSource.replace(/\n+$/, "").split("\n").map(highlight)
 const heroPythonLines = heroPython.split("\n").map(highlight)
 
+// ---- 学び方：画面図の番号と、説明（番号の位置から線を伸ばす）----
+const flowItems = [
+  { n: 1, title: "読む", text: "チュートリアルで、概念を 1 つずつ。コードはボタン 1 つで、横のプレイグラウンドに届きます。", x: 10.4, y: 5.75, width: 28 },
+  { n: 2, title: "書く", text: "書くそばから、エラーと直し方が出ます。変換後の Python も、横に並べて見られます。", x: 41.7, y: 17.75, width: 23 },
+  { n: 3, title: "確かめる", text: "ステップ実行で、1 行ずつ進めながら、変数の値が変わる様子を目で追えます。", x: 66.7, y: 17.75, width: 33 },
+]
+
 // ---- 理由 1 の図：AI が書き、人が読んで直す ----
 const codeBars = [70, 120, 96, 58, 132, 84, 110, 46]
 
@@ -306,7 +313,8 @@ const errorHtml = escapeHtml(errorText)
           <h2>読んで、書いて、<br />動きを目で確かめる。</h2>
           <p class="body">ブラウザだけで、書く・動かす・確かめるまでできます。インストールは要りません。</p>
         </div>
-        <div class="window" data-reveal>
+        <div class="window annot" data-reveal>
+          <div class="shot">
           <svg id="demo" viewBox="0 0 960 400" role="img" aria-label="ステップ実行の画面。コードの 1 行が光り、そのときの変数の値が右に表示される">
             <rect x="1" y="1" width="958" height="398" rx="18" class="editor" />
             <rect x="1" y="1" width="958" height="44" rx="18" class="panel" />
@@ -314,12 +322,12 @@ const errorHtml = escapeHtml(errorText)
             <line x1="1" y1="45" x2="959" y2="45" class="stroke" />
             <circle cx="26" cy="23" r="6" fill="#ed5350" /><circle cx="46" cy="23" r="6" fill="#fbbf24" /><circle cx="66" cy="23" r="6" fill="#45b164" />
             <text class="t dim" x="480" y="28" text-anchor="middle" font-size="13">プレイグラウンド</text>
-            <rect x="724" y="11" width="206" height="24" rx="12" class="panel" />
-            <text class="t dim" x="827" y="28" text-anchor="middle" font-size="12">チュートリアル 04 のコード</text>
-            <g class="badge"><circle cx="724" cy="23" r="11" /><text x="724" y="27.5" text-anchor="middle">1</text></g>
+            <rect x="100" y="11" width="206" height="24" rx="12" class="panel" />
+            <text class="t dim" x="203" y="28" text-anchor="middle" font-size="12">チュートリアル 04 のコード</text>
+            <g class="badge"><circle cx="100" cy="23" r="14" /><text x="100" y="23">1</text></g>
             <line x1="500" y1="45" x2="500" y2="399" class="stroke" />
             <text class="m dim" x="28" y="76" font-size="11" letter-spacing="2">KURURI</text>
-            <g class="badge"><circle cx="476" cy="71" r="11" /><text x="476" y="75.5" text-anchor="middle">2</text></g>
+            <g class="badge"><circle cx="400" cy="71" r="14" /><text x="400" y="71">2</text></g>
             <rect id="demo-hl" class="demo-hl" x="2" y="0" width="497" height="32" style="transform: translateY(88px)" />
             {[
               "function main = () {",
@@ -336,7 +344,7 @@ const errorHtml = escapeHtml(errorText)
               </g>
             ))}
             <text class="m dim" x="528" y="76" font-size="11" letter-spacing="2">ステップ実行</text>
-            <g class="badge"><circle cx="930" cy="71" r="11" /><text x="930" y="75.5" text-anchor="middle">3</text></g>
+            <g class="badge"><circle cx="640" cy="71" r="14" /><text x="640" y="71">3</text></g>
             {["最初へ", "戻る", "進む", "最後へ"].map((label, i) => (
               <g class="demo-btn" id={i === 2 ? "demo-next" : undefined}>
                 <rect x={528 + i * 78} y="92" width="68" height="30" rx="8" class="panel" style={i === 2 ? "stroke: var(--color-spark)" : ""} />
@@ -351,23 +359,22 @@ const errorHtml = escapeHtml(errorText)
             <text class="m dim" x="528" y="338" font-size="11" letter-spacing="2">出力</text>
             <text id="demo-out" class="m" x="528" y="364" font-size="14" opacity="0.6">（まだ何も出ていません）</text>
           </svg>
+          {flowItems.map((item, i) => (
+            <div class="note" style={`left:${item.x}%; width:${item.width}%; --y:${item.y}%; --d:${400 + i * 250}`}>
+              <h3><span class="n">{item.n}</span>{item.title}</h3>
+              <p>{item.text}</p>
+            </div>
+          ))}
+          </div>
         </div>
-        <ol class="flow">
-          <li data-reveal>
-            <span class="num">1</span>
-            <h3>読む</h3>
-            <p>チュートリアルで、概念を 1 つずつ。コードはボタン 1 つで、横のプレイグラウンドに届きます。</p>
-          </li>
-          <li data-reveal="120">
-            <span class="num">2</span>
-            <h3>書く</h3>
-            <p>書くそばから、エラーと直し方が出ます。変換後の Python も、横に並べて見られます。</p>
-          </li>
-          <li data-reveal="240">
-            <span class="num">3</span>
-            <h3>確かめる</h3>
-            <p>ステップ実行で、1 行ずつ進めながら、変数の値が変わる様子を目で追えます。</p>
-          </li>
+        <ol class="flow flow-mobile">
+          {flowItems.map((item) => (
+            <li>
+              <span class="num">{item.n}</span>
+              <h3>{item.title}</h3>
+              <p>{item.text}</p>
+            </li>
+          ))}
         </ol>
       </div>
     </section>

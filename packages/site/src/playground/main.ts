@@ -295,7 +295,7 @@ monaco.languages.registerCodeActionProvider(LANGUAGE_ID, {
 })
 
 const problemsList = element("problems")
-function showProblems(markers: readonly EditorMarker[]): void {
+function showProblems(markers: readonly EditorMarker[], lines: readonly string[]): void {
   renderProblems(problemsList, markers, {
     jump: (marker) => {
       editor.setPosition({ lineNumber: marker.startLineNumber, column: marker.startColumn })
@@ -303,7 +303,7 @@ function showProblems(markers: readonly EditorMarker[]): void {
       editor.focus()
     },
     fix: applyMarkerFix,
-  })
+  }, lines)
 }
 
 let runLines: string[] = []
@@ -413,7 +413,7 @@ function render(): void {
   const analysis = analyze(source)
   currentAnalysis = analysis
   renderLineIcons(source)
-  showProblems(analysis.markers)
+  showProblems(analysis.markers, source.split("\n"))
   const model = editor.getModel()
   if (model !== null) {
     monaco.editor.setModelMarkers(

@@ -44,18 +44,31 @@ section + section { border-left: 1px solid var(--color-line); }
 #output .prompt-line input:focus { border-bottom-color: var(--color-accent); }
 /* Python 欄は自動で作られるので、書き込めないことが見て分かるようにする */
 #python .cursors-layer { display: none !important; }
-/* 問題の一覧：Python 欄を閉じていても、エラーが目に入るよう、大きく、面で色を付けて見せる */
-#problems { list-style: none; margin: 0 0 0.6rem; padding: 0 0 0.6rem; display: grid; align-content: start; gap: 0.5rem; max-height: 60%; overflow: auto; flex-shrink: 0; border-bottom: 1px solid var(--color-line); }
-.problem { display: grid; grid-template-columns: auto 1fr auto; gap: 0.3rem 0.8rem; align-items: start; padding: 0.7rem 0.9rem; border-radius: 10px; font-size: 13px; line-height: 1.6; }
-.problem.error { background: color-mix(in srgb, var(--color-danger) 13%, transparent); }
-.problem.warning { background: color-mix(in srgb, var(--color-warn) 13%, transparent); }
-.problem-where { padding: 0.1rem 0.5rem; font: 700 11px var(--font-mono); border-radius: 6px; margin-top: 0.15rem; }
-.problem.error .problem-where { background: var(--color-danger); border-color: var(--color-danger); color: #fff; }
-.problem.warning .problem-where { background: var(--color-warn); border-color: var(--color-warn); color: #fff; }
-.problem-text > div:first-child { font-weight: 700; color: var(--color-ink); }
-.problem-help { color: var(--color-muted); white-space: pre-wrap; }
+/* 問題の一覧：エラーを、見出し・場所・コードの抜粋・直し方のカードで見せる */
+#problems { list-style: none; margin: 0 0 0.6rem; padding: 0 0 0.6rem; display: grid; align-content: start; gap: 0.7rem; max-height: 65%; overflow: auto; flex-shrink: 0; border-bottom: 1px solid var(--color-line); }
+.problem { display: grid; gap: 0.6rem; padding: 0.8rem 0.9rem; border-radius: 12px; font-size: 13px; line-height: 1.6; background: color-mix(in srgb, var(--color-danger) 10%, var(--color-panel)); }
+.problem.warning { background: color-mix(in srgb, var(--color-warn) 10%, var(--color-panel)); }
+.problem-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.7rem; }
+.problem-code { padding: 0.1rem 0.55rem; font: 700 11px var(--font-mono); border-radius: 6px; border: 0; color: #fff; background: var(--color-danger); cursor: pointer; }
+.problem.warning .problem-code { background: var(--color-warn); }
+.problem-code:hover:not(:disabled) { background: var(--color-ink); color: var(--color-canvas); }
+.problem-title { font-size: 13.5px; color: var(--color-ink); }
+.problem-where { margin-left: auto; font: 11px var(--font-mono); color: var(--color-muted); }
 .problem-fix { padding: 0.1rem 0.6rem; color: var(--color-accent-ink); background: var(--color-accent); border-color: var(--color-accent); }
-#console:has(#problems:not([hidden])) { height: 17rem; }
+.excerpt { overflow-x: auto; padding: 0.6rem 0; border-radius: 8px; background: var(--color-editor); font: 12.5px/1.75 var(--font-mono); color: var(--color-code); }
+.ex-line { display: flex; min-width: max-content; white-space: pre; }
+.ex-no { flex: none; width: 2.6rem; padding-right: 0.8rem; text-align: right; color: var(--color-muted); user-select: none; }
+.ex-dim { opacity: 0.55; }
+.ex-hl { background: color-mix(in srgb, var(--color-danger) 25%, transparent); border-radius: 3px; }
+.problem.warning .ex-hl { background: color-mix(in srgb, var(--color-warn) 25%, transparent); }
+.ex-ghost { visibility: hidden; }
+.ex-under { color: transparent; text-decoration: underline wavy var(--color-danger); text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.problem.warning .ex-under { text-decoration-color: var(--color-warn); }
+.ex-label { color: var(--color-danger); font-weight: 700; }
+.problem.warning .ex-label { color: var(--color-warn); }
+.problem-help { display: flex; gap: 0.7rem; align-items: baseline; color: var(--color-ink); }
+.problem-help-tag { flex: none; padding: 0.05rem 0.5rem; border-radius: 6px; background: color-mix(in srgb, var(--color-spark) 22%, transparent); color: var(--color-ink); font-size: 11px; font-weight: 700; }
+#console:has(#problems:not([hidden])) { height: 19rem; }
 .right.python-closed #problems { max-height: none; flex: 1 1 auto; border-bottom: 0; }
 /* カーソルのある行と、対応する反対側の行（Kururi ↔ Python） */
 .kururi-link-line { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
