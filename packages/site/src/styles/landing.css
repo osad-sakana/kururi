@@ -290,9 +290,16 @@ svg .t, #demo .t { font-feature-settings: "palt" 1; letter-spacing: 0.02em; }
 .cta-bulb .glass { fill: #fbbf24; fill-opacity: 0.32; stroke: none; }
 .cta-bulb .rays { stroke: #fbbf24; stroke-width: 1.8; }
 .js .cta-bulb .lit { opacity: 0; }
-.js .cta-inner.in .cta-bulb .lit { animation: bulb-on 0.9s steps(1, end) 0.15s forwards; }
-.js .cta-inner.in .cta-bulb svg { animation: bulb-pop-once 0.7s cubic-bezier(0.3, 1.4, 0.5, 1) 0.5s both; }
-/* ついたり消えたりしてから、点く（蛍光灯のように） */
-@keyframes bulb-on { 0% { opacity: 0; } 12% { opacity: 1; } 22% { opacity: 0; } 36% { opacity: 1; } 46% { opacity: 0; } 60%, 100% { opacity: 1; } }
-@keyframes bulb-pop-once { 0% { transform: scale(0.92); } 40% { transform: scale(1.3); } 62% { transform: scale(0.96); } 80% { transform: scale(1.06); } 100% { transform: scale(1); } }
+.js .cta-inner.in .cta-bulb .lit { animation: bulb-lit 0.9s ease 0.3s forwards; }
+.js .cta-inner.in .cta-bulb svg { animation: bulb-pop-once 0.9s linear 0.3s both; }
+/* 読み込みの電球と同じ、ポンッと大きくなって、ぽよんと戻りながら、光る（1 回だけ） */
+@keyframes bulb-pop-once {
+  0% { transform: scale(0.8, 0.8); }
+  20% { transform: scale(0.9, 1.05); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.2); }
+  40% { transform: scale(1.4, 1.4); animation-timing-function: ease-in-out; }
+  60% { transform: scale(0.92, 0.96); }
+  80% { transform: scale(1.12, 1.1); }
+  100% { transform: scale(1, 1); }
+}
+@keyframes bulb-lit { 0%, 34% { opacity: 0; } 42%, 100% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .js .cta-bulb .lit { opacity: 1; animation: none; } .js .cta-inner.in .cta-bulb svg { animation: none; } }
