@@ -39,9 +39,6 @@
 .lp-hero .lead { font-size: clamp(1rem, 1.6vw, 1.2rem); color: var(--color-muted); max-width: 33rem; margin: 0 0 0.6rem; }
 .lp-hero .lead strong { color: var(--color-ink); }
 .lp-hero .official { font-size: 0.85rem; color: var(--color-muted); margin: 1.6rem 0 0; }
-.pill { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.9rem; border: 1px solid var(--color-line); border-radius: 999px; font-size: 0.82rem; color: var(--color-muted); background: color-mix(in srgb, var(--color-panel) 70%, transparent); margin-bottom: 1.2rem; }
-.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-spark); animation: ping 2.4s ease-out infinite; }
-@keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-spark) 60%, transparent); } 80%, 100% { box-shadow: 0 0 0 9px transparent; } }
 .orbit-wrap svg.orbit { width: 100%; height: auto; display: block; overflow: visible; }
 
 /* ---- 図（SVG）の共通部品 ---- */
