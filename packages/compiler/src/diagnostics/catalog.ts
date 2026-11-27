@@ -168,7 +168,7 @@ export const DIAGNOSTIC_CATALOG = {
     code: "K0110",
     severity: "error",
     message: ({ text = "" }) => `トップレベルに「${text}」は書けません`,
-    hint: () => "トップレベルに書けるのは function、class、let、const だけです。文は function の中に書いてください",
+    hint: () => "トップレベルに書けるのは function、class、var、const だけです。プログラムは function main = () { ... } の中から始まるので、文はその中に書いてください",
   },
   K0201: {
     code: "K0201",

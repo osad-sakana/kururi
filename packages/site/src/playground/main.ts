@@ -24,7 +24,7 @@ import { mapRuntimeError } from "./runtime"
 import { createRunner } from "./runner"
 import type { TraceResult } from "./trace-types"
 import { createStepPanel } from "./step-panel"
-import { SAMPLE } from "./sample"
+import { START_CURSOR, START_SOURCE } from "./sample"
 import { sourceFromHash } from "./share"
 import { SAMPLES } from "./samples"
 import type { ThemePreference } from "./preferences"
@@ -49,9 +49,9 @@ function loadSource(): string {
   const shared = sourceFromHash(location.hash)
   if (shared !== null) return shared
   try {
-    return localStorage.getItem(STORAGE_KEY) ?? SAMPLE
+    return localStorage.getItem(STORAGE_KEY) ?? START_SOURCE
   } catch {
-    return SAMPLE
+    return START_SOURCE
   }
 }
 
@@ -457,6 +457,12 @@ openButton.addEventListener("click", () => {
   if (currentUrl !== null) window.open(currentUrl, "_blank", "noopener")
 })
 render()
+
+// はじめて開いたときは、main の枠の中にカーソルを置く
+if (editor.getValue() === START_SOURCE) {
+  editor.setPosition(START_CURSOR)
+  editor.focus()
+}
 
 // 準備ができたら、読み込みの画面を消す
 const boot = document.getElementById("boot")

@@ -28,3 +28,9 @@ function main = () {
     }
 }
 `.trimStart()
+
+/** はじめて開いたときの中身：main の枠だけ。学習者は、枠の中に書くだけで始められる。 */
+export const START_SOURCE = "function main = () {\n    \n}\n"
+
+/** START_SOURCE のカーソル位置（2 行目の字下げの後ろ） */
+export const START_CURSOR = { lineNumber: 2, column: 5 } as const
