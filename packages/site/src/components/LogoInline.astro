@@ -1,15 +1,23 @@
 ---
-// 文章の中に置く、小さなロゴ（文字の高さに合わせる）。文字の色は周りの文字と同じ、電球はテーマのspark色。
-// 本文の流れを乱さないよう、下の波線は省いてある。
+/**
+ * 文章の中に置く、小さなロゴ。周りの文字（Noto Sans JP）の行の高さに合わせてある。
+ *
+ * 調整の根拠（Noto Sans JP を 1000px で測った値）：
+ *   - ラテン大文字の高さ 0.733em、小文字（x）0.543em、かな「は」の上端 0.771em、下端 −0.037em
+ *   - ロゴの K は、線の太さを含めて 78 単位の高さ（y 17〜95）、小文字は 50 単位
+ *   - 1 単位 = 0.01em にすると、K の高さが 0.78em（かなの上端にそろう）、小文字が 0.50em（x の高さ 0.543em に近い）
+ *   - 文字の下端（y 95）を、文章の基準線にそろえる（SVG の下端は y 98 なので、3 単位 = 0.03em 下げる）
+ * 大きさは font-size で決まる。見出しや太字の中では、線を太くする（--logo-stroke）。
+ */
 interface Props {
   class?: string
 }
 const { class: className = "" } = Astro.props
 ---
 
-<svg class={`logo-inline ${className}`} viewBox="8 -4 290 102" role="img" aria-label="Kururi">
+<svg class={`logo-inline ${className}`} viewBox="14 12 280 86" role="img" aria-label="Kururi">
   <title>Kururi</title>
-  <g fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="word">
     <path d="M22 22V90M62 24C47 40 34 50 24 58M34 52C48 62 58 76 66 90" />
     <path d="M84 50V72C84 86 92 92 104 92 116 92 124 86 124 74M124 50V90" />
     <path d="M142 50V90M142 68C142 56 150 50 162 52" />
@@ -18,9 +26,31 @@ const { class: className = "" } = Astro.props
     <path d="M276 58V90" />
   </g>
   <g transform="translate(276 20) scale(1.15) rotate(180 0 7)">
-    <g fill="none" stroke="var(--color-spark)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <g fill="none" stroke="var(--color-spark)" stroke-linecap="round" stroke-linejoin="round" class="bulb">
       <path d="M-6 0V4A11 11 0 1 0 6 4V0Z" />
       <path d="M-5 -5H5M-3 -10H3" />
     </g>
   </g>
 </svg>
+
+<style>
+  .logo-inline {
+    /* 1 単位 = 0.01em */
+    --u: 0.01em;
+    height: calc(86 * var(--u));
+    width: calc(280 * var(--u));
+    vertical-align: calc(-3 * var(--u));
+    margin-inline: 0.1em;
+    overflow: visible;
+    flex: none;
+  }
+  .logo-inline .word { stroke-width: var(--logo-stroke, 9); }
+  .logo-inline .bulb { stroke-width: calc(var(--logo-stroke, 9) * 0.5); }
+  /* 太字・見出しの中では、周りの文字に合わせて線を太くする */
+  :global(strong) .logo-inline,
+  :global(h1) .logo-inline,
+  :global(h2) .logo-inline,
+  :global(h3) .logo-inline {
+    --logo-stroke: 12;
+  }
+</style>
