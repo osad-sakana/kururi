@@ -1,10 +1,22 @@
 /* 読み込み中の印：電球がピカッと光る */
-.bulb-spin { width: 1.5em; height: 1.5em; flex: none; display: inline-block; vertical-align: middle; overflow: visible; }
+.bulb-spin { width: 1.5em; height: 1.5em; flex: none; display: inline-block; vertical-align: middle; overflow: visible; transform-origin: 50% 70%; animation: bulb-pop 1.2s linear infinite; }
 .bulb-spin[hidden] { display: none; }
 .bulb-spin .b { stroke: var(--color-spark); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; animation: bulb-flash 1.2s ease-in-out infinite; }
 .bulb-spin .glass { fill: var(--color-spark); opacity: 0; animation: bulb-fill 1.2s ease-in-out infinite; }
 .bulb-spin .rays { stroke: var(--color-spark); stroke-width: 2.4; opacity: 0; animation: bulb-rays 1.2s ease-in-out infinite; }
+/* ポンッと大きくなって、縮み、ぽよんと戻りながら、ピカッと光る */
+@keyframes bulb-pop {
+  0% { transform: scale(0.8, 0.8); }
+  9% { transform: scale(0.9, 1.05); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.2); }
+  17% { transform: scale(1.4, 1.4); animation-timing-function: ease-in-out; }
+  26% { transform: scale(0.92, 0.96); }
+  34% { transform: scale(1.12, 1.1); }
+  43% { transform: scale(1, 1); }
+  60% { transform: scale(1, 1); }
+  75% { transform: scale(0.8, 0.8); }
+  100% { transform: scale(0.8, 0.8); }
+}
 @keyframes bulb-flash { 0%, 100% { opacity: 0.4; } 15%, 50% { opacity: 1; } 70% { opacity: 0.4; } }
 @keyframes bulb-fill { 0%, 100% { opacity: 0; } 15%, 50% { opacity: 0.4; } 70% { opacity: 0; } }
 @keyframes bulb-rays { 0%, 8%, 70%, 100% { opacity: 0; } 15%, 50% { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .bulb-spin .b, .bulb-spin .glass, .bulb-spin .rays { animation: none; } .bulb-spin .b { opacity: 1; } .bulb-spin .rays { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .bulb-spin { animation: none; } .bulb-spin .b, .bulb-spin .glass, .bulb-spin .rays { animation: none; } .bulb-spin .b { opacity: 1; } .bulb-spin .rays { opacity: 1; } }
