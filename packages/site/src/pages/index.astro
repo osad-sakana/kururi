@@ -314,8 +314,12 @@ const errorHtml = escapeHtml(errorText)
             <line x1="1" y1="45" x2="959" y2="45" class="stroke" />
             <circle cx="26" cy="23" r="6" fill="#ed5350" /><circle cx="46" cy="23" r="6" fill="#fbbf24" /><circle cx="66" cy="23" r="6" fill="#45b164" />
             <text class="t dim" x="480" y="28" text-anchor="middle" font-size="13">プレイグラウンド</text>
+            <rect x="724" y="11" width="206" height="24" rx="12" class="panel" />
+            <text class="t dim" x="827" y="28" text-anchor="middle" font-size="12">チュートリアル 04 のコード</text>
+            <g class="badge"><circle cx="724" cy="23" r="11" /><text x="724" y="27.5" text-anchor="middle">1</text></g>
             <line x1="500" y1="45" x2="500" y2="399" class="stroke" />
             <text class="m dim" x="28" y="76" font-size="11" letter-spacing="2">KURURI</text>
+            <g class="badge"><circle cx="476" cy="71" r="11" /><text x="476" y="75.5" text-anchor="middle">2</text></g>
             <rect id="demo-hl" class="demo-hl" x="2" y="0" width="497" height="32" style="transform: translateY(88px)" />
             {[
               "function main = () {",
@@ -332,6 +336,7 @@ const errorHtml = escapeHtml(errorText)
               </g>
             ))}
             <text class="m dim" x="528" y="76" font-size="11" letter-spacing="2">ステップ実行</text>
+            <g class="badge"><circle cx="930" cy="71" r="11" /><text x="930" y="75.5" text-anchor="middle">3</text></g>
             {["最初へ", "戻る", "進む", "最後へ"].map((label, i) => (
               <g class="demo-btn" id={i === 2 ? "demo-next" : undefined}>
                 <rect x={528 + i * 78} y="92" width="68" height="30" rx="8" class="panel" style={i === 2 ? "stroke: var(--color-spark)" : ""} />
@@ -347,23 +352,23 @@ const errorHtml = escapeHtml(errorText)
             <text id="demo-out" class="m" x="528" y="364" font-size="14" opacity="0.6">（まだ何も出ていません）</text>
           </svg>
         </div>
-        <div class="steps">
-          <div class="step" data-reveal>
-            <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z" /><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z" /></svg></span>
+        <ol class="flow">
+          <li data-reveal>
+            <span class="num">1</span>
             <h3>読む</h3>
-            <p>チュートリアルで、概念を 1 つずつ。コードはボタン 1 つで、そのまま動かせます。</p>
-          </div>
-          <div class="step" data-reveal>
-            <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3l4 4L8 20l-5 1 1-5z" /></svg></span>
+            <p>チュートリアルで、概念を 1 つずつ。コードはボタン 1 つで、横のプレイグラウンドに届きます。</p>
+          </li>
+          <li data-reveal="120">
+            <span class="num">2</span>
             <h3>書く</h3>
             <p>書くそばから、エラーと直し方が出ます。変換後の Python も、横に並べて見られます。</p>
-          </div>
-          <div class="step" data-reveal>
-            <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M10 8l6 4-6 4z" /></svg></span>
+          </li>
+          <li data-reveal="240">
+            <span class="num">3</span>
             <h3>確かめる</h3>
             <p>ステップ実行で、1 行ずつ進めながら、変数の値が変わる様子を目で追えます。</p>
-          </div>
-        </div>
+          </li>
+        </ol>
       </div>
     </section>
 
