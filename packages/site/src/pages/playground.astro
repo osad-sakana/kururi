@@ -1,5 +1,8 @@
 ---
+import "../styles/tokens.css"
+import "../playground/style.css"
 import iconUrl from "../../../../assets/logo/kururi-icon.svg?url"
+import Logo from "../components/Logo.astro"
 
 const base = import.meta.env.BASE_URL
 const home = base.endsWith("/") ? base : `${base}/`
@@ -13,6 +16,14 @@ const home = base.endsWith("/") ? base : `${base}/`
     <title>プレイグラウンド | Kururi</title>
     <meta name="description" content="Kururi をブラウザで書いて、Python に変換し、その場で実行できます。" />
     <link rel="icon" type="image/svg+xml" href={iconUrl} />
+    <!-- 読み込みの画面が正しい色で出るよう、保存したテーマと埋め込みの判定を、最初に当てる -->
+    <script is:inline>
+      try {
+        var embedded = new URLSearchParams(location.search).has("embed")
+        var theme = embedded ? "light" : localStorage.getItem("kururi.theme")
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+      } catch (e) {}
+    </script>
     <!-- narapy と同じ書体: BIZ UDPGothic（画面）と 0xProto（コード） -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -24,6 +35,11 @@ const home = base.endsWith("/") ? base : `${base}/`
     <script is:inline src={`${home}coi-serviceworker.js`}></script>
   </head>
   <body class="playground">
+    <div id="boot" role="status" aria-live="polite">
+      <Logo animated class="boot-logo" />
+      <div class="boot-bar" aria-hidden="true"><i></i></div>
+      <p>読み込み中…</p>
+    </div>
     <header>
       <a class="brand" href={home} aria-label="Kururi のトップへ"><h1 aria-label="Kururi"></h1></a>
       <nav class="site-links" aria-label="サイト内">
@@ -61,6 +77,10 @@ const home = base.endsWith("/") ? base : `${base}/`
     </main>
     <script>
       import "../playground/main"
+    </script>
+    <script is:inline>
+      // 何かの理由でアプリが立ち上がらなくても、読み込みの画面のまま固まらないようにする
+      setTimeout(function () { var boot = document.getElementById("boot"); if (boot) boot.classList.add("done") }, 20000)
     </script>
   </body>
 </html>

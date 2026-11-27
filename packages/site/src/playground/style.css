@@ -101,3 +101,17 @@ section + section { border-left: 1px solid var(--color-line); }
 
 /* チュートリアルの横に埋め込んだとき */
 .embed .brand, .embed .site-links, .embed #theme { display: none; }
+
+/* 読み込みの画面：エディタなどが立ち上がるまで、画面全体を覆う */
+#boot { position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.4rem; background: var(--color-canvas); color: var(--color-ink); transition: opacity 0.3s ease, visibility 0.3s; }
+#boot.done { opacity: 0; visibility: hidden; pointer-events: none; }
+#boot .boot-logo { width: min(15rem, 60vw); height: auto; overflow: visible; }
+#boot p { margin: 0; font-size: 12px; letter-spacing: 0.16em; color: var(--color-muted); }
+.boot-bar { width: 7rem; height: 3px; border-radius: 2px; background: var(--color-line); overflow: hidden; }
+.boot-bar i { display: block; width: 40%; height: 100%; border-radius: 2px; background: var(--color-spark); animation: boot-slide 1s ease-in-out infinite; }
+@keyframes boot-slide { from { translate: -100% 0; } to { translate: 250% 0; } }
+#boot .logo-rays { animation: boot-rays 1.4s ease-in-out infinite; }
+#boot .logo-bulb { animation: boot-glow 1.4s ease-in-out infinite; }
+@keyframes boot-glow { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(0 0 6px var(--color-spark)); } }
+@keyframes boot-rays { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .boot-bar i, #boot .logo-rays, #boot .logo-bulb { animation: none; } #boot .logo-rays { opacity: 1; } }

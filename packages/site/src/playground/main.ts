@@ -30,8 +30,6 @@ import { SAMPLES } from "./samples"
 import type { ThemePreference } from "./preferences"
 import { FONT_SIZE, clampFontSize, loadFontSize, loadPythonOpen, savePythonOpen, loadThemePreference, nextThemePreference, saveFontSize, saveThemePreference } from "./preferences"
 import { applyTheme, defineThemes, onSystemThemeChange } from "./theme"
-import "../styles/tokens.css"
-import "./style.css"
 
 applyBrand()
 
@@ -456,3 +454,12 @@ openButton.addEventListener("click", () => {
   if (currentUrl !== null) window.open(currentUrl, "_blank", "noopener")
 })
 render()
+
+// 準備ができたら、読み込みの画面を消す
+const boot = document.getElementById("boot")
+if (boot !== null) {
+  requestAnimationFrame(() => {
+    boot.classList.add("done")
+    boot.addEventListener("transitionend", () => boot.remove(), { once: true })
+  })
+}
