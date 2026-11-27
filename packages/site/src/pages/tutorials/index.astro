@@ -7,12 +7,12 @@ const home = base.endsWith("/") ? base : `${base}/`
 const lessons = (await getCollection("tutorials")).sort((a, b) => a.data.order - b.data.order)
 ---
 
-<Base title="チュートリアル" current="tutorials" lightOnly footer={false} description="Kururi で、プログラミングの概念を順番に学ぶチュートリアル。どの回も、その場で動かせます。">
+<Base title="チュートリアル" current="tutorials" lightOnly footer={false} description="Kururiで、プログラミングの概念を順番に学ぶチュートリアル。どの回も、その場で動かせます。">
   <main class="wrap prose">
     <p class="crumb"><a href={home}>トップ</a> / チュートリアル</p>
     <h1>チュートリアル</h1>
     <p class="lead">
-      プログラミングの概念を、1 つずつ順番に学びます。各回のコードは、ボタン 1 つでプレイグラウンドに送って、動かせます。
+      プログラミングの概念を、1つずつ順番に学びます。各回のコードは、ボタン1つでプレイグラウンドに送って、動かせます。
     </p>
     <ol class="toc">
       {lessons.map((lesson) => (

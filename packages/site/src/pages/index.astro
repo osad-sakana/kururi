@@ -22,7 +22,7 @@ const conceptNodes = concepts.map((label, i) => ({ label, at: polar(118, -Math.P
 const languageNodes = languages.map((label, i) => ({ label, at: polar(214, -Math.PI / 2 + Math.PI / languages.length + (i * 2 * Math.PI) / languages.length), width: 26 + label.length * 8.6 }))
 const links = languageNodes.flatMap((language, i) => [conceptNodes[i % concepts.length], conceptNodes[(i + 3) % concepts.length]].map((concept) => ({ from: language.at, to: concept!.at })))
 
-// ---- ヒーローのコード例（Python は、コンパイラが実際に出したもの）----
+// ---- ヒーローのコード例（Pythonは、コンパイラが実際に出したもの）----
 const heroSource = `function main = () {
     var names: string[] = ["さくら", "たろう"]
     for name in names {
@@ -44,12 +44,12 @@ const heroPythonLines = heroPython.split("\n").map(highlight)
 
 // ---- 学び方：画面図の番号と、説明（番号の位置から線を伸ばす）----
 const flowItems = [
-  { n: 1, title: "読む", text: "チュートリアルで、概念を 1 つずつ。コードはボタン 1 つで、横のプレイグラウンドに届きます。", x: 11, y: 17.75, width: 26 },
-  { n: 2, title: "書く", text: "書くそばから、エラーと直し方が出ます。変換後の Python も、横に並べて見られます。", x: 38.4, y: 17.75, width: 28 },
-  { n: 3, title: "確かめる", text: "ステップ実行で、1 行ずつ進めながら、変数の値が変わる様子を目で追えます。", x: 68.4, y: 17.75, width: 30 },
+  { n: 1, title: "読む", text: "チュートリアルで、概念を1つずつ。コードはボタン1つで、横のプレイグラウンドに届きます。", x: 11, y: 17.75, width: 26 },
+  { n: 2, title: "書く", text: "書くそばから、エラーと直し方が出ます。変換後のPythonも、横に並べて見られます。", x: 38.4, y: 17.75, width: 28 },
+  { n: 3, title: "確かめる", text: "ステップ実行で、1行ずつ進めながら、変数の値が変わる様子を目で追えます。", x: 68.4, y: 17.75, width: 30 },
 ]
 
-// ---- 理由 1 の図：AI が書き、人が読んで直す ----
+// ---- 理由1の図：AIが書き、人が読んで直す ----
 const codeBars = [70, 120, 96, 58, 132, 84, 110, 46]
 
 // ---- 本物のエラー（コンパイラが出したものをそのまま見せる）----
@@ -69,7 +69,7 @@ const errorHtml = escapeHtml(errorText)
   .join("")
 ---
 
-<Base current="home" lightOnly description="AI がコードを書く時代の、新しいプログラミング入門。Kururi は、プログラミングの概念を学ぶことに特化した最初の言語です。">
+<Base current="home" lightOnly description="AIがコードを書く時代の、新しいプログラミング入門。Kururiは、プログラミングの概念を学ぶことに特化した最初の言語です。">
   <main class="lp">
     <!-- ヒーロー -->
     <section class="lp-hero">
@@ -78,28 +78,27 @@ const errorHtml = escapeHtml(errorText)
         <div>
           <Logo animated class="hero-logo fade-up" />
           <h1>
-            <span class="line"><span style="--i: 0">AI 時代の、</span></span>
+            <span class="line"><span style="--i: 0">AI時代の、</span></span>
             <span class="line"><span style="--i: 1">最初の</span></span>
             <span class="line"><span style="--i: 2"><em>プログラミング言語</em>。</span></span>
           </h1>
-          <p class="lead fade-up" style="--i: 5">
-            書くのは AI。読んで、直して、決めるのは あなた。そのために要るのは、書き方の暗記ではなく<strong>概念の理解</strong>です。
-            <LogoInline /> は、その概念を学ぶことに特化した、最初の言語。ここで身につければ、どの言語への入り口にもなります。
-          </p>
-          <div class="actions fade-up" style="--i: 6">
+          <p class="lead fade-up" style="--i: 5">生成AIの登場で、プログラムを書く作業の多くを、AIが担うようになりました。それでも、人がプログラムを理解する必要は、なくなっていません。</p>
+          <p class="lead fade-up" style="--i: 6"><LogoInline />は、AI時代にも欠かせない<strong>プログラミングの概念の理解</strong>に特化したプログラミング言語です。</p>
+          <p class="lead fade-up" style="--i: 7">ここで身につけたことは、多くの言語への入り口になります。</p>
+          <div class="actions fade-up" style="--i: 8">
             <a class="button primary" href={`${home}tutorials`}>チュートリアルをはじめる</a>
             <a class="button" href={`${home}playground`}>プレイグラウンドで書く</a>
           </div>
-          <p class="official fade-up" style="--i: 7">「<LogoInline />」は学習用プログラミング言語！</p>
+          <p class="official fade-up" style="--i: 9">「<LogoInline />」は学習用プログラミング言語！</p>
         </div>
-        <div class="hero-code" aria-label="Kururi のコードと、変換後の Python の例">
+        <div class="hero-code" aria-label="Kururiのコードと、変換後のPythonの例">
           <div class="hc-card">
             <div class="hc-bar"><i></i><i></i><i></i><span>main.kururi</span></div>
             <pre class="hc-pre">{heroKururiLines.map((line, i) => <span class="cl" style={`--n:${i}`} set:html={line === "" ? " " : line} />)}</pre>
           </div>
           <div class="hc-arrow" aria-hidden="true">
             <svg viewBox="0 0 24 40"><path pathLength="1" d="M12 2 V34 M5 27 L12 35 L19 27" /></svg>
-            <span>Python に変換</span>
+            <span>Pythonに変換</span>
           </div>
           <div class="hc-card hc-py">
             <div class="hc-bar"><i></i><i></i><i></i><span>main.py</span></div>
@@ -119,11 +118,11 @@ const errorHtml = escapeHtml(errorText)
           <div data-reveal>
             <p class="kicker">Why concepts</p>
             <h2>なぜ、概念なのか</h2>
-            <p class="body">文法を覚える時代は、終わりつつあります。これから必要なのは、AI が出したものを、理解して使いこなす力です。</p>
+            <p class="body">文法を覚える時代は、終わりつつあります。これから必要なのは、AIが出したものを、理解して使いこなす力です。</p>
             <p class="body">概念とは、型、名前、分岐、繰り返し、関数、データのまとまり、「値がない」こと。中心にこれらがあり、まわりに、いろいろな言語があります。</p>
           </div>
         <div class="orbit-wrap" data-reveal="200">
-          <svg class="orbit" viewBox="0 0 520 520" role="img" aria-label="中心の Kururi が、型・名前・分岐などの概念と、Python や TypeScript などの言語をつないでいる図">
+          <svg class="orbit" viewBox="0 0 520 520" role="img" aria-label="中心のKururiが、型・名前・分岐などの概念と、PythonやTypeScriptなどの言語をつないでいる図">
             <defs>
               <linearGradient id="core-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0e7490" /><stop offset="1" stop-color="#164e63" /></linearGradient>
               <radialGradient id="halo-g"><stop offset="0" stop-color="#fbbf24" stop-opacity="0.45" /><stop offset="1" stop-color="#fbbf24" stop-opacity="0" /></radialGradient>
@@ -169,12 +168,12 @@ const errorHtml = escapeHtml(errorText)
         <div class="reason" data-reveal>
           <div class="reason-text">
             <div class="no">01</div>
-            <h3>書くのは AI の得意技になった。</h3>
+            <h3>書くのはAIの得意技になった。</h3>
             <p><strong>人に残るのは、出てきたコードを読み、直し、指示する力です。</strong></p>
-            <p>動くコードを書く作業は、AI に任せられます。でも、それが正しいか、意図に合っているかを決めるのは、人です。</p>
+            <p>動くコードを書く作業は、AIに任せられます。でも、それが正しいか、意図に合っているかを決めるのは、人です。</p>
           </div>
           <figure>
-            <svg viewBox="0 0 540 330" role="img" aria-label="AI が書いたコードを、人が読み、直し、指示する図">
+            <svg viewBox="0 0 540 330" role="img" aria-label="AIが書いたコードを、人が読み、直し、指示する図">
               <g>
                 <rect x="0" y="52" width="210" height="238" rx="16" class="editor" />
                 <rect x="14" y="68" width="8" height="8" rx="4" class="bar" /><rect x="28" y="68" width="8" height="8" rx="4" class="bar" /><rect x="42" y="68" width="8" height="8" rx="4" class="bar" />
@@ -183,7 +182,7 @@ const errorHtml = escapeHtml(errorText)
                 ))}
                 <g class="pop" style="--base: 100">
                   <rect x="0" y="0" width="116" height="34" rx="17" class="panel" style="stroke: var(--color-spark)" />
-                  <text class="t" x="58" y="22" text-anchor="middle" font-size="14" font-weight="700">AI が書く</text>
+                  <text class="t" x="58" y="22" text-anchor="middle" font-size="14" font-weight="700">AIが書く</text>
                 </g>
               </g>
               <path class="draw stroke-sp" pathLength="1" style="--base: 1200" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M228 170 H292 M278 156 L292 170 L278 184" />
@@ -244,12 +243,12 @@ const errorHtml = escapeHtml(errorText)
           <div class="reason-text">
             <div class="no">03</div>
             <h3>だから、概念に集中できる言語を最初に。</h3>
-            <p><strong><LogoInline /> は文法を最小にして、1 つの概念を 1 つの形で見せます。</strong></p>
+            <p><strong><LogoInline />は文法を最小にして、1つの概念を1つの形で見せます。</strong></p>
             <p>間違えたときは、必ず直し方を添えたエラーで教えます。迷わず、概念だけに向き合えます。</p>
           </div>
           <figure>
-            <svg viewBox="0 0 540 330" role="img" aria-label="値の種類、分岐、繰り返し、関数が、それぞれ 1 つの形に対応している図">
-              <text class="t dim" x="0" y="14" font-size="12" letter-spacing="2">1 つの概念 ＝ 1 つの形</text>
+            <svg viewBox="0 0 540 330" role="img" aria-label="値の種類、分岐、繰り返し、関数が、それぞれ1つの形に対応している図">
+              <text class="t dim" x="0" y="14" font-size="12" letter-spacing="2">1つの概念 ＝ 1つの形</text>
               {[
                 { concept: "値の種類", code: "var age: int = 12" },
                 { concept: "分岐", code: "if age >= 20 { … }" },
@@ -281,7 +280,7 @@ const errorHtml = escapeHtml(errorText)
         <div class="head" data-reveal>
           <p class="kicker">Same idea, any language</p>
           <h2>書き方は違っても、<br />考え方は同じ。</h2>
-          <p class="body">「関数」を、4 つの言語で書いてみます。色が付いた部分が、共通する概念の部品です。</p>
+          <p class="body">「関数」を、4つの言語で書いてみます。色が付いた部分が、共通する概念の部品です。</p>
         </div>
         <div class="snippets" data-reveal>
           <div class="snippet kururi">
@@ -327,10 +326,10 @@ const errorHtml = escapeHtml(errorText)
             <line x1="680" y1="45" x2="680" y2="399" class="stroke" />
 
             <!-- 左：チュートリアル -->
-            <text class="t dim" x="134" y="76" font-size="11">第 4 回　繰り返し</text>
+            <text class="t dim" x="134" y="76" font-size="11">第4回　繰り返し</text>
             <text class="t" x="28" y="108" font-size="22" font-weight="800">繰り返し</text>
             <text class="t dim" x="28" y="134" font-size="12">同じことを何度も書かずに、</text>
-            <text class="t dim" x="28" y="152" font-size="12">for と while で繰り返す。</text>
+            <text class="t dim" x="28" y="152" font-size="12">forとwhileで繰り返す。</text>
             <text class="t" x="28" y="186" font-size="14" font-weight="800">回数で繰り返す：for</text>
             <rect x="28" y="198" width="304" height="184" rx="10" class="panel" />
             <rect x="196" y="206" width="128" height="22" rx="11" style="fill: var(--color-accent)" />
@@ -373,7 +372,7 @@ const errorHtml = escapeHtml(errorText)
                 <text class="t" x={708 + i * 72 + 33} y="110" text-anchor="middle" font-size="11">{label}</text>
               </g>
             ))}
-            <text id="demo-count" class="m dim" x="708" y="154" font-size="11">1 / 7　main　2 行目（この行を実行する前）</text>
+            <text id="demo-count" class="m dim" x="708" y="154" font-size="11">1 / 7　main　2行目（この行を実行する前）</text>
             <text class="m dim" x="708" y="196" font-size="11">変数</text><text class="m dim" x="818" y="196" font-size="11">型</text><text class="m dim" x="890" y="196" font-size="11">値</text>
             <line x1="708" y1="206" x2="976" y2="206" class="stroke" />
             <g id="demo-v1" class="demo-var" opacity="0"><text id="demo-n1" class="m sp" x="708" y="234" font-size="15">total</text><text class="m" x="818" y="234" font-size="15">int</text><text id="demo-x1" class="m demo-val" x="890" y="234" font-size="15" font-weight="700">0</text></g>
@@ -415,22 +414,22 @@ const errorHtml = escapeHtml(errorText)
             「なぜ弾かれたか分からない」を、なくします。何が、どこで、なぜ間違いで、どう直せばよいか。<strong>必ず、直し方を添えて</strong>教えます。
           </p>
         </div>
-        <div class="terminal" data-reveal id="term" aria-label="Kururi が実際に出すエラーの例">
+        <div class="terminal" data-reveal id="term" aria-label="Kururiが実際に出すエラーの例">
           <div class="bar"><i></i><i></i><i></i><span style="margin-left: 0.4rem">main.kururi</span></div>
           <div class="screen">
             <pre set:html={errorHtml} />
           </div>
-          <div class="fix">これは実際に Kururi が出すエラーです</div>
+          <div class="fix">これは実際にKururiが出すエラーです</div>
         </div>
       </div>
     </section>
 
-    <!-- 8 回のコース -->
+    <!-- 8回のコース -->
     <section class="course">
       <div class="wrap">
         <div class="head" data-reveal>
           <p class="kicker">Course</p>
-          <h2>8 回で、概念をひとまわり。</h2>
+          <h2>8回で、概念をひとまわり。</h2>
           <p class="body">手順から始めて、値と型、分岐、繰り返し、関数、配列、クラス、そして「値がない」こと。順番に進めば、プログラミングの土台がそろいます。</p>
         </div>
         <nav class="path" data-reveal aria-label="チュートリアルの一覧">
@@ -476,7 +475,7 @@ const errorHtml = escapeHtml(errorText)
       <div class="wrap scope" data-reveal>
         <p class="kicker">Scope</p>
         <h2>「入り口」であって、「全部」ではない。</h2>
-        <p class="body"><LogoInline /> が扱うのは、多くの言語に共通する、土台の概念です。次のものは、扱いません。</p>
+        <p class="body"><LogoInline />が扱うのは、多くの言語に共通する、土台の概念です。次のものは、扱いません。</p>
         <ul>
           <li>ラムダ・クロージャ（関数を値として扱うこと）、ジェネリクス</li>
           <li>非同期・並行処理、メモリ管理</li>
@@ -493,7 +492,7 @@ const errorHtml = escapeHtml(errorText)
       <div class="wrap">
         <div data-reveal>
           <Logo animated class="cta-logo" />
-          <h2>まず、1 行、書いてみよう。</h2>
+          <h2>まず、1行、書いてみよう。</h2>
           <p class="body" style="margin-inline: auto">ブラウザだけで、いますぐ始められます。</p>
           <div class="actions">
             <a class="button primary" href={`${home}tutorials`}>チュートリアルをはじめる</a>
@@ -524,7 +523,7 @@ const errorHtml = escapeHtml(errorText)
     )
     reveals.forEach((el) => reveal.observe(el))
 
-    // ---- ステップ実行のデモ（見えているあいだ、1 歩ずつ進める）----
+    // ---- ステップ実行のデモ（見えているあいだ、1歩ずつ進める）----
     type Row = readonly [string, string]
     interface Step { readonly line: number; readonly vars: readonly Row[]; readonly out?: string }
     const steps: readonly Step[] = [

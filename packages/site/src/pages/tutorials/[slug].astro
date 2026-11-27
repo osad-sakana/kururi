@@ -19,7 +19,7 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
 ---
 
 <Base title={lesson.data.title} current="tutorials" lightOnly footer={false} description={lesson.data.summary}>
-  <!-- 横に開くプレイグラウンドで input() を使えるよう、必要なヘッダーをサービスワーカーで付ける（MIT） -->
+  <!-- 横に開くプレイグラウンドでinput() を使えるよう、必要なヘッダーをサービスワーカーで付ける（MIT） -->
   <script is:inline slot="head" src={`${home}coi-serviceworker.js`}></script>
   <div class="reader" data-playground={`${home}playground`}>
     <main class="wrap prose">
@@ -77,7 +77,7 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
     let loaded = false
     const send = (source: string) => iframe?.contentWindow?.postMessage({ type: "kururi:set-source", source }, location.origin)
 
-    /** パネルを開く。code があれば、そのコードを入れる（初回は URL で、2 回目からは postMessage で） */
+    /** パネルを開く。codeがあれば、そのコードを入れる（初回はURLで、2回目からはpostMessageで） */
     const open = (code?: string) => {
       if (!reader || !iframe) return
       reader.classList.add("open")
@@ -92,7 +92,7 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
     toggle?.addEventListener("click", () => open())
     closeButton?.addEventListener("click", close)
 
-    // Kururi のコードブロックに「プレイグラウンドで試す」を付ける。押すと、横のパネルにそのコードが入る
+    // Kururiのコードブロックに「プレイグラウンドで試す」を付ける。押すと、横のパネルにそのコードが入る
     for (const pre of document.querySelectorAll<HTMLElement>("pre[data-language='kururi']")) {
       const code = (pre.textContent ?? "").replace(/\n$/, "") + "\n"
       const wrapper = document.createElement("div")

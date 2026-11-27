@@ -10,13 +10,13 @@ interface Props {
   title?: string
   description?: string
   current?: "home" | "tutorials"
-  /** true のとき、OS やプレイグラウンドの設定に関わらず、ライトテーマに固定する（トップ用） */
+  /** trueのとき、OSやプレイグラウンドの設定に関わらず、ライトテーマに固定する（トップ用） */
   lightOnly?: boolean
-  /** false のとき、フッターを出さない（チュートリアル用） */
+  /** falseのとき、フッターを出さない（チュートリアル用） */
   footer?: boolean
 }
 
-const { lightOnly = false, footer = true, title, description = "Kururi は、プログラミングの概念を学ぶことに特化した最初の言語です。ここで身につければ、どの言語への入り口にもなります。", current } = Astro.props
+const { lightOnly = false, footer = true, title, description = "Kururiは、プログラミングの概念を学ぶことに特化した最初の言語です。ここで身につければ、多くの言語への入り口になります。", current } = Astro.props
 const base = import.meta.env.BASE_URL
 const home = base.endsWith("/") ? base : `${base}/`
 const pageTitle = title === undefined ? "「Kururi」は学習用プログラミング言語！" : `${title} | Kururi`
@@ -51,7 +51,7 @@ const pageTitle = title === undefined ? "「Kururi」は学習用プログラミ
   <body>
     <header class="site-header">
       <div class="wrap">
-        <a class="brand" href={home} aria-label="Kururi のトップへ"><Logo animated /></a>
+        <a class="brand" href={home} aria-label="Kururiのトップへ"><Logo animated /></a>
         <nav aria-label="サイト内">
           <a href={`${home}tutorials`} aria-current={current === "tutorials" ? "page" : undefined}>チュートリアル</a>
           <a href={`${home}playground`}>プレイグラウンド</a>
