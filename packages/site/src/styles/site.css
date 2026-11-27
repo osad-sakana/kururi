@@ -14,7 +14,6 @@ code, pre { font-family: var(--font-mono); }
 .site-header .brand { display: block; color: var(--color-ink); line-height: 0; }
 .site-header .brand svg { height: 40px; width: auto; overflow: visible; }
 /* ロゴの電球：ほんのり脈打つ */
-.logo-bulb { transform-box: fill-box; }
 .logo-animated .logo-bulb { animation: bulb-glow 3.6s ease-in-out infinite; }
 .logo-animated .logo-rays { animation: rays 3.6s ease-in-out infinite; }
 @keyframes bulb-glow { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 45% { filter: drop-shadow(0 0 7px var(--color-spark)); } }

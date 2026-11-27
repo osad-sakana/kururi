@@ -70,7 +70,7 @@ svg .bar-sp { fill: var(--color-spark); }
 @keyframes flow { to { stroke-dashoffset: -200; } }
 .orbit .halo { transform-origin: 260px 260px; animation: halo 4s ease-in-out infinite; }
 @keyframes halo { 0%, 100% { opacity: 0.35; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.12); } }
-.orbit .core-bulb { transform-box: fill-box; transform-origin: center; animation: bulb-glow 3.6s ease-in-out infinite; }
+.orbit .core-bulb { animation: bulb-glow 3.6s ease-in-out infinite; }
 
 /* ---- なぜ、概念なのか ---- */
 .why { background: linear-gradient(180deg, var(--color-panel), color-mix(in srgb, var(--color-panel) 70%, var(--color-canvas))); border-block: 1px solid var(--color-line); }
