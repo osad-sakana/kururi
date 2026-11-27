@@ -27,6 +27,7 @@ import { createStepPanel } from "./step-panel"
 import { SAMPLE } from "./sample"
 import { sourceFromHash } from "./share"
 import { SAMPLES } from "./samples"
+import type { ThemePreference } from "./preferences"
 import { FONT_SIZE, clampFontSize, loadFontSize, loadPythonOpen, savePythonOpen, loadThemePreference, nextThemePreference, saveFontSize, saveThemePreference } from "./preferences"
 import { applyTheme, defineThemes, onSystemThemeChange } from "./theme"
 import "../styles/tokens.css"
@@ -81,7 +82,9 @@ monaco.languages.setLanguageConfiguration(LANGUAGE_ID, {
 })
 
 defineThemes()
-let themePreference = loadThemePreference()
+// チュートリアルの横に埋め込まれているときは、チュートリアルに合わせてライトに固定する
+const embedded = new URLSearchParams(location.search).has("embed")
+let themePreference: ThemePreference = embedded ? "light" : loadThemePreference()
 applyTheme(themePreference)
 onSystemThemeChange(() => applyTheme(themePreference))
 let fontSize = loadFontSize()

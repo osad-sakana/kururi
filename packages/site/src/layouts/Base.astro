@@ -11,9 +11,11 @@ interface Props {
   current?: "home" | "tutorials"
   /** true のとき、OS やプレイグラウンドの設定に関わらず、ライトテーマに固定する（トップ用） */
   lightOnly?: boolean
+  /** false のとき、フッターを出さない（チュートリアル用） */
+  footer?: boolean
 }
 
-const { lightOnly = false, title, description = "Kururi は、プログラミングの概念を学ぶことに特化した最初の言語です。ここで身につければ、どの言語への入り口にもなります。", current } = Astro.props
+const { lightOnly = false, footer = true, title, description = "Kururi は、プログラミングの概念を学ぶことに特化した最初の言語です。ここで身につければ、どの言語への入り口にもなります。", current } = Astro.props
 const base = import.meta.env.BASE_URL
 const home = base.endsWith("/") ? base : `${base}/`
 const pageTitle = title === undefined ? "「Kururi」は学習用プログラミング言語！" : `${title} | Kururi`
@@ -57,13 +59,13 @@ const pageTitle = title === undefined ? "「Kururi」は学習用プログラミ
       </div>
     </header>
     <slot />
-    <footer class="site-footer">
+    {footer && (<footer class="site-footer">
       <div class="wrap">
         <span>「<LogoInline />」は学習用プログラミング言語！</span>
         <a href={`${home}tutorials`}>チュートリアル</a>
         <a href={`${home}playground`}>プレイグラウンド</a>
         <a href="https://github.com/osad-sakana/kururi">GitHub</a>
       </div>
-    </footer>
+    </footer>)}
   </body>
 </html>

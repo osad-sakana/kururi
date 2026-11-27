@@ -7,7 +7,7 @@ const home = base.endsWith("/") ? base : `${base}/`
 const lessons = (await getCollection("tutorials")).sort((a, b) => a.data.order - b.data.order)
 ---
 
-<Base title="チュートリアル" current="tutorials" description="Kururi で、プログラミングの概念を順番に学ぶチュートリアル。どの回も、その場で動かせます。">
+<Base title="チュートリアル" current="tutorials" lightOnly footer={false} description="Kururi で、プログラミングの概念を順番に学ぶチュートリアル。どの回も、その場で動かせます。">
   <main class="wrap prose">
     <p class="crumb"><a href={home}>トップ</a> / チュートリアル</p>
     <h1>チュートリアル</h1>
