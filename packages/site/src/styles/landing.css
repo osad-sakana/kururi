@@ -9,10 +9,6 @@
 .lp p.body { color: var(--color-muted); font-size: 1.05rem; max-width: 36rem; margin: 0 0 1rem; }
 .lp p.body strong { color: var(--color-ink); }
 .lp .accent { color: var(--color-accent); }
-.lp a.button { position: relative; overflow: hidden; transition: transform 0.2s, background 0.2s; }
-.lp a.button:hover { transform: translateY(-2px); }
-.lp a.button::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.35) 50%, transparent 70%); transform: translateX(-120%); }
-.lp a.button:hover::after { transform: translateX(120%); transition: transform 0.7s; }
 
 /* ---- スクロールで現れる（JS が使えるときだけ隠す）---- */
 .js [data-reveal] { opacity: 0; translate: 0 28px; transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--d, 0) * 1ms), translate 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--d, 0) * 1ms); }
@@ -170,8 +166,7 @@ mark.r { --mk: var(--color-code-keyword); }
 .path::after { background: linear-gradient(90deg, var(--color-accent), var(--color-spark)); transform-origin: left; }
 .js .path::after { transform: scaleX(0); transition: transform 1.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s; }
 .js .path.in::after { transform: scaleX(1); }
-.path a { position: relative; display: block; text-align: center; text-decoration: none; color: var(--color-ink); font-size: 0.85rem; line-height: 1.5; padding-top: 3rem; transition: transform 0.25s; }
-.path a:hover { transform: translateY(-4px); }
+.path a { position: relative; display: block; text-align: center; text-decoration: none; color: var(--color-ink); font-size: 0.85rem; line-height: 1.5; padding-top: 3rem; }
 .path a::before { content: counter(lesson, decimal-leading-zero); counter-increment: lesson; position: absolute; top: 0; left: 50%; translate: -50% 0; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 700 11px var(--font-mono); background: var(--color-canvas); border: 2px solid var(--color-spark); color: var(--color-spark); z-index: 1; transition: background 0.2s, color 0.2s, scale 0.2s; }
 .js .path a::before { scale: 0; transition: scale 0.5s cubic-bezier(0.3, 1.5, 0.5, 1) calc(0.2s + var(--i) * 0.2s), background 0.2s, color 0.2s; }
 .js .path.in a::before { scale: 1; }

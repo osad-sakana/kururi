@@ -5,7 +5,8 @@ header { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1rem; 
 .brand { color: var(--color-ink); text-decoration: none; }
 .site-links { display: flex; gap: 0.8rem; font-size: 12px; }
 .site-links a { color: var(--color-muted); text-decoration: none; }
-.site-links a:hover { color: var(--color-ink); }
+.site-links a { padding: 0.2rem 0.5rem; border-radius: 6px; }
+.site-links a:hover { color: var(--color-canvas); background: var(--color-ink); }
 .brand { display: flex; flex-direction: column; line-height: 1; }
 h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
 h1 svg { display: block; height: 30px; width: auto; }
@@ -17,7 +18,7 @@ select { font: inherit; font-size: 12px; max-width: 11rem; padding: 0.4rem 0.5re
 #status { flex: 1; font-size: 12px; font-family: var(--font-mono); color: var(--color-muted); }
 #status.error { color: var(--color-danger); }
 button { font: inherit; font-size: 12px; padding: 0.4rem 0.75rem; border-radius: 8px; border: 1px solid var(--color-line); background: transparent; color: var(--color-muted); cursor: pointer; transition: color 0.15s, background 0.15s; }
-button:hover:not(:disabled) { color: var(--color-ink); background: var(--color-hover); }
+button:hover:not(:disabled) { color: var(--color-canvas); background: var(--color-ink); border-color: var(--color-ink); }
 button:disabled { cursor: not-allowed; opacity: 0.45; }
 button.primary { font-size: 14px; font-weight: 700; padding: 0.4rem 1rem; color: var(--color-accent-ink); background: var(--color-accent); border-color: var(--color-accent); }
 button.primary:hover:not(:disabled) { color: var(--color-accent); background: var(--color-accent-ink); }
