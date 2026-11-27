@@ -68,7 +68,7 @@ svg .bar-sp { fill: var(--color-spark); }
 .orbit .core-bulb { animation: bulb-glow 3.6s ease-in-out infinite; }
 
 /* ---- なぜ、概念なのか ---- */
-.why { background: linear-gradient(180deg, var(--color-panel), color-mix(in srgb, var(--color-panel) 70%, var(--color-canvas))); border-block: 1px solid var(--color-line); }
+.why { }
 .why .intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr); gap: clamp(2rem, 5vw, 4rem); align-items: center; margin-bottom: clamp(3rem, 6vw, 5rem); }
 .why .intro .body { max-width: 34rem; }
 .reason { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(1.5rem, 5vw, 4.5rem); align-items: center; padding: clamp(2.4rem, 5vw, 4rem) 0; border-top: 1px solid var(--color-line); }
@@ -115,7 +115,7 @@ mark.r { --mk: var(--color-code-keyword); }
 .legend mark { padding: 0.1em 10px; }
 
 /* ---- 学び方 ---- */
-.how { background: linear-gradient(180deg, color-mix(in srgb, var(--color-panel) 70%, var(--color-canvas)), var(--color-panel)); border-block: 1px solid var(--color-line); }
+.how { }
 .how .head { max-width: 40rem; margin-bottom: 2.5rem; }
 .how .window { margin: 0 0 3rem; }
 .how .window svg { width: 100%; height: auto; display: block; }
@@ -156,7 +156,7 @@ mark.r { --mk: var(--color-code-keyword); }
 .path small { display: block; color: var(--color-muted); font-size: 0.72rem; }
 
 /* ---- 言語の表 ---- */
-.langs-sec { background: var(--color-panel); border-block: 1px solid var(--color-line); }
+.langs-sec { }
 .langs-sec .head { max-width: 42rem; margin-bottom: 2rem; }
 .lp table.langs th { text-transform: none; }
 .lp table.langs td:first-child { white-space: nowrap; }
@@ -265,3 +265,21 @@ mark.r { --mk: var(--color-code-keyword); }
 svg .t, #demo .t { font-feature-settings: "palt" 1; letter-spacing: 0.02em; }
 .lp table.langs th { letter-spacing: 0.08em; }
 .lp table.langs .lang-name { letter-spacing: 0.02em; }
+
+/* ---- セクションの切れ目 ---- */
+.lp { --arc: clamp(1.6rem, 4.4vw, 3.8rem); }
+/* 色のついた帯は、上下を、ゆるい弧にする（直線の枠線の代わり） */
+.lp section.tint { background: var(--color-panel); }
+.lp section.tint::before, .lp section.tint::after { content: ""; position: absolute; left: 0; right: 0; height: var(--arc); background: var(--color-panel); pointer-events: none; border: 1px solid var(--color-line); }
+.lp section.tint::before { top: calc(var(--arc) * -1 + 1px); border-bottom: 0; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+.lp section.tint::after { bottom: calc(var(--arc) * -1 + 1px); border-top: 0; border-radius: 0 0 50% 50% / 0 0 100% 100%; }
+/* 帯どうしでない切れ目は、細い線の真ん中に、小さな電球を置く */
+.lp section.seamed::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1.8rem; translate: 0 -50%; pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-14 -9 28 37'%3E%3Cg transform='rotate(180 0 7)' fill='none' stroke='%23d97706' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M-6 0V4A11 11 0 1 0 6 4V0Z'/%3E%3Cpath d='M-5 -5H5M-3 -10H3'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d97706' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M0 -7V-3M-9 -4L-7 -1M9 -4L7 -1'/%3E%3C/g%3E%3C/svg%3E") center / 1.5rem 1.8rem no-repeat,
+    linear-gradient(to right, transparent calc(50% - 35rem), var(--color-line) calc(50% - 35rem) calc(50% - 1.3rem), transparent calc(50% - 1.3rem) calc(50% + 1.3rem), var(--color-line) calc(50% + 1.3rem) calc(50% + 35rem), transparent calc(50% + 35rem)) center / 100% 1px no-repeat; }
+@media (max-width: 1160px) { .lp section.seamed::before { background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-14 -9 28 37'%3E%3Cg transform='rotate(180 0 7)' fill='none' stroke='%23d97706' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M-6 0V4A11 11 0 1 0 6 4V0Z'/%3E%3Cpath d='M-5 -5H5M-3 -10H3'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d97706' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M0 -7V-3M-9 -4L-7 -1M9 -4L7 -1'/%3E%3C/g%3E%3C/svg%3E") center / 1.5rem 1.8rem no-repeat,
+    linear-gradient(to right, transparent 1.25rem, var(--color-line) 1.25rem calc(50% - 1.3rem), transparent calc(50% - 1.3rem) calc(50% + 1.3rem), var(--color-line) calc(50% + 1.3rem) calc(100% - 1.25rem), transparent calc(100% - 1.25rem)) center / 100% 1px no-repeat; } }
+/* 最後の帯は、はみ出しを隠しているので、切れ目の電球は帯の内側の上に置く */
+.lp section.cta.seamed::before { top: 1rem; translate: none; }
