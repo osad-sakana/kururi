@@ -1,7 +1,7 @@
 /* ランディングとチュートリアル共通の見た目（色・書体の変数は tokens.css） */
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--color-canvas); color: var(--color-ink); font-family: var(--font-sans); line-height: 1.8; font-size: 16px; }
+body { font-kerning: normal; margin: 0; background: var(--color-canvas); color: var(--color-ink); font-family: var(--font-sans); line-height: 1.8; font-size: 16px; }
 a { color: var(--color-accent); text-underline-offset: 3px; }
 a:hover { text-decoration-thickness: 2px; }
 code, pre { font-family: var(--font-mono); }
@@ -147,3 +147,7 @@ ul.plain li { margin: 0.3rem 0; }
 .side-loading { position: absolute; inset: 41px 0 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.7rem; color: var(--color-muted); font-size: 12px; letter-spacing: 0.14em; background: var(--color-editor); z-index: 1; }
 .side-loading .side-bulb { width: 2.6rem; height: 2.6rem; }
 .side.loaded .side-loading { display: none; }
+
+/* チュートリアルの本文：読みやすい字間 */
+.prose h1, .prose h2, .prose h3 { font-feature-settings: "palt" 1; letter-spacing: -0.02em; }
+.prose p, .prose li { letter-spacing: 0.03em; line-height: 1.95; }

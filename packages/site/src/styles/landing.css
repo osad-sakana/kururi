@@ -243,3 +243,24 @@ mark.r { --mk: var(--color-code-keyword); }
   .annot .note { display: none; }
   .flow-mobile { display: block; margin-top: 2rem; }
 }
+
+/* ---- 字間：Noto Sans JP は字間が広めなので、見出しは詰め（palt）、本文は少し開けて読みやすくする ---- */
+.lp { font-kerning: normal; font-feature-settings: "palt" 1; }
+.lp h1, .lp h2, .lp h3, .lp .logo-text { font-feature-settings: "palt" 1; }
+.lp-hero h1 { letter-spacing: -0.045em; line-height: 1.2; font-weight: 800; }
+.lp h2 { letter-spacing: -0.035em; line-height: 1.38; font-weight: 800; }
+.lp h3 { letter-spacing: -0.015em; font-weight: 700; }
+.lp p, .lp li, .lp td, .lp th { letter-spacing: 0.035em; line-height: 1.95; }
+.lp p.body { line-height: 1.95; }
+.lp .lead { letter-spacing: 0.03em; line-height: 1.95; }
+.lp .reason p, .lp .flow p, .lp .annot .note p { letter-spacing: 0.035em; }
+.lp .annot .note p { line-height: 1.85; }
+.lp .annot .note h3 { letter-spacing: 0; }
+.lp .official { letter-spacing: 0.06em; }
+.lp .button, .site-header nav a { letter-spacing: 0.06em; font-weight: 700; font-feature-settings: "palt" 1; }
+.lp .kicker { letter-spacing: 0.2em; }
+.lp .legend { letter-spacing: 0.05em; }
+.lp .reason .no { letter-spacing: -0.04em; }
+svg .t, #demo .t { font-feature-settings: "palt" 1; letter-spacing: 0.02em; }
+.lp table.langs th { letter-spacing: 0.08em; }
+.lp table.langs .lang-name { letter-spacing: 0.02em; }
