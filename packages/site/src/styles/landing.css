@@ -4,7 +4,7 @@
 .lp .wrap { width: min(100% - 2.5rem, 70rem); }
 .lp h1, .lp h2, .lp h3 { text-wrap: balance; word-break: auto-phrase; }
 .lp h2 { font-size: clamp(1.8rem, 3.8vw, 2.8rem); line-height: 1.35; letter-spacing: -0.015em; margin: 0 0 1rem; font-weight: 800; }
-.lp .kicker { position: relative; display: inline-flex; align-items: center; gap: 0.7rem; font: 700 12px var(--font-mono); letter-spacing: 0.2em; color: var(--color-spark); text-transform: uppercase; margin: 0 0 1rem; }
+.lp .kicker { position: relative; display: inline-flex; align-items: center; gap: 0.8rem; font: 600 13px var(--font-display); letter-spacing: 0.26em; color: var(--color-spark); text-transform: uppercase; margin: 0 0 1rem; }
 .lp .kicker::before { content: ""; width: 28px; height: 2px; background: var(--color-spark); transform-origin: left; }
 .lp p.body { word-break: auto-phrase; text-wrap: pretty; color: var(--color-muted); font-size: 1.05rem; max-width: 36rem; margin: 0 0 1rem; }
 .lp p.body strong { color: var(--color-ink); }
@@ -73,7 +73,7 @@ svg .bar-sp { fill: var(--color-spark); }
 .why .intro .body { max-width: 34rem; }
 .reason { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(1.5rem, 5vw, 4.5rem); align-items: center; padding: clamp(2.4rem, 5vw, 4rem) 0; border-top: 1px solid var(--color-line); }
 .reason:nth-of-type(odd) .reason-text { order: 2; }
-.reason .no { font: 800 clamp(3.4rem, 8vw, 6rem)/1 var(--font-mono); color: transparent; -webkit-text-stroke: 1.5px var(--color-spark); margin-bottom: 0.6rem; letter-spacing: -0.04em; background: linear-gradient(var(--color-spark), var(--color-spark)) no-repeat 0 100% / 100% 0; -webkit-background-clip: text; background-clip: text; transition: background-size 0.5s ease 0.15s; }
+.reason .no { font: 600 clamp(3.6rem, 8.5vw, 6.4rem)/1 var(--font-display); color: transparent; -webkit-text-stroke: 1.5px var(--color-spark); margin-bottom: 0.6rem; letter-spacing: -0.04em; background: linear-gradient(var(--color-spark), var(--color-spark)) no-repeat 0 100% / 100% 0; -webkit-background-clip: text; background-clip: text; transition: background-size 0.5s ease 0.15s; }
 .reason.in .no { background-size: 100% 100%; }
 .reason h3 { font-size: clamp(1.35rem, 2.6vw, 1.95rem); line-height: 1.45; margin: 0 0 0.8rem; }
 .reason p { color: var(--color-muted); margin: 0 0 0.6rem; max-width: 30rem; }
@@ -258,7 +258,7 @@ mark.r { --mk: var(--color-code-keyword); }
 .lp .annot .note h3 { letter-spacing: 0; }
 .lp .official { letter-spacing: 0.06em; }
 .lp .button, .site-header nav a { letter-spacing: 0.06em; font-weight: 700; font-feature-settings: "palt" 1; }
-.lp .kicker { letter-spacing: 0.2em; }
+.lp .kicker { letter-spacing: 0.26em; }
 .lp .legend { letter-spacing: 0.05em; }
 .lp .reason .no { letter-spacing: -0.04em; }
 svg .t, #demo .t { font-feature-settings: "palt" 1; letter-spacing: 0.02em; }

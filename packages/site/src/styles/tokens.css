@@ -1,6 +1,7 @@
 :root {
   color-scheme: light dark;
   --font-sans: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --font-display: "Jost", "Futura", "Avenir Next", "Century Gothic", sans-serif;
   --font-mono: "0xProto", ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
   /* カラートークン（ダーク = 既定）。playground/palette.ts と同じ値（ずれると palette.test.ts が落ちる） */
   --color-canvas: #051820;
