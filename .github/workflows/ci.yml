@@ -30,6 +30,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
+      # サイト（トップ・チュートリアル・プレイグラウンド）がビルドできるか
+      - run: pnpm build
 
   narapy-compat:
     # 生成した受け渡しデータを、narapy の main 自身のデコード処理で読めるか確かめる

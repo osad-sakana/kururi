@@ -1,0 +1,21 @@
+{
+  "name": "@kururi/site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@kururi/compiler": "workspace:*",
+    "@kururi/narapy": "workspace:*",
+    "astro": "^7.4.13",
+    "monaco-editor": "^0.52.2"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}

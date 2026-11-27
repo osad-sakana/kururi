@@ -1,0 +1,29 @@
+---
+import { getCollection } from "astro:content"
+import Base from "../../layouts/Base.astro"
+
+const base = import.meta.env.BASE_URL
+const home = base.endsWith("/") ? base : `${base}/`
+const lessons = (await getCollection("tutorials")).sort((a, b) => a.data.order - b.data.order)
+---
+
+<Base title="チュートリアル" current="tutorials" description="Kururi で、プログラミングの概念を順番に学ぶチュートリアル。どの回も、その場で動かせます。">
+  <main class="wrap prose">
+    <p class="crumb"><a href={home}>トップ</a> / チュートリアル</p>
+    <h1>チュートリアル</h1>
+    <p class="lead">
+      プログラミングの概念を、1 つずつ順番に学びます。各回のコードは、ボタン 1 つでプレイグラウンドに送って、動かせます。
+    </p>
+    <ol class="toc">
+      {lessons.map((lesson) => (
+        <li>
+          <a class="card" href={`${home}tutorials/${lesson.id.replace(/^\d+-/, "")}`}>
+            <span class="num">{String(lesson.data.order).padStart(2, "0")}　{lesson.data.concept}</span>
+            <h3>{lesson.data.title}</h3>
+            <p>{lesson.data.summary}</p>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </main>
+</Base>

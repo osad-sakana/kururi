@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": { "lib": ["ES2023", "DOM"], "types": ["astro/client"], "noEmit": true },
+  "include": ["src", "test", "astro.config.mjs"]
+}

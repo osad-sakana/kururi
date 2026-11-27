@@ -1,0 +1,71 @@
+:root {
+  color-scheme: light dark;
+  --font-sans: "BIZ UDPGothic", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  --font-mono: "0xProto", ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
+  /* カラートークン（ダーク = 既定）。src/palette.ts と同じ値（ずれると palette.test.ts が落ちる） */
+  --color-canvas: #08080a;
+  --color-panel: #151519;
+  --color-line: #33333b;
+  --color-ink: #e6e6ea;
+  --color-muted: #8c8d94;
+  --color-hover: #232329;
+  --color-accent: #a3e635;
+  --color-accent-ink: #0d1117;
+  --color-danger: #ed5350;
+  --color-success: #45b164;
+  --color-warn: #f1944f;
+  --color-editor: #000000;
+  --color-code: #d7d8dd;
+  --color-code-keyword: #b28fef;
+  --color-code-string: #6dba70;
+  --color-code-number: #f1944f;
+  --color-code-comment: #6b6c73;
+  --color-code-builtin: #b5e655;
+  --color-code-func: #d8b349;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --color-canvas: #f6f6f7;
+    --color-panel: #ffffff;
+    --color-line: #e3e3e6;
+    --color-ink: #202124;
+    --color-muted: #75767d;
+    --color-hover: #eef0f2;
+    --color-accent: #4d7c0f;
+    --color-accent-ink: #ffffff;
+    --color-danger: #be222a;
+    --color-success: #00722e;
+    --color-warn: #9a3e00;
+    --color-editor: #fbfbfc;
+    --color-code: #2a2b2f;
+    --color-code-keyword: #6d41a9;
+    --color-code-string: #045e17;
+    --color-code-number: #9a3e00;
+    --color-code-comment: #9a9ba1;
+    --color-code-builtin: #3f6212;
+    --color-code-func: #734e00;
+  }
+}
+:root[data-theme="light"] {
+  --color-canvas: #f6f6f7;
+  --color-panel: #ffffff;
+  --color-line: #e3e3e6;
+  --color-ink: #202124;
+  --color-muted: #75767d;
+  --color-hover: #eef0f2;
+  --color-accent: #4d7c0f;
+  --color-accent-ink: #ffffff;
+  --color-danger: #be222a;
+  --color-success: #00722e;
+  --color-warn: #9a3e00;
+  --color-editor: #fbfbfc;
+  --color-code: #2a2b2f;
+  --color-code-keyword: #6d41a9;
+  --color-code-string: #045e17;
+  --color-code-number: #9a3e00;
+  --color-code-comment: #9a9ba1;
+  --color-code-builtin: #3f6212;
+  --color-code-func: #734e00;
+}
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; }

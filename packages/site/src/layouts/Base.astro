@@ -1,0 +1,64 @@
+---
+import "../styles/tokens.css"
+import "../styles/site.css"
+import iconUrl from "../../../../assets/logo/kururi-icon.svg?url"
+import logoSvg from "../../../../assets/logo/kururi-wordmark.svg?raw"
+
+interface Props {
+  title?: string
+  description?: string
+  current?: "home" | "tutorials"
+}
+
+const { title, description = "Kururi は、プログラミングの概念を学ぶことに特化した最初の言語です。ここで身につければ、どの言語への入り口にもなります。", current } = Astro.props
+const base = import.meta.env.BASE_URL
+const home = base.endsWith("/") ? base : `${base}/`
+const pageTitle = title === undefined ? "「Kururi」は学習用プログラミング言語！" : `${title} | Kururi`
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={iconUrl} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=0xProto:ital,wght@0,400;0,700;1,400&family=BIZ+UDPGothic:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- プレイグラウンドで選んだ見た目（ライト / ダーク）を、ちらつかせずに引き継ぐ -->
+    <script is:inline>
+      try {
+        var theme = localStorage.getItem("kururi.theme")
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href={home} aria-label="Kururi のトップへ" set:html={logoSvg} />
+        <nav aria-label="サイト内">
+          <a href={`${home}tutorials`} aria-current={current === "tutorials" ? "page" : undefined}>チュートリアル</a>
+          <a href={`${home}playground`}>プレイグラウンド</a>
+          <a href="https://github.com/osad-sakana/kururi">GitHub</a>
+        </nav>
+      </div>
+    </header>
+    <slot />
+    <footer class="site-footer">
+      <div class="wrap">
+        <span>「Kururi」は学習用プログラミング言語！</span>
+        <a href={`${home}tutorials`}>チュートリアル</a>
+        <a href={`${home}playground`}>プレイグラウンド</a>
+        <a href="https://github.com/osad-sakana/kururi">GitHub</a>
+      </div>
+    </footer>
+  </body>
+</html>

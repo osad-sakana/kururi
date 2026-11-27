@@ -1,0 +1,56 @@
+---
+import { getCollection, render } from "astro:content"
+import Base from "../../layouts/Base.astro"
+
+export async function getStaticPaths() {
+  const lessons = (await getCollection("tutorials")).sort((a, b) => a.data.order - b.data.order)
+  return lessons.map((lesson, index) => ({
+    params: { slug: lesson.id.replace(/^\d+-/, "") },
+    props: { lesson, previous: lessons[index - 1], next: lessons[index + 1] },
+  }))
+}
+
+const { lesson, previous, next } = Astro.props
+const { Content } = await render(lesson)
+const base = import.meta.env.BASE_URL
+const home = base.endsWith("/") ? base : `${base}/`
+const slugOf = (id: string) => id.replace(/^\d+-/, "")
+---
+
+<Base title={lesson.data.title} current="tutorials" description={lesson.data.summary}>
+  <main class="wrap prose" data-playground={`${home}playground`}>
+    <p class="crumb"><a href={home}>トップ</a> / <a href={`${home}tutorials`}>チュートリアル</a> / 第 {lesson.data.order} 回</p>
+    <p class="crumb">学ぶ概念：{lesson.data.concept}</p>
+    <h1>{lesson.data.title}</h1>
+    <p class="lead">{lesson.data.summary}</p>
+    <Content />
+    <nav class="pager" aria-label="前後の回">
+      {previous !== undefined ? (
+        <a href={`${home}tutorials/${slugOf(previous.id)}`}><small>前の回</small>{previous.data.title}</a>
+      ) : <span />}
+      {next !== undefined ? (
+        <a class="next" href={`${home}tutorials/${slugOf(next.id)}`}><small>次の回</small>{next.data.title}</a>
+      ) : (
+        <a class="next" href={`${home}playground`}><small>つづき</small>プレイグラウンドで自由に書く</a>
+      )}
+    </nav>
+  </main>
+  <script>
+    import { codeHash } from "../../playground/share"
+
+    // Kururi のコードブロックに、「プレイグラウンドで試す」リンクを付ける
+    const root = document.querySelector<HTMLElement>("[data-playground]")
+    const target = root?.dataset.playground ?? "/playground"
+    for (const pre of document.querySelectorAll<HTMLElement>("pre[data-language='kururi']")) {
+      const code = pre.textContent ?? ""
+      const wrapper = document.createElement("div")
+      wrapper.className = "code-block"
+      pre.replaceWith(wrapper)
+      const link = document.createElement("a")
+      link.className = "try"
+      link.href = `${target}${codeHash(code.replace(/\n$/, "") + "\n")}`
+      link.textContent = "プレイグラウンドで試す"
+      wrapper.append(pre, link)
+    }
+  </script>
+</Base>

@@ -1,0 +1,169 @@
+---
+import { compile } from "@kururi/compiler"
+import Base from "../layouts/Base.astro"
+import { LANGUAGES } from "../data/languages"
+import { renderInline } from "../data/inline"
+import { codeHash } from "../playground/share"
+
+const base = import.meta.env.BASE_URL
+const home = base.endsWith("/") ? base : `${base}/`
+
+const example = `const GREETING: string = "こんにちは"
+
+class Dog = {
+    fields = {
+        private name: string
+    }
+
+    constructor = (name: string) {
+        self.name = name
+    }
+
+    public method bark = () {
+        print(\`\${GREETING}、\${self.name} です\`)
+    }
+}
+
+function main = () {
+    var dog: Dog = new Dog("ポチ")
+    for i in 0..3 {
+        dog.bark()
+    }
+}
+`
+const python = compile(example).python
+
+const concepts = [
+  { title: "値と型", text: "数・文字・真偽。値には「種類」があり、種類が合わないと弾かれる。", slug: "values" },
+  { title: "分岐", text: "条件によって、進む道を分ける。", slug: "branch" },
+  { title: "繰り返し", text: "同じことを、決めた回数や条件が続くあいだ繰り返す。", slug: "loop" },
+  { title: "関数", text: "手順に名前を付け、引数を渡して、結果を受け取る。", slug: "function" },
+  { title: "データの並び", text: "配列で、同じ種類の値をまとめて扱う。", slug: "array" },
+  { title: "クラス", text: "データと動きをひとまとめにして、外から守る。", slug: "class" },
+  { title: "値がない", text: "「ない」かもしれない値を、型で意識する（null）。", slug: "null" },
+  { title: "エラーを読む", text: "何が・どこで・なぜ・どう直すか。エラーは先生になる。", slug: "hello" },
+]
+
+const tools = [
+  { title: "ステップ実行", text: "1 行ずつ進めて、変数の値の変わり方を目で追える。戻ることもできる。" },
+  { title: "直すボタン", text: "エラーの直し方が分かるときは、1 クリックで直せる。何が変わったかも残る。" },
+  { title: "Python との対応", text: "Kururi の行にカーソルを置くと、変換後の Python の対応する行が光る。" },
+  { title: "補完とホバー", text: "名前にカーソルを置くと、型や説明が出る。補完で書き方を思い出せる。" },
+]
+---
+
+<Base current="home">
+  <main>
+    <div class="wrap hero">
+      <p class="eyebrow">KURURI</p>
+      <h1>「Kururi」は<br />学習用プログラミング言語！</h1>
+      <p class="lead">
+        AI がコードを書く時代に必要なのは、書き方の暗記ではなく、プログラミングの<strong>概念</strong>を理解することです。
+        Kururi は、概念を学ぶことに特化した、最初の言語。ここで身につければ、どの言語への入り口にもなります。
+      </p>
+      <div class="actions">
+        <a class="button primary" href={`${home}playground`}>プレイグラウンドで書いてみる</a>
+        <a class="button" href={`${home}tutorials`}>チュートリアルを読む</a>
+      </div>
+    </div>
+
+    <section class="block">
+      <div class="wrap">
+        <h2>こんなふうに書きます</h2>
+        <p class="sub">左が Kururi、右が変換後の Python。書いたコードは、そのまま読める Python になります。</p>
+        <div class="compare">
+          <figure>
+            <figcaption>KURURI</figcaption>
+            <pre class="code"><code>{example}</code></pre>
+          </figure>
+          <figure>
+            <figcaption>PYTHON</figcaption>
+            <pre class="code"><code>{python}</code></pre>
+          </figure>
+        </div>
+        <div class="actions">
+          <a class="button" href={`${home}playground${codeHash(example)}`}>このコードを動かす</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <h2>なぜ、概念なのか</h2>
+        <ul class="plain">
+          <li><strong>書くのは AI の得意技になった。</strong>人に残るのは、出てきたコードを読み、直し、指示する力です。</li>
+          <li><strong>その力の土台は、文法ではなく概念。</strong>型、名前、分岐、繰り返し、関数、データのまとまり、「値がない」こと。これらは言語が変わってもほぼそのまま通じます。</li>
+          <li><strong>だから、概念に集中できる言語を最初に。</strong>Kururi は文法を最小にして、1 つの概念を 1 つの形で見せます。間違えたときは、必ず直し方を添えたエラーで教えます。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <h2>Kururi で学ぶ概念</h2>
+        <p class="sub">順番に進めるチュートリアルがあります。どれも、その場で動かせます。</p>
+        <div class="cards">
+          {concepts.map((concept, index) => (
+            <a class="card" href={`${home}tutorials/${concept.slug}`}>
+              <span class="num">{String(index + 1).padStart(2, "0")}</span>
+              <h3>{concept.title}</h3>
+              <p>{concept.text}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <h2>学びを助ける道具</h2>
+        <div class="cards">
+          {tools.map((tool) => (
+            <div class="card">
+              <h3>{tool.title}</h3>
+              <p>{tool.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="languages">
+      <div class="wrap">
+        <h2>どの言語で役立つか</h2>
+        <p class="sub">
+          どの言語でも変わらないのは「考え方」の部分です。書き方（記号や語順）は言語ごとに違うので、そこは新しい言語で改めて覚えます。
+        </p>
+        <div class="table-scroll">
+          <table class="langs">
+            <thead>
+              <tr><th>言語</th><th>そのまま通じること</th><th>違うこと（最初に戸惑う点）</th></tr>
+            </thead>
+            <tbody>
+              {LANGUAGES.map((row) => (
+                <tr>
+                  <td>{row.name}</td>
+                  <td set:html={renderInline(row.shared)} />
+                  <td set:html={renderInline(row.differs)} />
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <h2>扱わないこと</h2>
+        <p class="sub">Kururi は「入り口」です。全部を教える言語ではありません。</p>
+        <p class="sub">
+          ラムダ・クロージャ、ジェネリクス、非同期・並行処理、メモリ管理、継承などは扱いません。実用言語になることは目指さない、学習用の言語です。
+        </p>
+        <div class="actions">
+          <a class="button primary" href={`${home}tutorials`}>はじめる</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>

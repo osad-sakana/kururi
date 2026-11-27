@@ -7,11 +7,14 @@
     "node": ">=22"
   },
   "scripts": {
+    "dev": "pnpm --filter @kururi/site dev",
+    "build": "pnpm --filter @kururi/site build",
+    "preview": "pnpm --filter @kururi/site preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit -p tsconfig.json && pnpm --filter @kururi/playground typecheck",
+    "typecheck": "tsc --noEmit -p tsconfig.json && pnpm --filter @kururi/site typecheck",
     "narapy-compat": "tsx scripts/narapy-compat.ts",
     "kururi": "tsx packages/cli/src/bin.ts",
-    "playground": "pnpm --filter @kururi/playground dev"
+    "playground": "pnpm --filter @kururi/site dev"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
