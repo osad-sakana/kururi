@@ -22,6 +22,26 @@ const conceptNodes = concepts.map((label, i) => ({ label, at: polar(118, -Math.P
 const languageNodes = languages.map((label, i) => ({ label, at: polar(214, -Math.PI / 2 + Math.PI / languages.length + (i * 2 * Math.PI) / languages.length), width: 26 + label.length * 8.6 }))
 const links = languageNodes.flatMap((language, i) => [conceptNodes[i % concepts.length], conceptNodes[(i + 3) % concepts.length]].map((concept) => ({ from: language.at, to: concept!.at })))
 
+// ---- ヒーローのコード例（Python は、コンパイラが実際に出したもの）----
+const heroSource = `function main = () {
+    var names: string[] = ["さくら", "たろう"]
+    for name in names {
+        print(\`こんにちは、\${name}さん\`)
+    }
+}
+`
+const heroCompiled = compile(heroSource)
+const heroPython = heroCompiled.python.replace(/\n+$/, "")
+const heroOutput = ["こんにちは、さくらさん", "こんにちは、たろうさん"]
+const escapeCode = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+/** 色付けは、字句ごとの簡単なもの（キーワード・型・文字列・数）。 */
+const highlight = (code: string) =>
+  escapeCode(code).replace(/(`[^`]*`|"[^"]*")|\b(function|var|const|for|in|if|else|return|class|def|print|while)\b|\b(int|string|float|boolean|list|str)\b|\b(\d+)\b/g, (match, str, kw, ty, num) =>
+    str !== undefined ? `<span class="s">${match}</span>` : kw !== undefined ? `<span class="k">${match}</span>` : ty !== undefined ? `<span class="y">${match}</span>` : num !== undefined ? `<span class="n">${match}</span>` : match,
+  )
+const heroKururiLines = heroSource.replace(/\n+$/, "").split("\n").map(highlight)
+const heroPythonLines = heroPython.split("\n").map(highlight)
+
 // ---- 理由 1 の図：AI が書き、人が読んで直す ----
 const codeBars = [70, 120, 96, 58, 132, 84, 110, 46]
 
@@ -50,15 +70,15 @@ const errorHtml = escapeHtml(errorText)
       <div class="wrap">
         <div>
           <Logo animated class="hero-logo fade-up" />
-          <p class="pill fade-up" style="--i: 1"><i></i>AI 時代の、新しいプログラミング入門</p>
+          <p class="pill fade-up" style="--i: 1"><i></i>概念を学ぶことに特化した言語</p>
           <h1>
-            <span class="line"><span style="--i: 0">書くのは <em>AI</em>。</span></span>
-            <span class="line"><span style="--i: 1">読んで、直して、</span></span>
-            <span class="line"><span style="--i: 2">決めるのは あなた。</span></span>
+            <span class="line"><span style="--i: 0">AI 時代の、</span></span>
+            <span class="line"><span style="--i: 1">最初の</span></span>
+            <span class="line"><span style="--i: 2"><em>プログラミング言語</em>。</span></span>
           </h1>
           <p class="lead fade-up" style="--i: 5">
-            AI がコードを書く時代に、人に残るのは<strong>概念を理解する力</strong>です。
-            <LogoInline /> は、プログラミングの概念を学ぶことに特化した、最初の言語。ここで身につければ、どの言語への入り口にもなります。
+            書くのは AI。読んで、直して、決めるのは あなた。そのために要るのは、書き方の暗記ではなく<strong>概念の理解</strong>です。
+            <LogoInline /> は、その概念を学ぶことに特化した、最初の言語。ここで身につければ、どの言語への入り口にもなります。
           </p>
           <div class="actions fade-up" style="--i: 6">
             <a class="button primary" href={`${home}tutorials`}>チュートリアルをはじめる</a>
@@ -66,7 +86,37 @@ const errorHtml = escapeHtml(errorText)
           </div>
           <p class="official fade-up" style="--i: 7">「<LogoInline />」は学習用プログラミング言語！</p>
         </div>
-        <div class="orbit-wrap">
+        <div class="hero-code" aria-label="Kururi のコードと、変換後の Python の例">
+          <div class="hc-card">
+            <div class="hc-bar"><i></i><i></i><i></i><span>main.kururi</span></div>
+            <pre class="hc-pre">{heroKururiLines.map((line, i) => <span class="cl" style={`--n:${i}`} set:html={line === "" ? " " : line} />)}</pre>
+          </div>
+          <div class="hc-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 40"><path pathLength="1" d="M12 2 V34 M5 27 L12 35 L19 27" /></svg>
+            <span>Python に変換</span>
+          </div>
+          <div class="hc-card hc-py">
+            <div class="hc-bar"><i></i><i></i><i></i><span>main.py</span></div>
+            <pre class="hc-pre">{heroPythonLines.map((line, i) => <span class="pl" style={`--n:${i}`} set:html={line === "" ? " " : line} />)}</pre>
+            <div class="hc-out">
+              {heroOutput.map((line, i) => <span class="ol" style={`--n:${i}`}>{line}</span>)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- なぜ、概念なのか -->
+    <section class="why" id="why">
+      <div class="wrap">
+        <div class="intro">
+          <div data-reveal>
+            <p class="kicker">Why concepts</p>
+            <h2>なぜ、概念なのか</h2>
+            <p class="body">文法を覚える時代は、終わりつつあります。これから必要なのは、AI が出したものを、理解して使いこなす力です。</p>
+            <p class="body">概念とは、型、名前、分岐、繰り返し、関数、データのまとまり、「値がない」こと。中心にこれらがあり、まわりに、いろいろな言語があります。</p>
+          </div>
+        <div class="orbit-wrap" data-reveal="200">
           <svg class="orbit" viewBox="0 0 520 520" role="img" aria-label="中心の Kururi が、型・名前・分岐などの概念と、Python や TypeScript などの言語をつないでいる図">
             <defs>
               <linearGradient id="core-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0e7490" /><stop offset="1" stop-color="#164e63" /></linearGradient>
@@ -108,16 +158,6 @@ const errorHtml = escapeHtml(errorText)
             <text class="t" x={CENTER} y={CENTER + 74} text-anchor="middle" font-size="15" font-weight="800" letter-spacing="3">概念</text>
           </svg>
         </div>
-      </div>
-    </section>
-
-    <!-- なぜ、概念なのか -->
-    <section class="why" id="why">
-      <div class="wrap">
-        <div class="intro" data-reveal>
-          <p class="kicker">Why concepts</p>
-          <h2>なぜ、概念なのか</h2>
-          <p class="body">文法を覚える時代は、終わりつつあります。これから必要なのは、AI が出したものを、理解して使いこなす力です。</p>
         </div>
 
         <div class="reason" data-reveal>
@@ -239,7 +279,7 @@ const errorHtml = escapeHtml(errorText)
         </div>
         <div class="snippets" data-reveal>
           <div class="snippet kururi">
-            <h4>KURURI</h4>
+            <h4><LogoInline /></h4>
             <pre set:html={`function <mark class="n" style="--k:0">add</mark> = (<mark class="a" style="--k:1">a: int, b: int</mark>) -> <mark class="r" style="--k:2">int</mark> {\n    return a + b\n}`} />
           </div>
           <div class="snippet">
