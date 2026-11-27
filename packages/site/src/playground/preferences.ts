@@ -6,6 +6,7 @@ export const FONT_SIZE = { min: 10, max: 24, step: 1, initial: 13 } as const
 const THEME_ORDER: readonly ThemePreference[] = ["system", "light", "dark"]
 const FONT_KEY = "kururi.fontSize"
 const THEME_KEY = "kururi.theme"
+const PYTHON_KEY = "kururi.pythonOpen"
 
 export function clampFontSize(size: number): number {
   if (!Number.isFinite(size)) return FONT_SIZE.initial
@@ -54,4 +55,13 @@ export function loadThemePreference(): ThemePreference {
 
 export function saveThemePreference(preference: ThemePreference): void {
   write(THEME_KEY, preference)
+}
+
+/** Python 欄を開いておくか。初めは閉じておく（学ぶのは Kururi なので、まず Kururi に集中できるように）。 */
+export function loadPythonOpen(): boolean {
+  return read(PYTHON_KEY) === "open"
+}
+
+export function savePythonOpen(open: boolean): void {
+  write(PYTHON_KEY, open ? "open" : "closed")
 }

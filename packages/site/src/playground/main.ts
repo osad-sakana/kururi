@@ -27,7 +27,7 @@ import { createStepPanel } from "./step-panel"
 import { SAMPLE } from "./sample"
 import { sourceFromHash } from "./share"
 import { SAMPLES } from "./samples"
-import { FONT_SIZE, clampFontSize, loadFontSize, loadThemePreference, nextThemePreference, saveFontSize, saveThemePreference } from "./preferences"
+import { FONT_SIZE, clampFontSize, loadFontSize, loadPythonOpen, savePythonOpen, loadThemePreference, nextThemePreference, saveFontSize, saveThemePreference } from "./preferences"
 import { applyTheme, defineThemes, onSystemThemeChange } from "./theme"
 import "../styles/tokens.css"
 import "./style.css"
@@ -57,6 +57,8 @@ function loadSource(): string {
 }
 
 function saveSource(source: string): void {
+  // チュートリアルの横に埋め込まれているときは、自分のプレイグラウンドのコードを上書きしない
+  if (new URLSearchParams(location.search).has("embed")) return
   try {
     localStorage.setItem(STORAGE_KEY, source)
   } catch {
@@ -135,6 +137,18 @@ const output = element("output")
 let currentUrl: string | null = null
 let currentAnalysis = analyze("")
 let pendingInput: { readonly row: HTMLElement; readonly cancel: () => void } | null = null
+
+// Python 欄は、初めは閉じておく（開閉は覚えておく）
+const pythonToggle = element<HTMLButtonElement>("python-toggle")
+const rightPane = pythonToggle.closest("section")
+function setPythonOpen(open: boolean): void {
+  rightPane?.classList.toggle("python-closed", !open)
+  pythonToggle.setAttribute("aria-expanded", String(open))
+  savePythonOpen(open)
+  if (open) requestAnimationFrame(() => pythonView.layout())
+}
+pythonToggle.addEventListener("click", () => setPythonOpen(pythonToggle.getAttribute("aria-expanded") !== "true"))
+setPythonOpen(loadPythonOpen())
 
 const THEME_LABELS = { system: "見た目：自動", light: "見た目：ライト", dark: "見た目：ダーク" } as const
 const themeButton = element<HTMLButtonElement>("theme")

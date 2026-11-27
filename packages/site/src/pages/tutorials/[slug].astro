@@ -52,7 +52,6 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
   <script>
     import { codeHash, sourceFromHash } from "../../playground/share"
 
-    const PANEL_KEY = "kururi.panel"
     const WIDTH_KEY = "kururi.panelWidth"
     const reader = document.querySelector<HTMLElement>(".reader")
     const iframe = document.querySelector<HTMLIFrameElement>(".side iframe")
@@ -79,7 +78,6 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
     const open = (code?: string) => {
       if (!reader || !iframe) return
       reader.classList.add("open")
-      store.set(PANEL_KEY, "open")
       if (!loaded) {
         loaded = true
         iframe.src = `${target}?embed=1${code === undefined ? "" : codeHash(code)}`
@@ -87,7 +85,6 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
     }
     const close = () => {
       reader?.classList.remove("open")
-      store.set(PANEL_KEY, "closed")
     }
     toggle?.addEventListener("click", () => open())
     closeButton?.addEventListener("click", close)
@@ -129,9 +126,11 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
       addEventListener("pointerup", stop)
     })
 
-    // 前回開いていたら、広い画面では開いたままにする（#code= で来たときは、そのコードを入れる）
+    // チュートリアルを開いたら、広い画面では必ず横にプレイグラウンドを開く。
+    // 最初は、この回の最初のコードを入れておく（#code= で来たときは、そのコード）
+    const firstCode = document.querySelector<HTMLAnchorElement>("a.try")
     const fromHash = sourceFromHash(location.hash)
-    if (fromHash !== null) open(fromHash)
-    else if (store.get(PANEL_KEY) === "open" && innerWidth > 1100) open()
+    const initial = fromHash ?? (firstCode === null ? undefined : sourceFromHash(new URL(firstCode.href).hash) ?? undefined)
+    if (fromHash !== null || innerWidth > 1100) open(initial)
   </script>
 </Base>

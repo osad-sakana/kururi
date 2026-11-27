@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { FONT_SIZE, clampFontSize, nextThemePreference, resolveTheme } from "../../src/playground/preferences"
+import { FONT_SIZE, clampFontSize, loadPythonOpen, nextThemePreference, resolveTheme } from "../../src/playground/preferences"
 
 describe("clampFontSize", () => {
   it("範囲に収め、整数にする", () => {
@@ -23,5 +23,11 @@ describe("theme", () => {
     expect(resolveTheme("system", false)).toBe("light")
     expect(resolveTheme("light", true)).toBe("light")
     expect(resolveTheme("dark", false)).toBe("dark")
+  })
+})
+
+describe("Python 欄", () => {
+  it("保存した値がなければ、閉じておく", () => {
+    expect(loadPythonOpen()).toBe(false)
   })
 })
