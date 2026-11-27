@@ -9,9 +9,8 @@
 .lp p.body { color: var(--color-muted); font-size: 1.05rem; max-width: 36rem; margin: 0 0 1rem; }
 .lp p.body strong { color: var(--color-ink); }
 .lp .accent { color: var(--color-accent); }
-.lp a.button { position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s, background 0.2s; }
+.lp a.button { position: relative; overflow: hidden; transition: transform 0.2s, background 0.2s; }
 .lp a.button:hover { transform: translateY(-2px); }
-.lp a.button.primary { box-shadow: 0 8px 28px color-mix(in srgb, var(--color-accent) 35%, transparent); }
 .lp a.button::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.35) 50%, transparent 70%); transform: translateX(-120%); }
 .lp a.button:hover::after { transform: translateX(120%); transition: transform 0.7s; }
 
@@ -37,7 +36,7 @@
 .lp-hero h1 { font-size: clamp(2.2rem, 5.2vw, 3.9rem); line-height: 1.22; letter-spacing: -0.025em; margin: 0 0 1.4rem; font-weight: 800; }
 .lp-hero h1 .line { display: block; overflow: hidden; padding-bottom: 0.06em; }
 .lp-hero h1 .line > span { display: block; animation: rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(0.35s + var(--i, 0) * 0.14s); }
-.lp-hero h1 em { font-style: normal; color: var(--color-spark); text-shadow: 0 0 32px color-mix(in srgb, var(--color-spark) 45%, transparent); }
+.lp-hero h1 em { font-style: normal; color: var(--color-spark); }
 @keyframes rise { from { transform: translateY(105%); } }
 .fade-up { animation: fade-up 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 0.12s + 0.2s); }
 @keyframes fade-up { from { opacity: 0; transform: translateY(20px); } }
@@ -99,14 +98,12 @@ svg .bar-sp { fill: var(--color-spark); }
 .js .in .grow { transform: scaleX(1); }
 .js .slide { opacity: 0; transform: translateX(-26px); transition: opacity 0.5s ease calc(var(--base, 0) * 1ms + var(--i, 0) * 130ms), transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--base, 0) * 1ms + var(--i, 0) * 130ms); }
 .js .in .slide { opacity: 1; transform: translateX(0); }
-.glow-box { animation: box-glow 3.2s ease-in-out infinite 1.6s; }
-@keyframes box-glow { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(0 0 12px color-mix(in srgb, var(--color-spark) 55%, transparent)); } }
 .scan { animation: scan 3.6s ease-in-out infinite 1.4s; }
 @keyframes scan { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
 
 /* ---- 同じ概念、どの言語でも ---- */
 .same .head { max-width: 44rem; margin-bottom: 2.5rem; }
-.snippets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid var(--color-line); border-radius: 18px; overflow: hidden; background: var(--color-editor); box-shadow: 0 30px 60px -30px color-mix(in srgb, #000 40%, transparent); }
+.snippets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid var(--color-line); border-radius: 18px; overflow: hidden; background: var(--color-editor); }
 .snippet { padding: 1.2rem 1.5rem 1.4rem; border-right: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); min-width: 0; }
 .snippet:nth-child(even) { border-right: 0; }
 .snippet:nth-child(n + 3) { border-bottom: 0; }
@@ -128,7 +125,7 @@ mark.r { --mk: var(--color-code-keyword); }
 .how { background: linear-gradient(180deg, color-mix(in srgb, var(--color-panel) 70%, var(--color-canvas)), var(--color-panel)); border-block: 1px solid var(--color-line); }
 .how .head { max-width: 40rem; margin-bottom: 2.5rem; }
 .how .window { margin: 0 0 3rem; }
-.how .window svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 30px 50px color-mix(in srgb, #000 35%, transparent)); }
+.how .window svg { width: 100%; height: auto; display: block; }
 .demo-hl { fill: var(--color-spark); fill-opacity: 0.18; transition: transform 0.45s cubic-bezier(0.3, 1, 0.4, 1); }
 .demo-btn { transition: transform 0.15s, fill 0.15s; transform-box: fill-box; transform-origin: center; }
 .demo-btn.press { transform: scale(0.92); fill: color-mix(in srgb, var(--color-spark) 40%, var(--color-panel)); }
@@ -145,7 +142,7 @@ mark.r { --mk: var(--color-code-keyword); }
 
 /* ---- エラーは先生 ---- */
 .teach .wrap { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
-.terminal { position: relative; border: 1px solid var(--color-line); border-radius: 18px; background: var(--color-editor); overflow: hidden; box-shadow: 0 30px 60px -30px color-mix(in srgb, #000 45%, transparent); }
+.terminal { position: relative; border: 1px solid var(--color-line); border-radius: 18px; background: var(--color-editor); overflow: hidden; }
 .terminal .bar { display: flex; align-items: center; gap: 6px; padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--color-line); background: var(--color-panel); font: 11px var(--font-mono); color: var(--color-muted); }
 .terminal .bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--color-line); }
 .terminal .screen { position: relative; min-height: 15.5rem; }
