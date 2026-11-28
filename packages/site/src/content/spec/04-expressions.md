@@ -25,18 +25,18 @@ to_int("12") + 1
 演算子は、**左から右へ**評価されます。ただし、`and`と`or`は、左を評価して答えが決まれば、右を評価しません（短絡評価）。
 
 ```kururi
-function noisy = () -> boolean {
+function is_noisy = () -> boolean {
     print("評価された")
     return true
 }
 
 function main = () {
-    print(true or noisy())
-    print(false and noisy())
+    print(true or is_noisy())
+    print(false and is_noisy())
 }
 ```
 
-上のコードでは、`noisy()`は一度も呼ばれません。
+上のコードでは、`is_noisy()`は一度も呼ばれません。
 
 ## 演算子
 

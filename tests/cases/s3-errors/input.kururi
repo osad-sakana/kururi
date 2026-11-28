@@ -4,7 +4,7 @@ function twice = (n: int) -> int {
     return n * 2
 }
 
-function check = (n: int, label: string) -> boolean {
+function is_valid = (n: int, label: string) -> boolean {
     var n: int = 1
     if n > 0 {
         return true
@@ -18,6 +18,6 @@ function show = () {
 function main = () {
     twice(1, 2)
     twice("a")
-    var ok: boolean = check(1)
+    var is_ok: boolean = is_valid(1)
     var v: int = show()
 }

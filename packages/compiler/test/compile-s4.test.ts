@@ -53,8 +53,8 @@ describe("compile (S4): 生成", () => {
 
   it("オブジェクトの配列と、他のオブジェクトのフィールド", () => {
     const src = withMain(
-      "class Node = {\n  fields = {\n    public value: int\n  }\n  constructor = (value: int) {\n    self.value = value\n  }\n  public method same = (other: Node) -> boolean {\n    return self.value == other.value\n  }\n}",
-      "  var nodes: Node[] = [new Node(1), new Node(2)]\n  nodes.push(new Node(3))\n  nodes[0].value = 5\n  nodes[1].value += 1\n  print(nodes[0].same(nodes[1]))",
+      "class Node = {\n  fields = {\n    public value: int\n  }\n  constructor = (value: int) {\n    self.value = value\n  }\n  public method is_same = (other: Node) -> boolean {\n    return self.value == other.value\n  }\n}",
+      "  var nodes: Node[] = [new Node(1), new Node(2)]\n  nodes.push(new Node(3))\n  nodes[0].value = 5\n  nodes[1].value += 1\n  print(nodes[0].is_same(nodes[1]))",
     )
     expect(codesOf(src)).toEqual([])
     expect(compile(src).python).toContain("nodes[0].value = 5")
@@ -85,18 +85,18 @@ describe("compile (S4): 診断", () => {
 
   it("同じクラスの中なら、他のインスタンスの private も使える", () => {
     expect(
-      codesOf(withMain("class A = {\n  fields = {\n    v: int = 1\n  }\n  public method eq = (o: A) -> boolean {\n    return self.v == o.v\n  }\n}")),
+      codesOf(withMain("class A = {\n  fields = {\n    v: int = 1\n  }\n  public method is_equal = (o: A) -> boolean {\n    return self.v == o.v\n  }\n}")),
     ).toEqual([])
   })
 
   it("初期値のないフィールドを constructor が代入しないと K0405", () => {
     expect(codesOf(withMain("class A = {\n  fields = {\n    x: int\n  }\n}"))).toEqual(["K0405"])
     expect(codesOf(withMain("class A = {\n  fields = {\n    x: int\n  }\n  constructor = () {\n  }\n}"))).toEqual(["K0405"])
-    expect(codesOf(withMain("class A = {\n  fields = {\n    x: int\n  }\n  constructor = (f: boolean) {\n    if f {\n      self.x = 1\n    }\n  }\n}"))).toEqual(["K0405"])
+    expect(codesOf(withMain("class A = {\n  fields = {\n    x: int\n  }\n  constructor = (is_f: boolean) {\n    if is_f {\n      self.x = 1\n    }\n  }\n}"))).toEqual(["K0405"])
   })
 
   it("if / else の両方で代入していればよい", () => {
-    expect(codesOf(withMain("class A = {\n  fields = {\n    x: int\n  }\n  constructor = (f: boolean) {\n    if f {\n      self.x = 1\n    } else {\n      self.x = 2\n    }\n  }\n}"))).toEqual([])
+    expect(codesOf(withMain("class A = {\n  fields = {\n    x: int\n  }\n  constructor = (is_f: boolean) {\n    if is_f {\n      self.x = 1\n    } else {\n      self.x = 2\n    }\n  }\n}"))).toEqual([])
   })
 
   it("self をクラスの外で使うと K0404", () => {

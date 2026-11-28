@@ -76,3 +76,34 @@ describe("compile: 名前の書き方（K0506）", () => {
     expect(codesOf(main("  var 合計: int = 1"))).toEqual([])
   })
 })
+
+describe("compile: boolean の名前（K0507）", () => {
+  const main = (body: string): string => `function main = () {\n${body}\n}\n`
+  const codesOf = (source: string): string[] => compile(source).diagnostics.map((d) => d.code)
+
+  it("boolean の変数・引数・フィールド・関数・メソッドは is_ か has_ で始める", () => {
+    expect(codesOf(main("  var ready: boolean = true\n  print(ready)"))).toEqual(["K0507"])
+    expect(codesOf(main("  var is_ready: boolean = true\n  var has_items: boolean = false\n  print(is_ready and has_items)"))).toEqual([])
+    expect(codesOf("function check = (flag: boolean) {\n}\n" + main(""))).toEqual(["K0507"])
+    expect(codesOf("function even = (n: int) -> boolean {\n  return n % 2 == 0\n}\n" + main(""))).toEqual(["K0507"])
+    expect(codesOf("class A = {\n  fields = {\n    public open: boolean = true\n  }\n  public method done = () -> boolean {\n    return true\n  }\n}\n" + main(""))).toEqual(["K0507", "K0507"])
+  })
+
+  it("const は IS_ か HAS_ で始める", () => {
+    expect(codesOf("const DEBUG: boolean = true\n" + main(""))).toEqual(["K0507"])
+    expect(codesOf("const IS_DEBUG: boolean = true\n" + main(""))).toEqual([])
+  })
+
+  it("boolean 以外・boolean の配列・boolean? は対象外。日本語の名前も対象外", () => {
+    expect(codesOf(main("  var ready: int = 1\n  var flags: boolean[] = [true]\n  var maybe: boolean? = null\n  var 準備: boolean = true\n  print(ready)\n  print(flags)\n  print(maybe)\n  print(準備)"))).toEqual([])
+  })
+
+  it("1 クリックで is_ を付けて直せる（名前の使われている所もまとめて直す）", () => {
+    const [diagnostic] = compile(main("  var ready: boolean = true\n  print(ready)")).diagnostics
+    expect(diagnostic?.fix).toEqual({ title: "「is_ready」に直す", text: "is_ready", renameAll: true })
+  })
+
+  it("名前の書き方（スネークケース）の違反があるときは、そちらだけを出す", () => {
+    expect(codesOf(main("  var isReady: boolean = true\n  print(isReady)"))).toEqual(["K0506"])
+  })
+})

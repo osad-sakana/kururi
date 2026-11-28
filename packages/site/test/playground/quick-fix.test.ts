@@ -28,7 +28,7 @@ describe("applyFix", () => {
       "function main = () {\n    let x: int = 1\n    print(x)\n}\n",
       "function main = () {\n    var someValue: int = 1\n    print(someValue)\n}\n",
       "function main = () {\n    var count: int = 0\n    count++\n}\n",
-      "function main = () {\n    var a: boolean = true && false\n}\n",
+      "function main = () {\n    var is_a: boolean = true && false\n}\n",
     ]
     for (const source of sources) {
       const marker = analyze(source).markers.find((m) => m.fix !== undefined)

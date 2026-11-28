@@ -29,10 +29,10 @@ describe("compile (S1): 生成", () => {
   })
 
   it("var と const は型注釈つきの代入になる", () => {
-    const { python } = compile(main("  var a: int = 1\n  const B: float = 2\n  var c: boolean = true"))
+    const { python } = compile(main("  var a: int = 1\n  const B: float = 2\n  var is_c: boolean = true"))
     expect(python).toContain("    a = 1")
     expect(python).toContain("    B = 2.0")
-    expect(python).toContain("    c = True")
+    expect(python).toContain("    is_c = True")
   })
 
   it("int を float に入れるときは float に変換する", () => {
@@ -53,14 +53,14 @@ describe("compile (S1): 生成", () => {
   })
 
   it("boolean は true / false と表示する", () => {
-    const { python } = compile(main("  var a: boolean = 1 < 2 and not false\n  print(a)\n  print(to_string(a))"))
-    expect(python).toContain('print("true" if a else "false")')
-    expect(python).toContain('print(("true" if a else "false"))')
+    const { python } = compile(main("  var is_ok: boolean = 1 < 2 and not false\n  print(is_ok)\n  print(to_string(is_ok))"))
+    expect(python).toContain('print("true" if is_ok else "false")')
+    expect(python).toContain('print(("true" if is_ok else "false"))')
   })
 
   it("文字列補間は f 文字列になり、{ } は二重にする", () => {
-    const { python } = compile(main('  var n: int = 1\n  var b: boolean = false\n  print("{n} ${n + 1} ${b} \\"x\\"")'))
-    expect(python).toContain('print(f"{{n}} {n + 1} {("true" if b else "false")} \\"x\\"")')
+    const { python } = compile(main('  var n: int = 1\n  var is_b: boolean = false\n  print("{n} ${n + 1} ${is_b} \\"x\\"")'))
+    expect(python).toContain('print(f"{{n}} {n + 1} {("true" if is_b else "false")} \\"x\\"")')
   })
 
   it("式を含まない補間は普通の文字列にする", () => {

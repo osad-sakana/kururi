@@ -72,7 +72,7 @@ Pythonのように、`xs[-1]`で最後の要素は取れません。`xs[xs.lengt
 
 ### 名前の付け方が決まっている
 
-変数・関数は`snake_case`、クラスは`UpperCamelCase`、定数は`UPPER_SNAKE_CASE`です。違うとエラーになります。
+変数・関数は`snake_case`、クラスは`UpperCamelCase`、定数は`UPPER_SNAKE_CASE`です。`boolean`の名前は、`is_`か`has_`で始めます。違うとエラーになります。
 
 ### 値を返さない関数も式
 

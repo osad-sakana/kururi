@@ -1,24 +1,24 @@
 error[K0103]: 「&&」は Kururi では使えない文字です
- --> input.kururi:3:10
+ --> input.kururi:3:13
   |
-3 |     if a && false || !a {
-  |          ^^
+3 |     if is_a && false || !is_a {
+  |             ^^
   |
 help: 「かつ」は and と書きます
 
 error[K0103]: 「||」は Kururi では使えない文字です
- --> input.kururi:3:19
+ --> input.kururi:3:22
   |
-3 |     if a && false || !a {
-  |                   ^^
+3 |     if is_a && false || !is_a {
+  |                      ^^
   |
 help: 「または」は or と書きます
 
 error[K0103]: 「!」は Kururi では使えない文字です
- --> input.kururi:3:22
+ --> input.kururi:3:25
   |
-3 |     if a && false || !a {
-  |                      ^
+3 |     if is_a && false || !is_a {
+  |                         ^
   |
 help: 「でない」は not と書きます（例: not x）
 

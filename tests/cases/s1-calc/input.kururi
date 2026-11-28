@@ -6,11 +6,11 @@ function main = () {
     var count: int = 3
     var total: int = price * count
     var with_tax: float = total * (1 + TAX_RATE)
-    var big: boolean = total > 3000 and not (count == 0)
+    var is_big: boolean = total > 3000 and not (count == 0)
 
     print("小計: " + to_string(total))
     print("税込: ${with_tax} 円（個数 ${count}、{そのまま}）")
-    print(big)
+    print(is_big)
     print(7 / 2)
     print(-7 % 3)
 }

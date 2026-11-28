@@ -60,7 +60,7 @@ function main = () {
 
 同じことを何通りにも書けると、読むときに迷います。Kururiは、書き方をなるべく1つに決めています。
 
-- 名前の付け方を決めています（変数は`snake_case`、クラスは`UpperCamelCase`、定数は`UPPER_SNAKE_CASE`）。
+- 名前の付け方を決めています（変数は`snake_case`、クラスは`UpperCamelCase`、定数は`UPPER_SNAKE_CASE`。`boolean`は`is_`か`has_`で始めます）。
 - 繰り返しは`for`と`while`だけです。
 - 変数は`var`と`const`だけです。
 

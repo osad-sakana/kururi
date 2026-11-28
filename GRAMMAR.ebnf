@@ -36,7 +36,10 @@
      クラス名: 先頭が大文字で "_" を含まない（アッパーキャメルケース）
      const の名前: 小文字を含まない（大文字のスネークケース）
      それ以外（var・関数・method・引数・フィールド・ループ変数）: 大文字を含まない（スネークケース）
-     英字を含まない名前（日本語など）は対象外 *)
+     英字を含まない名前（日本語など）は対象外
+   boolean の名前（意味検査。違反は K0507）
+     型が boolean の変数・引数・フィールドと、-> boolean の関数・メソッドは、is_ か has_ で始める。
+     const は IS_ か HAS_ で始める。boolean[] と boolean? は対象外。英字を含まない名前も対象外 *)
 IDENT     = idStart { idContinue } ;
                 (* idStart / idContinue は Python の XID_Start / XID_Continue に揃える
                    （ひらがな・カタカナ・漢字・ASCII の英字と "_"。数字は ASCII の 0〜9 のみ）。

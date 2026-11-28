@@ -6,11 +6,11 @@ error[K0323]: トップレベルの初期値で、自分で作った関数「twi
   |
 help: 初期値に使えるのは、リテラル・演算・const・組み込み関数だけです。main の中で計算してください
 
-error[K0322]: 関数「check」は boolean の値を返す関数なのに、return しない道があります
+error[K0322]: 関数「is_valid」は boolean の値を返す関数なのに、return しない道があります
  --> input.kururi:7:10
   |
-7 | function check = (n: int, label: string) -> boolean {
-  |          ^^^^^ ここで関数が終わってしまうことがあります
+7 | function is_valid = (n: int, label: string) -> boolean {
+  |          ^^^^^^^^ ここで関数が終わってしまうことがあります
   |
 help: if / else のすべての場合と、関数の最後に return を書いてください
 
@@ -46,11 +46,11 @@ error[K0301]: string の値を int には入れられません
    |
 help: int の値を書くか、型を string に変えてください
 
-error[K0305]: check には引数が 2 個必要ですが、1 個書かれています
-  --> input.kururi:21:23
+error[K0305]: is_valid には引数が 2 個必要ですが、1 個書かれています
+  --> input.kururi:21:26
    |
-21 |     var ok: boolean = check(1)
-   |                       ^^^^^^^^ 引数は 2 個です
+21 |     var is_ok: boolean = is_valid(1)
+   |                          ^^^^^^^^^^^ 引数は 2 個です
    |
 help: 引数を 2 個にそろえてください（関数を作ったときの引数の数と同じにします）
 

@@ -13,9 +13,9 @@ describe("compile (S11): 文字列と配列のメソッド", () => {
         "  var a: string = s.upper()",
         "  var b: string = s.lower()",
         "  var c: string = s.trim()",
-        '  var d: boolean = s.contains("H")',
-        '  var e: boolean = s.starts_with("H")',
-        '  var f: boolean = s.ends_with("o")',
+        '  var is_d: boolean = s.contains("H")',
+        '  var is_e: boolean = s.starts_with("H")',
+        '  var is_f: boolean = s.ends_with("o")',
         '  var g: int = s.index_of("l")',
         '  var h: string = s.replace("l", "L")',
         '  var parts: string[] = s.split(" ")',
@@ -24,9 +24,9 @@ describe("compile (S11): 文字列と配列のメソッド", () => {
     expect(python).toContain("a = s.upper()")
     expect(python).toContain("b = s.lower()")
     expect(python).toContain("c = s.strip()")
-    expect(python).toContain('d = ("H" in s)')
-    expect(python).toContain('e = s.startswith("H")')
-    expect(python).toContain('f = s.endswith("o")')
+    expect(python).toContain('is_d = ("H" in s)')
+    expect(python).toContain('is_e = s.startswith("H")')
+    expect(python).toContain('is_f = s.endswith("o")')
     expect(python).toContain('g = s.find("l")')
     expect(python).toContain('h = s.replace("l", "L")')
     expect(python).toContain('parts = s.split(" ")')
@@ -37,16 +37,16 @@ describe("compile (S11): 文字列と配列のメソッド", () => {
   })
 
   it("配列の contains と join", () => {
-    const python = pythonOf('  var xs: int[] = [1, 2]\n  var ok: boolean = xs.contains(2)\n  var names: string[] = ["a", "b"]\n  var text: string = names.join(", ")')
-    expect(python).toContain("ok = (2 in xs)")
+    const python = pythonOf('  var xs: int[] = [1, 2]\n  var has_two: boolean = xs.contains(2)\n  var names: string[] = ["a", "b"]\n  var text: string = names.join(", ")')
+    expect(python).toContain("has_two = (2 in xs)")
     expect(python).toContain('text = ", ".join(names)')
   })
 
   it("引数の型が違えば K0301、数が違えば K0305", () => {
-    expect(codesOf(main('  var s: string = "a"\n  var b: boolean = s.contains(1)'))).toEqual(["K0301"])
+    expect(codesOf(main('  var s: string = "a"\n  var is_b: boolean = s.contains(1)'))).toEqual(["K0301"])
     expect(codesOf(main('  var s: string = "a"\n  var t: string = s.upper(1)'))).toEqual(["K0305"])
     expect(codesOf(main('  var s: string = "a"\n  var t: string = s.replace("a")'))).toEqual(["K0305"])
-    expect(codesOf(main("  var xs: int[] = [1]\n  var ok: boolean = xs.contains(\"a\")"))).toEqual(["K0301"])
+    expect(codesOf(main("  var xs: int[] = [1]\n  var has_two: boolean = xs.contains(\"a\")"))).toEqual(["K0301"])
   })
 
   it("戻り値の型で検査される", () => {

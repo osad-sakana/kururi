@@ -7,10 +7,10 @@ def main():
     count = 3
     total = price * count
     with_tax = total * (1 + TAX_RATE)
-    big = total > 3000 and not (count == 0)
+    is_big = total > 3000 and not (count == 0)
     print("小計: " + str(total))
     print(f"税込: {with_tax} 円（個数 {count}、{{そのまま}}）")
-    print("true" if big else "false")
+    print("true" if is_big else "false")
     print(7 / 2)
     print(-7 % 3)
 

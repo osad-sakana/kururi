@@ -2,6 +2,7 @@ import type { Reporter } from "../reporter"
 import type { ClassMember, ConstructorDecl, Expr, FunctionDecl, Program, TopLevel, VarDecl } from "../syntax/ast"
 import { checkClass, registerMembers } from "./check-class"
 import { ExprChecker } from "./check-expr"
+import { checkBooleanNames } from "./boolean-names"
 import { checkCallable } from "./check-function"
 import { resolveType } from "./check-stmt"
 import type { FunctionContext } from "./check-stmt"
@@ -22,6 +23,7 @@ export interface CheckResult {
 /** 名前の解決と型の検査。診断は reporter にためる。 */
 export function check(program: Program, reporter: Reporter): CheckResult {
   const exprs = new ExprChecker(reporter)
+  checkBooleanNames(program, reporter)
   const { globals, primary, members } = registerTopLevel(program, reporter)
   const globalWrites = new Map<object, readonly string[]>()
   const base = { globals, exprs, reporter }

@@ -454,6 +454,14 @@ export const DIAGNOSTIC_CATALOG = {
     label: () => "書き方が違います",
     hint: ({ rule = "", suggestion = "" }) => `${rule}。「${suggestion}」のように直してください`,
   },
+  K0507: {
+    code: "K0507",
+    severity: "error",
+    message: ({ name = "" }) => `boolean の名前「${name}」は、is_ か has_ で始めます`,
+    label: () => "真偽を表す名前にします",
+    hint: ({ suggestion = "", constant }) =>
+      `boolean の変数・引数・フィールド・関数の名前は、${constant === "1" ? "IS_ か HAS_" : "is_ か has_"} で始めます（例: ${constant === "1" ? "IS_DEBUG、HAS_LIMIT" : "is_ready、has_items"}）。「${suggestion}」のように直してください`,
+  },
   K0504: {
     code: "K0504",
     severity: "error",

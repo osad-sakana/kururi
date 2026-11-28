@@ -96,8 +96,8 @@ function main = (args: string[]) {
 
 ```kururi
 function main = () {
-    var a: boolean = true
-    if a {
+    var is_a: boolean = true
+    if is_a {
         var x: int = 1
         print(x)
     } else {
@@ -115,8 +115,8 @@ function main = () {
 
 ```kururi-error K0211
 function main = () {
-    var a: boolean = true
-    if a {
+    var is_a: boolean = true
+    if is_a {
         var x: int = 1
         print(x)
     } else {

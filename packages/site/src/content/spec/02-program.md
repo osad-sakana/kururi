@@ -81,6 +81,37 @@ function main = () {
 | `const` | 小文字を含まない | `MAX_COUNT` |
 | それ以外（`var`、関数、メソッド、引数、フィールド、ループ変数） | 大文字を含まない | `total_count`、`add_item` |
 
+### boolean の名前
+
+型が`boolean`の名前は、`is_`か`has_`で始めます。`if is_ready`のように、条件が文として読めて、真偽の値だと名前から分かるようにするためです。
+
+- 対象：`boolean`型の変数・引数・フィールドと、`-> boolean`の関数・メソッド。
+- `const`は、`IS_`か`HAS_`で始めます（`IS_DEBUG`）。
+- `boolean[]`と`boolean?`は、対象外です。
+
+```kururi
+const IS_DEBUG: boolean = false
+
+function is_even = (n: int) -> boolean {
+    return n % 2 == 0
+}
+
+function main = () {
+    var has_items: boolean = true
+    print(is_even(4) and has_items)
+    print(IS_DEBUG)
+}
+```
+
+```kururi-error K0507
+function main = () {
+    var ready: boolean = true
+    print(ready)
+}
+```
+
+名前の書き方の決まりは、次のとおりです。
+
 - ひらがな・カタカナ・漢字の名前も使えます（英字を含まない名前は、上の決まりの対象外です）。
 - `__`で始まる名前は使えません。
 - 全角の英数字や、半角のカタカナなど、正規化で形が変わる文字は使えません。

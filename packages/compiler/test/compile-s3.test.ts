@@ -8,13 +8,13 @@ describe("compile (S3): 生成", () => {
   it("引数と戻り値のある関数", () => {
     const { python, diagnostics } = compile(
       withMain(
-        "function add = (a: int, b: int) -> int {\n  return a + b\n}\nfunction greet = (names: string[], flag: boolean) {\n  return\n}",
+        "function add = (a: int, b: int) -> int {\n  return a + b\n}\nfunction greet = (names: string[], is_flag: boolean) {\n  return\n}",
         "  print(add(1, 2))",
       ),
     )
     expect(diagnostics).toEqual([])
     expect(python).toContain("def add(a, b):\n    return a + b")
-    expect(python).toContain("def greet(names, flag):\n    return")
+    expect(python).toContain("def greet(names, is_flag):\n    return")
     expect(python).toContain("print(add(1, 2))")
   })
 
@@ -36,8 +36,8 @@ describe("compile (S3): 生成", () => {
     expect(
       codesOf(
         withMain(
-          "function even = (n: int) -> boolean {\n  if n == 0 { return true }\n  return odd(n - 1)\n}\nfunction odd = (n: int) -> boolean {\n  if n == 0 { return false }\n  return even(n - 1)\n}",
-          "  print(even(4))",
+          "function is_even = (n: int) -> boolean {\n  if n == 0 { return true }\n  return is_odd(n - 1)\n}\nfunction is_odd = (n: int) -> boolean {\n  if n == 0 { return false }\n  return is_even(n - 1)\n}",
+          "  print(is_even(4))",
         ),
       ),
     ).toEqual([])
