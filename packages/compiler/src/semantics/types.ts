@@ -21,11 +21,10 @@ export function elementType(type: Type): Type {
   return type.slice(0, -2) as Type
 }
 
-/** value の型の値を、declared の型の場所に入れられるか（int → float と、空の配列だけ特別扱い）。 */
+/** value の型の値を、declared の型の場所に入れられるか。同じ型か、null → T?、空の配列 → 配列だけ（int → float などの暗黙の変換はない）。 */
 export function isAssignable(declared: Type, value: Type): boolean {
   if (declared === value) return true
   if (isNullable(declared)) return value === NULL_TYPE || isAssignable(nonNull(declared), value)
-  if (declared === "float" && value === "int") return true
   return value === EMPTY_ARRAY && isArray(declared)
 }
 

@@ -41,15 +41,14 @@ function main = () {
 
 ## 型が合うかどうか
 
-値を入れる場所の型と、値の型は、**同じでなければ**なりません。例外は次の3つだけです。
+Kururiは、**型を自動では変えません**（暗黙の型変換がありません）。値を入れる場所の型と、値の型は、**同じでなければ**なりません。例外は次の2つだけです。
 
-1. `int`の値を、`float`の場所に入れられます（`1`が`1.0`になります）。
-2. `null`は、`T?`の場所に入れられます。
-3. 空の配列`[]`は、配列の型が決まる場所に入れられます。
+1. `null`は、`T?`の場所に入れられます。
+2. 空の配列`[]`は、配列の型が決まる場所に入れられます。
 
 ```kururi
 function main = () {
-    var a: float = 1
+    var a: float = 1.0
     var b: string? = null
     var xs: int[] = []
     print(a)
@@ -64,7 +63,27 @@ function main = () {
 }
 ```
 
-`float`の値を`int`に入れたり、文字列と数を`+`でつないだりはできません。
+`int`の値を`float`に入れる場合も、同じです。`1`は`int`、`1.0`は`float`で、別の型です。
+
+```kururi-error K0301
+function main = () {
+    var a: float = 1
+}
+```
+
+型を変えたいときは、`to_float(x)`、`to_int(x)`のように、**自分で書いて変えます**。
+
+```kururi
+function main = () {
+    var n: int = 3
+    var a: float = to_float(n)
+    var b: int = to_int(2.9)
+    print(a)
+    print(b)
+}
+```
+
+`float`の値を`int`に入れたり、文字列と数を`+`でつないだりも、できません。
 
 ```kururi-error K0302
 function main = () {

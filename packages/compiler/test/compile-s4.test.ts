@@ -60,10 +60,13 @@ describe("compile (S4): 生成", () => {
     expect(compile(src).python).toContain("nodes[0].value = 5")
   })
 
-  it("float のフィールド・引数に int を渡すと変換する", () => {
-    const { python } = compile(withMain("class P = {\n  fields = {\n    public x: float = 0\n  }\n  constructor = (x: float) {\n    self.x = x\n  }\n}", "  var p: P = new P(1)"))
+  it("float のフィールド・引数には float を渡す（int は K0301）", () => {
+    const cls = "class P = {\n  fields = {\n    public x: float = 0.0\n  }\n  constructor = (x: float) {\n    self.x = x\n  }\n}"
+    const { python } = compile(withMain(cls, "  var p: P = new P(1.0)"))
     expect(python).toContain("self.x = 0.0")
     expect(python).toContain("p = P(1.0)")
+    expect(codesOf(withMain(cls, "  var p: P = new P(1)"))).toEqual(["K0301"])
+    expect(codesOf(withMain("class P = {\n  fields = {\n    public x: float = 0\n  }\n}", ""))).toEqual(["K0301"])
   })
 
   it("クラスの自分自身の名前は本体の中で使える", () => {

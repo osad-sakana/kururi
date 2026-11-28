@@ -30,12 +30,14 @@ describe("compile (S2b): 生成", () => {
     expect(py).toContain("grid[0][1] = 5")
   })
 
-  it("float の配列には int を float にして入れる", () => {
-    const py = pyOf("  var a: float[] = [1, 2.5]\n  a.push(3)\n  a[0] = 4\n  var n: int = 2\n  a.push(n)")
+  it("float の配列には float だけ入れられる（int は K0301）", () => {
+    const py = pyOf("  var a: float[] = [1.0, 2.5]\n  a.push(3.0)\n  a[0] = 4.0\n  var n: int = 2\n  a.push(to_float(n))")
     expect(py).toContain("a = [1.0, 2.5]")
     expect(py).toContain("a.append(3.0)")
     expect(py).toContain("a[0] = 4.0")
     expect(py).toContain("a.append(float(n))")
+    expect(codesOf(main("  var a: float[] = [1, 2.5]"))).toEqual(["K0301"])
+    expect(codesOf(main("  var a: float[] = [1.5]\n  a.push(3)"))).toEqual(["K0301"])
   })
 
   it("for は for になり、文字列の長さと添字も使える", () => {
@@ -57,7 +59,7 @@ describe("compile (S2b): 生成", () => {
 describe("compile (S2b): 診断", () => {
   it("配列の型が合わなければ K0301", () => {
     expect(codesOf(main('  var a: int[] = [1, "x"]'))).toEqual(["K0301"])
-    expect(codesOf(main("  var a: float[] = [1]\n  var b: int[] = a"))).toEqual(["K0301"])
+    expect(codesOf(main("  var a: float[] = [1.0]\n  var b: int[] = a"))).toEqual(["K0301"])
     expect(codesOf(main("  var a: int[] = [1]\n  var b: float[] = a"))).toEqual(["K0301"])
     expect(codesOf(main("  var a: int = []"))).toEqual(["K0301"])
     expect(codesOf(main('  var a: int[] = [1]\n  a.push("x")'))).toEqual(["K0301"])

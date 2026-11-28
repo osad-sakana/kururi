@@ -6,7 +6,7 @@ function main = () {
     fruits.push("grape")
     fruits.remove_at(0)
     var count: int = fruits.length
-    var weights: float[] = [1, 2.5]
+    var weights: float[] = [1.0, 2.5]
     var grid: int[][] = [[1, 2], [3, 4]]
     var empty: int[] = []
     print("${count} 個")
@@ -15,7 +15,7 @@ function main = () {
     }
     for row in grid {
         for v in row {
-            weights.push(v)
+            weights.push(to_float(v))
         }
     }
     print(NAMES[0][0])

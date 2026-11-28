@@ -6,8 +6,6 @@ import type { Type } from "../semantics/types"
 /** 型検査の結果のうち、Python の生成に要るもの。 */
 export interface TypeInfo {
   readonly types: ReadonlyMap<Expr, Type>
-  /** int → float の変換が要る式 */
-  readonly widened: ReadonlySet<Expr>
   /** 0 以上と分かっている添字の式（これ以外の添字は、実行時に負の数を検査する） */
   readonly safeIndexes: ReadonlySet<Expr>
 }
@@ -25,9 +23,7 @@ function showBoolean(code: string): string {
 
 /** 式を Python のコードにする。括弧はソースのとおりに残す。 */
 export function emitExpr(expr: Expr, info: TypeInfo): string {
-  const code = emitRaw(expr, info)
-  if (!info.widened.has(expr)) return code
-  return expr.kind === "int" ? `${code}.0` : `float(${code})`
+  return emitRaw(expr, info)
 }
 
 function emitRaw(expr: Expr, info: TypeInfo): string {

@@ -18,18 +18,18 @@ describe("compile (S3): 生成", () => {
     expect(python).toContain("print(add(1, 2))")
   })
 
-  it("int を float の引数・戻り値・代入に渡すと float に変換する", () => {
+  it("float の引数・戻り値には float を渡す。int を渡すと K0301", () => {
     const { python } = compile(
       withMain(
-        "function half = (x: float) -> float {\n  return 1\n}",
-        "  var n: int = 3\n  print(half(2))\n  print(half(n))\n  var xs: float[] = [1, 2]\n  xs.push(n)",
+        "function half = (x: float) -> float {\n  return 1.0\n}",
+        "  var n: int = 3\n  print(half(2.0))\n  print(half(to_float(n)))",
       ),
     )
     expect(python).toContain("return 1.0")
     expect(python).toContain("print(half(2.0))")
     expect(python).toContain("print(half(float(n)))")
-    expect(python).toContain("xs = [1.0, 2.0]")
-    expect(python).toContain("xs.append(float(n))")
+    expect(codesOf(withMain("function half = (x: float) -> float {\n  return x\n}", "  print(half(2))"))).toEqual(["K0301"])
+    expect(codesOf(withMain("function f = () -> float {\n  return 1\n}", ""))).toEqual(["K0301"])
   })
 
   it("関数は定義の順序を問わず呼べる（相互再帰もよい）", () => {
