@@ -89,8 +89,9 @@ function complete(source: string): string {
 const SECTIONS = ["なぜ必要か", "やってみる", "しくみ", "広げてみる", "わざと間違える", "まとめ", "練習", "つぎへ"]
 
 describe("新しい構成の章（N-M）", () => {
-  it("第 1 部は 4 章ある", () => {
-    expect(chapters.filter((name) => name.startsWith("1-")).length).toBe(4)
+  it("全部で 6 部・20 章ある（1: 4 章、2: 4 章、3: 3 章、4: 3 章、5: 2 章、6: 4 章）", () => {
+    const count = (part: number): number => chapters.filter((name) => name.startsWith(`${part}-`)).length
+    expect([1, 2, 3, 4, 5, 6].map(count)).toEqual([4, 4, 3, 3, 2, 4])
   })
 
   for (const chapter of chapters) {
