@@ -55,6 +55,12 @@ importers:
 
   packages/site:
     dependencies:
+      '@fontsource/jost':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/noto-sans-jp':
+        specifier: ^5.3.1
+        version: 5.3.1
       '@kururi/compiler':
         specifier: workspace:*
         version: link:../compiler
@@ -441,6 +447,12 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@fontsource/jost@5.3.0':
+    resolution: {integrity: sha512-lORv5y49hSoLVxjGb0qNuBzXvnaNYI3B94200uGPGJFei8fao6d6LLz2ziWbOZubGfZnibzuT6GVNX8fBw8WQQ==}
+
+  '@fontsource/noto-sans-jp@5.3.1':
+    resolution: {integrity: sha512-9NNBB/M9PextLYVXGSfIaLZsPnrt5UDw8g2B6T0M775H2yb/oekApSjuS1XKOP7FPcMMEnTavR5rJGDM66qKtA==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -2171,6 +2183,10 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
+
+  '@fontsource/jost@5.3.0': {}
+
+  '@fontsource/noto-sans-jp@5.3.1': {}
 
   '@img/colour@1.1.0':
     optional: true

@@ -2,6 +2,7 @@
   "name": "@kururi/lsp",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "bin": { "kururi-lsp": "./src/bin.ts" },
   "exports": { ".": "./src/diagnostics.ts" },

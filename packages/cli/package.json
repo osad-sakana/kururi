@@ -2,6 +2,7 @@
   "name": "@kururi/cli",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "dependencies": { "@kururi/compiler": "workspace:*", "@kururi/narapy": "workspace:*" }
 }

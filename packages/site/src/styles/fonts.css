@@ -1,0 +1,33 @@
+/* 書体はすべて自前で配信する（外部のフォントサービスへ接続しない）。
+   Noto Sans JP・Jost は @fontsource（SIL OFL 1.1）、0xProto は src/assets/fonts（SIL OFL 1.1）。 */
+@import "@fontsource/noto-sans-jp/400.css";
+@import "@fontsource/noto-sans-jp/500.css";
+@import "@fontsource/noto-sans-jp/700.css";
+@import "@fontsource/noto-sans-jp/800.css";
+@import "@fontsource/jost/500.css";
+@import "@fontsource/jost/600.css";
+@import "@fontsource/jost/700.css";
+
+@font-face {
+  font-family: "0xProto";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/0xProto-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "0xProto";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/0xProto-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "0xProto";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/0xProto-Italic.woff2") format("woff2");
+}

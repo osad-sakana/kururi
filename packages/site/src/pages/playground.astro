@@ -1,4 +1,5 @@
 ---
+import "../styles/fonts.css"
 import "../styles/tokens.css"
 import "../styles/bulb.css"
 import "../styles/problem.css"
@@ -27,13 +28,6 @@ const home = base.endsWith("/") ? base : `${base}/`
         if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
       } catch (e) {}
     </script>
-    <!-- 書体: Noto Sans JP（画面）と 0xProto（コード） -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=0xProto:ital,wght@0,400;0,700;1,400&family=Noto+Sans+JP:wght@400;500;700;800&display=swap"
-      rel="stylesheet"
-    />
     <!-- input() の入力待ちに SharedArrayBuffer を使う。公開先でも動くよう、必要なヘッダーをサービスワーカーで付ける（MIT） -->
     <script is:inline src={`${home}coi-serviceworker.js`}></script>
   </head>
