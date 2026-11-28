@@ -124,6 +124,45 @@ function renderLineIcons(source: string): void {
     })),
   )
 }
+/** 行頭のアイコンを押すと、その説明を、アイコンのそばに出す（hover の説明は、押さなくても出る） */
+const iconHint = document.createElement("div")
+iconHint.className = "icon-hint"
+iconHint.hidden = true
+iconHint.setAttribute("role", "status")
+document.body.append(iconHint)
+let iconHintTimer: ReturnType<typeof setTimeout> | undefined
+
+function hideIconHint(): void {
+  iconHint.hidden = true
+  if (iconHintTimer !== undefined) clearTimeout(iconHintTimer)
+}
+
+function showIconHint(text: string, x: number, y: number): void {
+  iconHint.textContent = text
+  iconHint.hidden = false
+  const width = iconHint.offsetWidth
+  iconHint.style.left = `${Math.max(8, Math.min(x + 12, window.innerWidth - width - 8))}px`
+  iconHint.style.top = `${y + 14}px`
+  if (iconHintTimer !== undefined) clearTimeout(iconHintTimer)
+  iconHintTimer = setTimeout(hideIconHint, 6000)
+}
+
+editor.onMouseDown((event) => {
+  const { target } = event
+  if (target.type === monaco.editor.MouseTargetType.GUTTER_LINE_DECORATIONS && target.position !== null) {
+    const line = target.position.lineNumber
+    const icon = classifyLines(editor.getValue()).find((candidate) => candidate.line === line)
+    if (icon !== undefined) {
+      showIconHint(icon.hint, event.event.posx, event.event.posy)
+      return
+    }
+  }
+  hideIconHint()
+})
+editor.onKeyDown(hideIconHint)
+editor.onDidScrollChange(hideIconHint)
+editor.onDidChangeModelContent(hideIconHint)
+
 const pythonView = monaco.editor.create(element("python"), {
   ...editorOptions,
   value: "",

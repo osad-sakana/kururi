@@ -40,7 +40,7 @@ function dataUri(shape: string): string {
 
 /** アイコンは CSS の mask で描く（色を変えやすく、ダークテーマにも合う）。 */
 export function iconCss(): string {
-  const base = ".kururi-icon { width: 14px !important; margin-left: 4px; height: 100%; max-height: 18px; background-color: currentColor; mask: center / 14px 14px no-repeat; -webkit-mask: center / 14px 14px no-repeat; cursor: help; }"
+  const base = ".kururi-icon { width: 14px !important; margin-left: 4px; height: 100%; max-height: 18px; background-color: currentColor; mask: center / 14px 14px no-repeat; -webkit-mask: center / 14px 14px no-repeat; cursor: pointer; }"
   const rules = ICON_KINDS.map((kind) => {
     const uri = dataUri(SHAPES[kind])
     const opacity = kind === "else" ? " opacity: 0.55;" : ""
