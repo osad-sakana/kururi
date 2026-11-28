@@ -49,7 +49,9 @@ function parseComparison(c: Cursor): Expr | undefined {
   if (right === undefined) return undefined
   const next = c.peek()
   if (next.kind === "op" && COMPARE_OPS.has(next.text)) {
-    c.report("K0106", next.range)
+    // a < b < c は、2 つ目の比較の記号を「and b <」に変えると、a < b and b < c になる
+    const fix = { title: "and でつないで書き直す", text: `and ${c.sourceText(right.range)} ${next.text}` }
+    c.report("K0106", next.range, {}, fix)
     return undefined
   }
   return binary(op.text as BinaryOp, left, right)

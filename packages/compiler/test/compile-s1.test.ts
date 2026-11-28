@@ -161,6 +161,11 @@ describe("compile (S1): 構文・予約語の診断", () => {
     expect(codesOf(main("  print(1 < 2 < 3)"))).toEqual(["K0106"])
   })
 
+  it("比較の連鎖には、and でつなぐ直し方が付く（2 つ目の記号を「and 真ん中 記号」に変える）", () => {
+    const [diagnostic] = compile(main("  var a: int = 1\n  print(a < a + 1 <= 3)")).diagnostics
+    expect(diagnostic?.fix).toEqual({ title: "and でつないで書き直す", text: "and a + 1 <=" })
+  })
+
   it("トップレベルに文を書くと K0110", () => {
     expect(codesOf('print("a")\n')).toEqual(["K0110"])
   })

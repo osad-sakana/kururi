@@ -14,7 +14,14 @@ export class Cursor {
     private readonly reporter: Reporter,
     /** ファイルの終わりを、メッセージの中でどう呼ぶか */
     private readonly eofName: string = "ファイルの終わり",
+    /** 元のソース（直し方の文字を、ソースの一部から作るため） */
+    private readonly source: string = "",
   ) {}
+
+  /** ソースの範囲の文字。 */
+  sourceText(range: Range): string {
+    return this.source.slice(range.start, range.end)
+  }
 
   peek(offset = 0): Token {
     const last = this.tokens[this.tokens.length - 1] as Token
@@ -140,7 +147,7 @@ export class Cursor {
 
   /** 補間 ${ } の中のトークン列を、同じ診断の入れ物で別に読む。 */
   parseNested<T>(tokens: readonly Token[], parse: (c: Cursor) => T | undefined): T | undefined {
-    const nested = new Cursor(tokens, this.reporter, "「}」")
+    const nested = new Cursor(tokens, this.reporter, "「}」", this.source)
     const result = parse(nested)
     if (result === undefined) return undefined
     if (!nested.atEof()) {

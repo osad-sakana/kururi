@@ -18,7 +18,7 @@ const UNSUPPORTED_STATEMENTS: ReadonlySet<string> = new Set([
 
 export function parse(tokens: readonly Token[], source: string): ParseResult {
   const reporter = new Reporter(source)
-  const c = new Cursor(tokens, reporter)
+  const c = new Cursor(tokens, reporter, undefined, source)
   const items: TopLevel[] = []
   c.skipNewlines()
   while (!c.atEof()) {

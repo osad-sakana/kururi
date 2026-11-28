@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { compile } from "@kururi/compiler"
 import { analyze } from "../../src/playground/analyze"
 import { applyFix, renameIdentifier } from "../../src/playground/quick-fix"
 
@@ -35,5 +36,20 @@ describe("applyFix", () => {
       const fixed = applyFix(source, marker!, marker!.fix!)
       expect(analyze(fixed).errorCount, fixed).toBe(0)
     }
+  })
+})
+
+describe("比較の連鎖（K0106）の直し方", () => {
+  it("a < b < c を a < b and b < c にする", () => {
+    const source = "function main = () {\n    var b: int = 2\n    print(1 < b < 3)\n}\n"
+    const diagnostic = compile(source).diagnostics[0]
+    expect(diagnostic?.code).toBe("K0106")
+    const fix = diagnostic?.fix
+    const span = diagnostic?.span
+    if (fix === undefined || span === undefined) throw new Error("直し方がありません")
+    const range = { startLineNumber: span.start.line, startColumn: span.start.column, endLineNumber: span.end.line, endColumn: span.end.column }
+    const fixed = applyFix(source, range, fix)
+    expect(fixed).toContain("print(1 < b and b < 3)")
+    expect(compile(fixed).diagnostics).toEqual([])
   })
 })
