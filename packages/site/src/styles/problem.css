@@ -1,0 +1,25 @@
+/* 問題の一覧：エラーを、見出し・場所・コードの抜粋・直し方のカードで見せる */
+#problems { list-style: none; margin: 0 0 0.6rem; padding: 0 0 0.6rem; display: grid; align-content: start; gap: 0.7rem; max-height: 65%; overflow: auto; flex-shrink: 0; border-bottom: 1px solid var(--color-line); }
+.problem { display: grid; gap: 0.6rem; padding: 0.8rem 0.9rem; border-radius: 12px; font-size: 13px; line-height: 1.6; background: color-mix(in srgb, var(--color-danger) 10%, var(--color-panel)); }
+.problem.warning { background: color-mix(in srgb, var(--color-warn) 10%, var(--color-panel)); }
+.problem-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.7rem; }
+.problem-code { padding: 0.1rem 0.55rem; font: 700 11px var(--font-mono); border-radius: 6px; border: 0; color: #fff; background: var(--color-danger); cursor: pointer; }
+.problem.warning .problem-code { background: var(--color-warn); }
+.problem-code:hover:not(:disabled) { background: var(--color-ink); color: var(--color-canvas); }
+.problem-title { font-size: 13.5px; color: var(--color-ink); }
+.problem-where { margin-left: auto; font: 11px var(--font-mono); color: var(--color-muted); }
+.problem-fix { padding: 0.1rem 0.6rem; color: var(--color-accent-ink); background: var(--color-accent); border-color: var(--color-accent); }
+.excerpt { overflow-x: auto; padding: 0.6rem 0; border-radius: 8px; background: var(--color-editor); font: 12.5px/1.75 var(--font-mono); color: var(--color-code); }
+.ex-line { display: flex; min-width: max-content; white-space: pre; }
+.ex-no { flex: none; width: 2.6rem; padding-right: 0.8rem; text-align: right; color: var(--color-muted); user-select: none; }
+.ex-dim { opacity: 0.55; }
+.ex-hl { background: color-mix(in srgb, var(--color-danger) 25%, transparent); border-radius: 3px; }
+.problem.warning .ex-hl { background: color-mix(in srgb, var(--color-warn) 25%, transparent); }
+.ex-ghost { visibility: hidden; }
+.ex-under { color: transparent; text-decoration: underline wavy var(--color-danger); text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.problem.warning .ex-under { text-decoration-color: var(--color-warn); }
+.ex-label { color: var(--color-danger); font-weight: 700; }
+.problem.warning .ex-label { color: var(--color-warn); }
+.problem-help { display: flex; gap: 0.7rem; align-items: baseline; color: var(--color-ink); }
+.problem-help-tag { flex: none; padding: 0.05rem 0.5rem; border-radius: 6px; background: color-mix(in srgb, var(--color-spark) 22%, transparent); color: var(--color-ink); font-size: 11px; font-weight: 700; }
+#problems { max-height: none; }

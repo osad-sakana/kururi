@@ -1,6 +1,9 @@
 ---
+import "../styles/problem.css"
 import "../styles/landing.css"
-import { compile, formatDiagnostics } from "@kururi/compiler"
+import { compile } from "@kururi/compiler"
+import { analyze } from "../playground/analyze"
+import { problemView } from "../playground/problem-view"
 import { getCollection } from "astro:content"
 import Base from "../layouts/Base.astro"
 import Logo from "../components/Logo.astro"
@@ -44,7 +47,7 @@ const heroPythonLines = heroPython.split("\n").map(highlight)
 
 // ---- 学び方：画面図の番号と、説明（番号の位置から線を伸ばす）----
 const flowItems = [
-  { n: 1, title: "読む", text: "チュートリアルで、概念を1つずつ学びます。コードはボタン1つで、横のプレイグラウンドに届きます。", x: 11, y: 17.75, width: 26 },
+  { n: 1, title: "読む", text: "チュートリアルで、概念を1つずつ学びます。横のプレイグラウンドを開いて、書いてあるコードをその場で動かせます。", x: 11, y: 17.75, width: 26 },
   { n: 2, title: "書く", text: "リアルタイムで、エラーが出て、直し方も添えられます。変換後のPythonも、横に並べて見られます。", x: 38.4, y: 17.75, width: 28 },
   { n: 3, title: "確かめる", text: "ステップ実行で、1行ずつ進めながら、変数の値が変わる様子を目で追えます。", x: 68.4, y: 17.75, width: 30 },
 ]
@@ -52,21 +55,25 @@ const flowItems = [
 // ---- 理由1の図：AIが書き、人が読んで直す ----
 const codeBars = [70, 120, 96, 58, 132, 84, 110, 46]
 
-// ---- 本物のエラー（コンパイラが出したものをそのまま見せる）----
-const badSource = `function main = () {
+// ---- 本物のエラー（コンパイラが出したものを、プレイグラウンドと同じカードで見せる）----
+const problemSources = [
+  `function main = () {
     var count: int = "three"
     print(count)
 }
-`
-const badDiagnostics = compile(badSource).diagnostics
-const errorText = formatDiagnostics(badDiagnostics, { source: badSource, fileName: "main.kururi" }).trim()
-const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-const errorHtml = escapeHtml(errorText)
-  .replace(/^(error\[[A-Z0-9]+\])/m, '<span class="e">$1</span>')
-  .replace(/^(help:)/m, '<span class="h">$1</span>')
-  .split("\n")
-  .map((line, i) => `<span class="ln" style="--n:${i}">${line}</span>`)
-  .join("")
+`,
+  `function main = () {
+    var age: int = 15
+    if 10 < age < 20 {
+        print("10代")
+    }
+}
+`,
+]
+const problems = problemSources.flatMap((source) => {
+  const [marker] = analyze(source).markers
+  return marker === undefined ? [] : [problemView(marker, source.split("\n"))]
+})
 ---
 
 <Base current="home" lightOnly description="AIがコードを書く時代の、新しいプログラミング入門。Kururiは、プログラミングの概念を学ぶことに特化した最初の言語です。">
@@ -330,8 +337,6 @@ const errorHtml = escapeHtml(errorText)
             <text class="t dim" x="28" y="152" font-size="12">forとwhileで繰り返す。</text>
             <text class="t" x="28" y="186" font-size="14" font-weight="800">回数で繰り返す：for</text>
             <rect x="28" y="198" width="304" height="184" rx="10" class="panel" />
-            <rect x="196" y="206" width="128" height="22" rx="11" style="fill: var(--color-accent)" />
-            <text x="260" y="221" text-anchor="middle" font-size="10" font-weight="700" style="fill: var(--color-accent-ink); font-family: var(--font-sans)">プレイグラウンドで試す</text>
             {[
               "function main = () {",
               "    var total: int = 0",
@@ -412,12 +417,34 @@ const errorHtml = escapeHtml(errorText)
             「なぜ実行できないのか分からない」を、なくします。何がどのように問題で、どのように直せば良いのか、それを丁寧に教えます。
           </p>
         </div>
-        <div class="terminal" data-reveal id="term" aria-label="Kururiが実際に出すエラーの例">
-          <div class="bar"><i></i><i></i><i></i><span style="margin-left: 0.4rem">main.kururi</span></div>
-          <div class="screen">
-            <pre set:html={errorHtml} />
-          </div>
-          <div class="fix">これは実際にKururiが出すエラーです</div>
+        <div class="cards" data-reveal id="term" aria-label="Kururiが実際に出すエラーの例">
+          {problems.map((view, i) => (
+            <div class={`problem ${view.severity} pv`} style={`--n:${i}`}>
+              <div class="problem-head">
+                <span class="problem-code">{view.code}</span>
+                <strong class="problem-title">{view.title}</strong>
+                <span class="problem-where">{view.where}</span>
+                {view.fix !== undefined && <span class="problem-fix">{view.fix}</span>}
+              </div>
+              <div class="excerpt">
+                {view.previous !== undefined && (
+                  <div class="ex-line ex-dim"><span class="ex-no">{view.previous.no}</span><span class="ex-code">{view.previous.text}</span></div>
+                )}
+                <div class="ex-line">
+                  <span class="ex-no">{view.line.no}</span>
+                  <span class="ex-code">{view.line.before}<span class="ex-hl">{view.line.range}</span>{view.line.after}</span>
+                </div>
+                <div class="ex-line ex-underline">
+                  <span class="ex-no"></span>
+                  <span class="ex-code"><span class="ex-ghost" aria-hidden="true">{view.line.before}</span><span class="ex-under">{view.line.range}</span>{view.label !== undefined && <span class="ex-label"> {view.label}</span>}</span>
+                </div>
+              </div>
+              {view.hint !== undefined && (
+                <div class="problem-help"><span class="problem-help-tag">直し方</span><span class="problem-help-text">{view.hint}</span></div>
+              )}
+            </div>
+          ))}
+          <p class="cards-note">どちらも、実際にKururiが出すエラーです</p>
         </div>
       </div>
     </section>
@@ -504,9 +531,10 @@ const errorHtml = escapeHtml(errorText)
             </svg>
           </div>
           <h2>最初のprintで、灯りをつけよう</h2>
-          <p class="body">ブラウザだけで、いますぐ始められます。</p>
+          <p class="body">ブラウザだけで、いますぐ始められます。書き方を調べたいときは、言語仕様を見てください。</p>
           <div class="actions">
             <a class="button primary" href={`${home}tutorials`}>チュートリアルをはじめる</a>
+            <a class="button" href={`${home}spec`}>言語仕様を見る</a>
           </div>
         </div>
       </div>
