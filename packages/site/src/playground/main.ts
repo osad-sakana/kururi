@@ -1,3 +1,4 @@
+import { kururinBubble, youBubble, youInput } from "./chat"
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api"
 import "monaco-editor/esm/vs/basic-languages/python/python.contribution"
 // editor.api は中身だけなので、使う機能（補完・ホバー・電球・検索 など）を足す
@@ -214,35 +215,23 @@ if (new URLSearchParams(location.search).has("embed")) {
 }
 
 function appendOutput(text: string, className?: string): void {
-  const line = document.createElement("div")
-  line.textContent = text
-  if (className !== undefined) line.className = className
-  output.append(line)
+  output.append(kururinBubble(text, className))
   output.scrollTop = output.scrollHeight
 }
 
-/** input() の入力欄を、出力の流れの中（その行の続き）に出す。Enter で確定すると、入力した値が出力に残る。 */
+/** input() を、くるりんの問いかけ（prompt）と、こちらの返事の吹き出しで受け取る */
 function askInline(prompt: string): Promise<string | null> {
   return new Promise((resolve) => {
-    const row = document.createElement("div")
-    row.className = "prompt-line"
-    const label = document.createElement("span")
-    label.textContent = prompt
-    const field = document.createElement("input")
-    field.type = "text"
-    field.setAttribute("aria-label", prompt === "" ? "入力" : prompt)
-    row.append(label, field)
-    output.append(row)
-    field.focus()
-    output.scrollTop = output.scrollHeight
-    pendingInput = { row, cancel: () => resolve(null) }
-    field.addEventListener("keydown", (event) => {
-      if (event.key !== "Enter" || event.isComposing) return
+    if (prompt !== "") output.append(kururinBubble(prompt))
+    const field = youInput(prompt, (value) => {
       pendingInput = null
-      const value = field.value
-      row.replaceChildren(`${prompt}${value}`)
+      field.row.replaceWith(youBubble(value))
       resolve(value)
     })
+    output.append(field.row)
+    field.focus()
+    output.scrollTop = output.scrollHeight
+    pendingInput = { row: field.row, cancel: () => resolve(null) }
   })
 }
 
@@ -350,11 +339,7 @@ function showStepOutput(lines: number | null): void {
   }
   savedOutput ??= [...output.childNodes].map((node) => node.cloneNode(true))
   output.replaceChildren(
-    ...runLines.slice(0, lines).map((text) => {
-      const line = document.createElement("div")
-      line.textContent = text
-      return line
-    }),
+    ...runLines.slice(0, lines).map((text) => kururinBubble(text)),
   )
 }
 
