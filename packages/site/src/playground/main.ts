@@ -214,6 +214,19 @@ if (new URLSearchParams(location.search).has("embed")) {
   })
 }
 
+const BUBBLE_DELAY_MS = 300
+let outputChain: Promise<void> = Promise.resolve()
+let outputGeneration = 0
+
+/** 吹き出しは、前のものから少し間をあけて順番に出す（実行し直したら、残りは捨てる） */
+function later(show: () => void, wait = true): void {
+  const generation = outputGeneration
+  outputChain = outputChain.then(async () => {
+    if (wait) await new Promise((resolve) => setTimeout(resolve, BUBBLE_DELAY_MS))
+    if (generation === outputGeneration) show()
+  })
+}
+
 function appendOutput(text: string, className?: string): void {
   output.append(kururinBubble(text, className))
   output.scrollTop = output.scrollHeight
@@ -221,7 +234,7 @@ function appendOutput(text: string, className?: string): void {
 
 /** input() を、くるりんの問いかけ（prompt）と、こちらの返事の吹き出しで受け取る */
 function askInline(prompt: string): Promise<string | null> {
-  return new Promise((resolve) => {
+  return new Promise((resolve) => later(() => {
     if (prompt !== "") output.append(kururinBubble(prompt))
     const field = youInput(prompt, (value) => {
       pendingInput = null
@@ -232,7 +245,7 @@ function askInline(prompt: string): Promise<string | null> {
     field.focus()
     output.scrollTop = output.scrollHeight
     pendingInput = { row: field.row, cancel: () => resolve(null) }
-  })
+  }))
 }
 
 function cancelInput(): void {
@@ -358,7 +371,7 @@ const runner = createRunner({
   onInput: askInline,
   onOutput: (text) => {
     runLines = [...runLines, text]
-    appendOutput(text)
+    later(() => appendOutput(text))
   },
   onStatus: (text) => {
     status.textContent = text
@@ -369,19 +382,23 @@ const runner = createRunner({
     const error = mapRuntimeError(traceback, currentAnalysis.lineMap)
     markRuntimeError(error.kururiLine)
     const where = error.kururiLine === null ? "" : `（Kururi の ${error.kururiLine} 行目）`
-    appendOutput(`実行時エラー${where}: ${error.summary}`, "error")
+    later(() => appendOutput(`実行時エラー${where}: ${error.summary}`, "error"))
   },
   onFinish: () => {
     cancelInput()
     runButton.disabled = currentAnalysis.errorCount > 0 || currentAnalysis.python === ""
     stepButton.disabled = runButton.disabled
     stopButton.hidden = true
-    if (pendingTrace !== null) stepPanel.open(pendingTrace, currentAnalysis.lineMap)
+    const trace = pendingTrace
     pendingTrace = null
+    // 吹き出しが出そろってから、ステップ実行の画面に切り替える
+    if (trace !== null) later(() => stepPanel.open(trace, currentAnalysis.lineMap), false)
   },
 })
 
 function start(trace: boolean): void {
+  outputGeneration += 1
+  outputChain = Promise.resolve()
   stepPanel.close()
   output.replaceChildren()
   runLines = []
