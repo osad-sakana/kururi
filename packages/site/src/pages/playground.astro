@@ -56,7 +56,14 @@ const home = base.endsWith("/") ? base : `${base}/`
         <button id="font-up" type="button" aria-label="文字を大きくする" title="文字を大きくする">A＋</button>
       </div>
       <button id="theme" type="button" title="見た目を切り替える（自動 / ライト / ダーク）"></button>
-      <button id="open-narapy" type="button" disabled>narapy で開く</button>
+      <div class="menu">
+        <button id="menu-button" class="menu-button" type="button" aria-label="メニュー" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+        </button>
+        <div id="menu-list" class="menu-list" role="menu" hidden>
+          <button id="open-narapy" type="button" role="menuitem" disabled>narapy で開く</button>
+        </div>
+      </div>
     </header>
     <main>
       <section aria-label="Kururi">

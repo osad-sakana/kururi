@@ -449,7 +449,24 @@ function render(): void {
 
 editor.onDidChangeModelContent(() => stepPanel.close())
 editor.onDidChangeModelContent(debounce(render, 200))
+const menuButton = element<HTMLButtonElement>("menu-button")
+const menuList = element("menu-list")
+function setMenu(open: boolean): void {
+  menuList.hidden = !open
+  menuButton.setAttribute("aria-expanded", String(open))
+}
+menuButton.addEventListener("click", () => setMenu(menuList.hidden !== false))
+document.addEventListener("click", (event) => {
+  if (!menuList.hidden && !(event.target instanceof Node && menuButton.parentElement?.contains(event.target))) setMenu(false)
+})
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !menuList.hidden) {
+    setMenu(false)
+    menuButton.focus()
+  }
+})
 openButton.addEventListener("click", () => {
+  setMenu(false)
   if (currentUrl !== null) window.open(currentUrl, "_blank", "noopener")
 })
 render()
