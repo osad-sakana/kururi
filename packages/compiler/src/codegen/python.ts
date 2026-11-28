@@ -78,12 +78,6 @@ function emitVar(decl: VarDecl, info: TypeInfo, indent: number): Line {
   return { text: `${" ".repeat(indent)}${decl.name} = ${init}`, offset: decl.range.start }
 }
 
-/** range(終わり) または range(始まり, 終わり)。始まりが 0 なら省く。 */
-function rangeArgs(stmt: Extract<Stmt, { kind: "range" }>, info: TypeInfo): string {
-  const end = emitExpr(stmt.end, info)
-  return stmt.start.kind === "int" && stmt.start.text === "0" ? end : `${emitExpr(stmt.start, info)}, ${end}`
-}
-
 function emitBlock(stmts: readonly Stmt[], info: TypeInfo, indent: number): Line[] {
   const lines = stmts.flatMap((stmt) => emitStatement(stmt, info, indent))
   return lines.length === 0 ? [{ text: `${" ".repeat(indent)}pass` }] : lines
@@ -111,9 +105,9 @@ function emitStatement(stmt: Stmt, info: TypeInfo, indent: number): Line[] {
       ]
     case "while":
       return [at(`while ${emitExpr(stmt.condition, info)}:`, stmt.range.start), ...emitBlock(stmt.body, info, indent + 4)]
-    case "range":
+    case "times":
       return [
-        at(`for ${stmt.name} in range(${rangeArgs(stmt, info)}):`, stmt.range.start),
+        at(`for ${stmt.name} in range(${emitExpr(stmt.count, info)}):`, stmt.range.start),
         ...emitBlock(stmt.body, info, indent + 4),
       ]
     case "foreach":

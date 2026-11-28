@@ -20,7 +20,7 @@ error[K0114]: 「repeat」は新しい書き方に変わりました
 5 |     repeat i: 3 {
   |     ^^^^^^ 書き方が変わっています
   |
-help: 回数で回すときは for i in 0..10 { ... } と書きます
+help: 回数で回すときは for i 10 times { ... } と書きます
 
 error[K0114]: 「foreach」は新しい書き方に変わりました
  --> input.kururi:8:5

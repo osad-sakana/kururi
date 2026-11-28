@@ -1,5 +1,7 @@
 import type { Expr, FunctionDecl, Program, Stmt } from "../syntax/ast"
 import type { Reporter } from "../reporter"
+import type { Type } from "./types"
+import { NULL_TYPE } from "./types"
 
 /** 式の中にある名前を、読むものとして全部集める。 */
 function collectReads(expr: Expr, reads: Set<string>): void {
@@ -42,12 +44,93 @@ function collectReads(expr: Expr, reads: Set<string>): void {
   }
 }
 
+/** 式の直下の部分式。 */
+function childrenOf(expr: Expr): readonly Expr[] {
+  switch (expr.kind) {
+    case "template":
+      return expr.parts.flatMap((part) => (part.kind === "expr" ? [part.expr] : []))
+    case "unary":
+      return [expr.operand]
+    case "binary":
+      return [expr.left, expr.right]
+    case "paren":
+      return [expr.inner]
+    case "array":
+      return expr.elements
+    case "index":
+      return [expr.target, expr.index]
+    case "member":
+      return [expr.object]
+    case "new":
+      return expr.args
+    case "call":
+      return [expr.callee, ...expr.args]
+    default:
+      return []
+  }
+}
+
+function calleeName(expr: Extract<Expr, { kind: "call" }>): string {
+  return expr.callee.kind === "ident" || expr.callee.kind === "member" ? expr.callee.name : "この関数"
+}
+
+/** 値として使われている式を調べる。値を返さない関数（null になる呼び出し）の値を使っていたら警告する。 */
+function lintValueUse(expr: Expr, types: ReadonlyMap<Expr, Type>, reporter: Reporter, isStatement = false): void {
+  if (expr.kind === "call" && !isStatement && types.get(expr) === NULL_TYPE) {
+    reporter.report("K0604", expr.range, { name: calleeName(expr) })
+  }
+  // 文として単独で書いた呼び出しは、callee（関数の名前）は見ないで、引数だけ見る
+  const children = expr.kind === "call" && expr.callee.kind === "ident" ? expr.args : childrenOf(expr)
+  children.forEach((child) => lintValueUse(child, types, reporter))
+}
+
+/** 文の中の式を、すべて調べる。 */
+function lintStatementExprs(stmts: readonly Stmt[], types: ReadonlyMap<Expr, Type>, reporter: Reporter): void {
+  for (const stmt of stmts) {
+    switch (stmt.kind) {
+      case "var":
+        lintValueUse(stmt.init, types, reporter)
+        break
+      case "exprStmt":
+        if (stmt.expr.kind === "call") lintValueUse(stmt.expr, types, reporter, true)
+        else {
+          const comparison = stmt.expr.kind === "binary" && stmt.expr.op === "=="
+          reporter.report("K0603", stmt.expr.range, comparison ? { op: "==" } : {})
+          lintValueUse(stmt.expr, types, reporter)
+        }
+        break
+      case "assign":
+        lintValueUse(stmt.target, types, reporter)
+        lintValueUse(stmt.value, types, reporter)
+        break
+      case "if":
+        stmt.branches.forEach((branch) => lintValueUse(branch.condition, types, reporter))
+        break
+      case "while":
+        lintValueUse(stmt.condition, types, reporter)
+        break
+      case "times":
+        lintValueUse(stmt.count, types, reporter)
+        break
+      case "foreach":
+        lintValueUse(stmt.iterable, types, reporter)
+        break
+      case "return":
+        if (stmt.value !== undefined) lintValueUse(stmt.value, types, reporter)
+        break
+      default:
+        break
+    }
+    bodiesOf(stmt).forEach((body) => lintStatementExprs(body, types, reporter))
+  }
+}
+
 function bodiesOf(stmt: Stmt): readonly (readonly Stmt[])[] {
   switch (stmt.kind) {
     case "if":
       return [...stmt.branches.map((branch) => branch.body), ...(stmt.otherwise === undefined ? [] : [stmt.otherwise])]
     case "while":
-    case "range":
+    case "times":
     case "foreach":
       return [stmt.body]
     default:
@@ -75,9 +158,8 @@ function collectStmtReads(stmts: readonly Stmt[], reads: Set<string>): void {
       case "while":
         collectReads(stmt.condition, reads)
         break
-      case "range":
-        collectReads(stmt.start, reads)
-        collectReads(stmt.end, reads)
+      case "times":
+        collectReads(stmt.count, reads)
         break
       case "foreach":
         collectReads(stmt.iterable, reads)
@@ -115,18 +197,22 @@ function lintReachability(body: readonly Stmt[], reporter: Reporter): void {
   for (const stmt of body) bodiesOf(stmt).forEach((inner) => lintReachability(inner, reporter))
 }
 
-function lintFunction(fn: FunctionDecl, reporter: Reporter): void {
+function lintFunction(fn: FunctionDecl, reporter: Reporter, types: ReadonlyMap<Expr, Type>): void {
   lintBody(fn.body, reporter)
+  lintStatementExprs(fn.body, types, reporter)
 }
 
 /** 動くが見直したほうがよい書き方を、警告として集める（使っていない変数、実行されない行）。エラーがないときだけ呼ぶ。 */
-export function lint(program: Program, reporter: Reporter): void {
+export function lint(program: Program, reporter: Reporter, types: ReadonlyMap<Expr, Type>): void {
   for (const item of program.items) {
-    if (item.kind === "function") lintFunction(item, reporter)
+    if (item.kind === "function") lintFunction(item, reporter, types)
     else if (item.kind === "class") {
       for (const member of item.members) {
-        if (member.kind === "method") lintFunction(member.fn, reporter)
-        else if (member.kind === "constructor") lintBody(member.body, reporter)
+        if (member.kind === "method") lintFunction(member.fn, reporter, types)
+        else if (member.kind === "constructor") {
+          lintBody(member.body, reporter)
+          lintStatementExprs(member.body, types, reporter)
+        }
       }
     }
   }

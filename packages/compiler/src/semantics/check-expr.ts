@@ -23,15 +23,11 @@ export class ExprChecker {
   constructor(private readonly reporter: Reporter) {}
 
   /**
-   * 値として使う式の型。値を返さない呼び出し（print など）は、ここでエラーにする。
+   * 値として使う式の型（値を返さない呼び出しは null になる）。
    * 空の配列 [] は、型が決まる場所（allowEmpty）でだけ使える。
    */
   valueType(expr: Expr, scope: Scope, allowEmpty = false): Type {
     const type = this.typeOf(expr, scope)
-    if (type === "void") {
-      this.reporter.report("K0304", expr.range, { name: calleeName(expr) })
-      return this.fail(expr)
-    }
     if (type === EMPTY_ARRAY && !allowEmpty) {
       this.reporter.report("K0314", expr.range)
       return this.fail(expr)
@@ -61,7 +57,8 @@ export class ExprChecker {
     }
     const actual = this.valueType(expr, scope, true)
     if (expected !== "error" && actual !== "error" && !isAssignable(expected, actual)) {
-      this.reporter.report("K0301", expr.range, { expected, actual: typeLabel(actual) })
+      const callee = actual === NULL_TYPE && expr.kind === "call" ? calleeName(expr) : undefined
+      this.reporter.report("K0301", expr.range, { expected, actual: typeLabel(actual), ...(callee === undefined ? {} : { callee }) })
       return this.fail(expr)
     }
     if (target === "float" && actual === "int") this.widened.add(expr)
@@ -362,7 +359,7 @@ export class ExprChecker {
       return "error"
     }
     if (argTypes[0] === "error") return "error"
-    return name === "print" ? "void" : "string"
+    return name === "print" ? NULL_TYPE : "string"
   }
 
   private classMethodCall(expr: Node<"call">, callee: Node<"member">, info: ClassInfo, scope: Scope): Type {
@@ -438,10 +435,10 @@ export class ExprChecker {
     }
     if (method === "remove_at") {
       this.checkIndex(arg, scope, "位置")
-      return "void"
+      return NULL_TYPE
     }
     this.checkAssignable(arg, scope, elementType(base))
-    return "void"
+    return NULL_TYPE
   }
 }
 
@@ -458,10 +455,8 @@ const FIXED_BUILTINS: Readonly<Record<string, { accepts: readonly (readonly Type
   random: { accepts: [["int"], ["int"]], returns: "int" },
 }
 
-function calleeName(expr: Expr): string {
-  if (expr.kind !== "call") return "この式"
-  if (expr.callee.kind === "ident") return expr.callee.name
-  return expr.callee.kind === "member" ? expr.callee.name : "この式"
+function calleeName(expr: Extract<Expr, { kind: "call" }>): string {
+  return expr.callee.kind === "ident" || expr.callee.kind === "member" ? expr.callee.name : "この関数"
 }
 
 /** 二項演算の結果の型。その組み合わせが使えなければ undefined。 */

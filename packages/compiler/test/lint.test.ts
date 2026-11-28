@@ -30,8 +30,8 @@ describe("警告（K0601 使っていない変数 / K0602 実行されない行�
   })
 
   it("入れ子のブロックの中の変数も調べる。for の変数・引数には出ない", () => {
-    expect(warningsOf(main("  for i in 0..3 {\n    var x: int = i\n  }"))).toEqual(["K0601"])
-    expect(warningsOf(main("  for i in 0..3 {\n    print(\"a\")\n  }"))).toEqual([])
+    expect(warningsOf(main("  for i 3 times {\n    var x: int = i\n  }"))).toEqual(["K0601"])
+    expect(warningsOf(main("  for i 3 times {\n    print(\"a\")\n  }"))).toEqual([])
     expect(warningsOf("function f = (a: int) {\n}\nfunction main = () {\n  f(1)\n}\n")).toEqual([])
   })
 
@@ -47,5 +47,31 @@ describe("警告（K0601 使っていない変数 / K0602 実行されない行�
 
   it("エラーがあるときは、警告は出さない", () => {
     expect(warningsOf(main("  var a: int = \"x\""))).toEqual(["K0301"])
+  })
+})
+
+describe("警告（K0603 値を使わない式 / K0604 値を返さない関数の値）", () => {
+  it("値を使わない式を単独で書くと K0603（エラーではなく警告）", () => {
+    const result = compile(main("  1 + 2"), { warnings: true })
+    expect(result.diagnostics.map((d) => d.code)).toEqual(["K0603"])
+    expect(result.diagnostics[0]?.severity).toBe("warning")
+    expect(result.python).toContain("1 + 2")
+  })
+
+  it("関数の呼び出しを単独で書くのは警告しない", () => {
+    expect(warningsOf(main('  print("a")'))).toEqual([])
+    expect(warningsOf(main("  var xs: int[] = [1]\n  xs.push(2)\n  xs.remove_at(0)"))).toEqual([])
+    expect(warningsOf("function f = () {\n}\nfunction main = () {\n  f()\n}\n")).toEqual([])
+  })
+
+  it("値を返さない関数の値を使うと K0604", () => {
+    expect(warningsOf(main('  var x: null = print("a")\n  print(x)'))).toEqual(["K0604"])
+    expect(warningsOf(main('  var x: string? = print("a")\n  print(x)'))).toEqual(["K0604"])
+    expect(warningsOf(main('  print(print("a"))'))).toEqual(["K0604"])
+  })
+
+  it("値を返す関数の値を使うのは警告しない", () => {
+    expect(warningsOf(main('  var n: int = to_int("1")\n  print(n)'))).toEqual([])
+    expect(warningsOf("function f = () -> int {\n  return 1\n}\nfunction main = () {\n  print(f())\n}\n")).toEqual([])
   })
 })

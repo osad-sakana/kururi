@@ -79,13 +79,12 @@ export interface WhileStmt {
   readonly range: Range
 }
 
-/** for i in a..b { }（a 以上 b 未満） */
-export interface RangeStmt {
-  readonly kind: "range"
+/** for i n times { }（i は 0 から n - 1） */
+export interface TimesStmt {
+  readonly kind: "times"
   readonly name: string
   readonly nameRange: Range
-  readonly start: Expr
-  readonly end: Expr
+  readonly count: Expr
   readonly body: readonly Stmt[]
   readonly range: Range
 }
@@ -110,7 +109,7 @@ export interface JumpStmt {
   readonly range: Range
 }
 
-export type Stmt = VarDecl | ExprStmt | AssignStmt | IfStmt | WhileStmt | RangeStmt | ForeachStmt | ReturnStmt | JumpStmt
+export type Stmt = VarDecl | ExprStmt | AssignStmt | IfStmt | WhileStmt | TimesStmt | ForeachStmt | ReturnStmt | JumpStmt
 
 export interface Param {
   readonly name: string

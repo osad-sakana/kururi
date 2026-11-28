@@ -5,20 +5,28 @@ const codesOf = (source: string): string[] => compile(source).diagnostics.map((d
 const main = (body: string): string => `function main = () {\n${body}\n}\n`
 
 describe("compile (S10): 新しい書き方", () => {
-  it("戻り値がない関数は -> を省ける。-> void と書いてもよい", () => {
-    expect(codesOf("function f = () {\n}\nfunction main = () -> void {\n}\n")).toEqual([])
+  it("戻り値がない関数は -> を省く。-> void は古い書き方として案内する", () => {
+    expect(codesOf("function f = () {\n}\n" + main(""))).toEqual([])
+    expect(codesOf("function f = () -> void {\n}\n" + main(""))).toEqual(["K0114"])
   })
 
-  it("for i in a..b は range になる。始まりが 0 なら省く", () => {
-    const { python } = compile(main("  for i in 0..3 {\n    print(i)\n  }\n  for j in 2..5 {\n    print(j)\n  }"))
+  it("for i n times は range(n) になる", () => {
+    const { python } = compile(main("  for i 3 times {\n    print(i)\n  }"))
     expect(python).toContain("for i in range(3):")
-    expect(python).toContain("for j in range(2, 5):")
   })
 
-  it("範囲の端には式を書ける。int でなければ K0306", () => {
-    expect(codesOf(main("  var n: int = 4\n  for i in 0..n + 1 {\n  }"))).toEqual([])
-    expect(codesOf(main('  for i in 0.."x" {\n  }'))).toEqual(["K0306"])
-    expect(codesOf(main("  for i in 1.5..3 {\n  }"))).toEqual(["K0306"])
+  it("回数には式を書ける。int でなければ K0306", () => {
+    expect(codesOf(main("  var n: int = 4\n  for i n + 1 times {\n  }"))).toEqual([])
+    expect(codesOf(main('  for i "x" times {\n  }'))).toEqual(["K0306"])
+    expect(codesOf(main("  for i 1.5 times {\n  }"))).toEqual(["K0306"])
+  })
+
+  it("古い for i in a..b は K0114 で案内する", () => {
+    expect(codesOf(main("  for i in 0..3 {\n  }"))).toEqual(["K0114"])
+  })
+
+  it("times を書き忘れると構文エラー", () => {
+    expect(codesOf(main("  for i 3 {\n  }"))).toEqual(["K0101"])
   })
 
   it("for x in 配列 は for のまま。配列でなければ K0306", () => {
@@ -27,7 +35,7 @@ describe("compile (S10): 新しい書き方", () => {
   })
 
   it("ループの変数には代入できない", () => {
-    expect(codesOf(main("  for i in 0..3 {\n    i = 1\n  }"))).toEqual(["K0213"])
+    expect(codesOf(main("  for i 3 times {\n    i = 1\n  }"))).toEqual(["K0213"])
   })
 
   it("else if は elif になる", () => {
@@ -72,7 +80,7 @@ describe("compile (S10): 古い書き方への案内（K0114）", () => {
     expect(codesOf("let a: int = 1\n" + main(""))).toEqual(["K0114"])
   })
 
-  it("repeat は for i in 0..n に変わった", () => {
+  it("repeat は for i n times に変わった", () => {
     expect(codesOf(main("  repeat i: 3 {\n  }"))).toEqual(["K0114"])
   })
 

@@ -41,7 +41,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
   if (reporter.count > 0) return result("", reporter.list(), [])
 
   const warnings = new Reporter(source)
-  if (options.warnings === true) lint(parsed.program, warnings)
+  if (options.warnings === true) lint(parsed.program, warnings, types)
   const output = emitPython(parsed.program, { types, widened }, globalWrites, source)
   return result(output.python, warnings.list(), output.lineMap)
 }

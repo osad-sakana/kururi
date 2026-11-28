@@ -4,7 +4,7 @@ import type { Range } from "../syntax/tokens"
 import type { ExprChecker } from "./check-expr"
 import { assignedNames, union, whenFalse, whenTrue, without } from "./narrowing"
 import type { ClassInfo, Local, Scope, Symbol } from "./scope"
-import { VALUE_TYPE_NAMES, elementType, isArray, isAssignable, isClassType, nonNull, typeLabel } from "./types"
+import { NULL_TYPE, VALUE_TYPE_NAMES, elementType, isArray, isAssignable, isClassType, nonNull, typeLabel } from "./types"
 import type { Type } from "./types"
 
 type Locals = ReadonlyMap<string, Local>
@@ -29,11 +29,10 @@ export function resolveType(
   name: string,
   range: Range,
   reporter: Reporter,
-  allowVoid: boolean,
   globals: ReadonlyMap<string, Symbol>,
 ): Type {
   const base = name.replace(/(\[\]|\?)+$/, "")
-  if (VALUE_TYPE_NAMES.has(base) || (allowVoid && name === "void")) return name as Type
+  if (VALUE_TYPE_NAMES.has(base) || name === "null") return name as Type
   const symbol = globals.get(base)
   if (symbol?.kind === "class") {
     if (range.start >= symbol.info.start) return name as Type
@@ -82,11 +81,8 @@ function checkStatement(
     case "var":
       return checkVar(stmt, locals, scope, ctx)
     case "exprStmt":
+      // 値を使わない式（1 + 2 だけ、など）は、エラーにせず、警告にする（lint が出す）
       ctx.exprs.typeOf(stmt.expr, scope)
-      if (stmt.expr.kind !== "call") {
-        const comparison = stmt.expr.kind === "binary" && stmt.expr.op === "=="
-        ctx.reporter.report("K0307", stmt.expr.range, comparison ? { op: "==" } : {})
-      }
       return locals
     case "assign":
       checkAssign(stmt, scope, ctx)
@@ -108,9 +104,8 @@ function checkStatement(
       // while x != null { ... } の本体では、毎回条件を確かめ直すので x は null でない
       checkBlock(stmt.body, locals, loopDepth + 1, ctx, union(loopNarrowing(narrowed, stmt.body), whenTrue(stmt.condition)))
       return locals
-    case "range": {
-      checkCondition(stmt.start, "for の始まり", "int", scope, ctx)
-      checkCondition(stmt.end, "for の終わり", "int", scope, ctx)
+    case "times": {
+      checkCondition(stmt.count, "for の回数", "int", scope, ctx)
       const inner = declare(stmt.name, "int", "loop", stmt.nameRange, locals, ctx)
       checkBlock(stmt.body, inner, loopDepth + 1, ctx, loopNarrowing(narrowed, stmt.body))
       return locals
@@ -136,7 +131,7 @@ function checkStatement(
 }
 
 function checkVar(stmt: Extract<Stmt, { kind: "var" }>, locals: Locals, scope: Scope, ctx: FunctionContext): Locals {
-  const declared = resolveType(stmt.type.name, stmt.type.range, ctx.reporter, false, ctx.globals)
+  const declared = resolveType(stmt.type.name, stmt.type.range, ctx.reporter, ctx.globals)
   ctx.exprs.checkAssignable(stmt.init, scope, declared)
   return declare(stmt.name, declared, stmt.mutable ? "let" : "const", stmt.nameRange, locals, ctx)
 }
@@ -230,12 +225,12 @@ function checkAssign(stmt: AssignStmt, scope: Scope, ctx: FunctionContext): void
 function checkReturn(stmt: Extract<Stmt, { kind: "return" }>, scope: Scope, ctx: FunctionContext): void {
   const expected = ctx.returnType
   if (stmt.value === undefined) {
-    if (expected !== "void" && expected !== "error") ctx.reporter.report("K0320", stmt.range, { expected })
+    if (expected !== NULL_TYPE && expected !== "error") ctx.reporter.report("K0320", stmt.range, { expected })
     return
   }
-  if (expected === "void") {
-    ctx.exprs.valueType(stmt.value, scope, true)
-    ctx.reporter.report("K0321", stmt.value.range)
+  if (expected === NULL_TYPE) {
+    const actual = ctx.exprs.valueType(stmt.value, scope, true)
+    if (actual !== NULL_TYPE && actual !== "error") ctx.reporter.report("K0321", stmt.value.range)
     return
   }
   ctx.exprs.checkAssignable(stmt.value, scope, expected)

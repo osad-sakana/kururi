@@ -34,7 +34,7 @@ function add = (a: int, b: int) -> int {
 function main = () {
     var dog: Dog = new Dog("ポチ")
     var total: int = 0
-    for i in 0..3 {
+    for i 3 times {
         dog.bark()
         total = add(total, i)
     }
@@ -72,7 +72,7 @@ Kururi が身につけさせるのは、特定の言語の知識ではありま�
 | C# | Java と同じ点に加え、`T?`（null 許容型） | 型を名前の前に書く。文末に `;` |
 | Kotlin | `名前: 型`、`T?`、クラス、`for … in` | 範囲 `1..10` は終わりを含む。`val` / `var` の 2 種類 |
 | Swift | `名前: 型`、`T?`、`->` で戻り値の型、`for … in` | 範囲は `0..<10`（終わりを含まない）と `0...10`（含む）を使い分ける |
-| Rust | `名前: 型`、`->`、`for i in 0..10`（終わりを含まない）、`snake_case` | 所有権がある。`null` はなく `Option` を使う。変更するには `mut` が要る |
+| Rust | `名前: 型`、`->`、`snake_case` | 所有権がある。`null` はなく `Option` を使う。変更するには `mut` が要る |
 | Go | 静的な型、`for`、関数による分割 | クラスがない。名前の付け方（大文字で公開）が違う |
 | C / C++ | 静的な型、分岐・繰り返し・関数、`{ }`（C++ はクラスも） | メモリを自分で管理する。型を名前の前に書く |
 | Ruby | `snake_case`、クラスの `UpperCamelCase`、オブジェクト指向の考え方 | 型がない。ブロックの書き方が独特 |
@@ -101,7 +101,7 @@ Kururi が身につけさせるのは、特定の言語の知識ではありま�
 |---|---|
 | 型を明示する | `var total: int = 0` のように、値の種類を必ず書く。型の間違いはコンパイル時に分かる |
 | 形がそろっている | 宣言は「種類 名前 = 中身」。`var`、`function`、`class` で同じ形 |
-| ループは `for` だけ | `for i in 0..10`（範囲）と `for x in xs`（配列） |
+| ループは `for` だけ | `for i 10 times`（回数）と `for x in xs`（配列） |
 | クラスは 3 部構成 | `fields`（データ）、`constructor`（作り方）、`method`（動き） |
 | 名前の書き方を決める | クラスは `ShoppingCart`、`const` は `TAX_RATE`、それ以外は `total_price` |
 | 丁寧なエラー | 何が・どこで・なぜ・どう直すかを日本語で示す。エラーコード付き。直せるものは 1 クリックで直せる |

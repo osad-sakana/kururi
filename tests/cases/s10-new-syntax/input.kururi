@@ -20,10 +20,11 @@ class Counter = {
 }
 
 function main = () {
-    for i in 0..LIMIT {
+    for i LIMIT times {
         total = add(total, i)
     }
-    for j in 2..LIMIT {
+    for k LIMIT - 2 times {
+        var j: int = k + 2
         if j % 2 == 0 {
             print(j)
         } else if j == 3 {

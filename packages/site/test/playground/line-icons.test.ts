@@ -24,7 +24,7 @@ describe("classifyLines", () => {
   })
 
   it("制御構文の行を見分ける", () => {
-    const source = ["if a {", "} else if b {", "} else {", "}", "for i in 0..3 {", "while x {", "return 1"].join("\n")
+    const source = ["if a {", "} else if b {", "} else {", "}", "for i 3 times {", "while x {", "return 1"].join("\n")
     expect(kinds(source)).toEqual(["1:if", "2:else", "3:else", "5:for", "6:while", "7:return"])
   })
 

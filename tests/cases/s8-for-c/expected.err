@@ -4,7 +4,7 @@ error[K0114]: 「for (…; …; …)」は新しい書き方に変わりまし�
 2 |     for (var i: int = 0; i < 3; i += 1) {
   |         ^ 書き方が変わっています
   |
-help: 回数で回すときは for i in 0..10 { ... }、配列を 1 つずつ取り出すときは for x in xs { ... } と書きます
+help: 回数で回すときは for i 10 times { ... }、配列を 1 つずつ取り出すときは for x in xs { ... } と書きます
 
 error[K0103]: 「;」は Kururi では使えない文字です
  --> input.kururi:2:24

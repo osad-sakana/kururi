@@ -3,6 +3,7 @@ import type { Range } from "../syntax/tokens"
 import { alwaysReturns, checkBlock, declare } from "./check-stmt"
 import type { FunctionContext } from "./check-stmt"
 import type { Local } from "./scope"
+import { NULL_TYPE } from "./types"
 import type { Type } from "./types"
 
 export interface Callable {
@@ -25,7 +26,7 @@ export function checkCallable(
   })
   checkBlock(fn.body, locals, 0, ctx)
   const { returnType } = ctx
-  if (!options.isMain && returnType !== "void" && returnType !== "error" && !alwaysReturns(fn.body)) {
+  if (!options.isMain && returnType !== NULL_TYPE && returnType !== "error" && !alwaysReturns(fn.body)) {
     ctx.reporter.report("K0322", fn.nameRange, { name: fn.name, expected: returnType })
   }
   return [...ctx.globalWrites]

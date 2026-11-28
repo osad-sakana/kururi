@@ -53,12 +53,13 @@ export function check(program: Program, reporter: Reporter): CheckResult {
   return { types: exprs.types, widened: exprs.widened, globalWrites: globalWrites as CheckResult["globalWrites"] }
 }
 
-/** main は引数なしで、戻り値の型は void。 */
+/** main は引数なしで、戻り値はなし（-> を書かない）。 */
 function reportMainShape(fn: FunctionDecl, reporter: Reporter): void {
   if (fn.name !== "main") return
   const [firstParam] = fn.params
   if (firstParam !== undefined) reporter.report("K0207", firstParam.nameRange)
-  if (fn.returnType.name !== "void") reporter.report("K0207", fn.returnType.range)
+  // -> を書いたら（範囲が空でなければ）、型が何であってもエラー
+  if (fn.returnType.name !== "null" || fn.returnType.range.end > fn.returnType.range.start) reporter.report("K0207", fn.returnType.range)
 }
 
 interface Registry {
@@ -89,14 +90,14 @@ function registerTopLevel(program: Program, reporter: Reporter): Registry {
   program.items.forEach((item, order) => {
     if (!primary.has(item)) return
     if (item.kind === "var") {
-      const type = resolveType(item.type.name, item.type.range, reporter, false, globals)
+      const type = resolveType(item.type.name, item.type.range, reporter, globals)
       globals.set(item.name, { kind: "variable", type, order, mutable: item.mutable })
     } else if (item.kind === "function") {
       globals.set(item.name, {
         kind: "function",
         name: item.name,
-        params: item.params.map((p) => resolveType(p.type.name, p.type.range, reporter, false, globals)),
-        returnType: resolveType(item.returnType.name, item.returnType.range, reporter, true, globals),
+        params: item.params.map((p) => resolveType(p.type.name, p.type.range, reporter, globals)),
+        returnType: resolveType(item.returnType.name, item.returnType.range, reporter, globals),
       })
     } else {
       const symbol = globals.get(item.name)

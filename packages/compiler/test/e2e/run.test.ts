@@ -83,14 +83,14 @@ describe.skipIf(python === undefined)("E2E: 制御構文", () => {
   it("repeat は回数を 1 回だけ評価し、continue / break が効く", () => {
     const out = run(
       main(
-        "  var n: int = 3\n  for i in 0..n {\n    n += 10\n    if i == 1 { continue }\n    print(i)\n  }\n  var k: int = 0\n  while true {\n    k += 1\n    if k > 2 { break }\n  }\n  print(k)",
+        "  var n: int = 3\n  for i n times {\n    n += 10\n    if i == 1 { continue }\n    print(i)\n  }\n  var k: int = 0\n  while true {\n    k += 1\n    if k > 2 { break }\n  }\n  print(k)",
       ),
     )
     expect(out).toBe("0\n2\n3\n")
   })
 
   it("global 宣言でトップレベルの変数を更新できる", () => {
-    expect(run(`var total: int = 0\nfunction main = () {\n  for i in 0..4 {\n    total += i\n  }\n  print(total)\n}\n`)).toBe("6\n")
+    expect(run(`var total: int = 0\nfunction main = () {\n  for i 4 times {\n    total += i\n  }\n  print(total)\n}\n`)).toBe("6\n")
   })
 
   it("float への代入は float になる", () => {
@@ -140,7 +140,7 @@ describe.skipIf(python === undefined)("E2E: 関数", () => {
 
   it("配列を渡して書き換える・グローバルを更新する", () => {
     const out = run(
-      `var calls: int = 0\nfunction add_all = (xs: int[], v: int) {\n  calls += 1\n  for i in 0..xs.length {\n    xs[i] += v\n  }\n}\n${main("  var a: int[] = [1, 2]\n  add_all(a, 10)\n  add_all(a, 1)\n  print(a[0] + a[1])\n  print(calls)")}`,
+      `var calls: int = 0\nfunction add_all = (xs: int[], v: int) {\n  calls += 1\n  for i xs.length times {\n    xs[i] += v\n  }\n}\n${main("  var a: int[] = [1, 2]\n  add_all(a, 10)\n  add_all(a, 1)\n  print(a[0] + a[1])\n  print(calls)")}`,
     )
     expect(out).toBe("25\n2\n")
   })

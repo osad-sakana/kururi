@@ -67,7 +67,7 @@ const OTHER_LANGUAGE_NAMES: Readonly<Record<string, string>> = {
   str: "文字列にするときは to_string(x) と書きます",
   parseInt: "整数にするときは to_int(x) と書きます",
   parseFloat: "小数にするときは to_float(x) と書きます",
-  range: "回数で回すときは for i in 0..10 { ... } と書きます",
+  range: "回数で回すときは for i 10 times { ... } と書きます",
   append: "配列に足すときは list.push(x) と書きます",
 }
 
@@ -244,7 +244,7 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: () => "main は「function main = () { ... }」と書きます",
     label: () => "ここが違います",
-    hint: () => "main には引数を付けられず、戻り値の型は void にします",
+    hint: () => "main には引数も戻り値も付けられません（function main = () { ... } と書きます）",
   },
   K0208: {
     code: "K0208",
@@ -256,9 +256,11 @@ export const DIAGNOSTIC_CATALOG = {
   K0301: {
     code: "K0301",
     severity: "error",
-    message: ({ expected = "", actual = "" }) => `${actual} の値を ${expected} には入れられません`,
-    label: ({ actual = "" }) => `この値は ${actual} です`,
-    hint: ({ expected = "", actual = "" }) => {
+    message: ({ expected = "", actual = "", callee }) =>
+      callee === undefined ? `${actual} の値を ${expected} には入れられません` : `「${callee}」は値を返さないので、${expected} には入れられません`,
+    label: ({ actual = "", callee }) => (callee === undefined ? `この値は ${actual} です` : "値がありません（null になります）"),
+    hint: ({ expected = "", actual = "", callee }) => {
+      if (callee !== undefined) return `${callee} は文として、単独で書いてください。値を返したいときは、-> ${expected} のように戻り値の型を書いて、return で返します`
       if (actual === "null") return `null を入れたいときは、型の後ろに ? を付けてください（例: ${expected}?）`
       if (actual.endsWith("?")) return "null かもしれない値は、if x != null { ... } の中なら使えます"
       return `${expected} の値を書くか、型を ${actual} に変えてください`
@@ -280,13 +282,6 @@ export const DIAGNOSTIC_CATALOG = {
         : `${left} と ${right} には「${op}」を使えません`,
     label: ({ op = "" }) => `「${op}」が使えません`,
     hint: ({ op = "" }) => operatorHint(op),
-  },
-  K0304: {
-    code: "K0304",
-    severity: "error",
-    message: ({ name = "" }) => `「${name}」は値を返さないので、値としては使えません`,
-    label: () => "値がありません",
-    hint: ({ name = "" }) => `${name} は文として、単独で書いてください`,
   },
   K0305: {
     code: "K0305",
@@ -362,9 +357,9 @@ export const DIAGNOSTIC_CATALOG = {
   K0321: {
     code: "K0321",
     severity: "error",
-    message: () => "戻り値の型が void の関数は、値を返せません",
+    message: () => "戻り値を書いていない関数は、値を返せません",
     label: () => "値を返しています",
-    hint: () => "値を返したいときは、関数の戻り値の型を int などに変えてください。値を返さないなら return だけを書きます",
+    hint: () => "値を返したいときは、-> int のように戻り値の型を書いてください。値を返さないなら return だけを書きます",
   },
   K0322: {
     code: "K0322",
@@ -422,16 +417,6 @@ export const DIAGNOSTIC_CATALOG = {
     message: () => "constructor に public / private は付けられません",
     label: () => "不要です",
     hint: () => "constructor は常に外から呼べます。public / private を消してください",
-  },
-  K0307: {
-    code: "K0307",
-    severity: "error",
-    message: () => "この式は何もしません",
-    label: () => "値を計算するだけです",
-    hint: ({ op }) =>
-      op === "=="
-        ? "値を入れるときは = と書きます（例: a = 2）。== は比べるだけで、変数は変わりません"
-        : "文として書けるのは、関数の呼び出し（例: print(...)）だけです",
   },
   K0308: {
     code: "K0308",
@@ -497,6 +482,23 @@ export const DIAGNOSTIC_CATALOG = {
     message: () => "この行は実行されません",
     label: () => "ここには届きません",
     hint: ({ after = "" }) => `「${after}」のあとの行は実行されません。不要なら消してください`,
+  },
+  K0603: {
+    code: "K0603",
+    severity: "warning",
+    message: () => "この式の値は使われていません",
+    label: () => "値を計算するだけです",
+    hint: ({ op }) =>
+      op === "=="
+        ? "値を入れるときは = と書きます（例: a = 2）。== は比べるだけで、変数は変わりません"
+        : "値を使わないなら消してください。使うなら、変数に入れるか、print に渡します",
+  },
+  K0604: {
+    code: "K0604",
+    severity: "warning",
+    message: ({ name = "" }) => `「${name}」は値を返しません（null になります）`,
+    label: () => "値がありません",
+    hint: ({ name = "" }) => `${name} は文として、単独で書くのがふつうです。この値を使うのは、間違いかもしれません`,
   },
 } as const satisfies Readonly<Record<string, CatalogEntry>>
 

@@ -20,7 +20,8 @@ def main():
     global total
     for i in range(LIMIT):
         total = add(total, i)
-    for j in range(2, LIMIT):
+    for k in range(LIMIT - 2):
+        j = k + 2
         if j % 2 == 0:
             print(j)
         elif j == 3:

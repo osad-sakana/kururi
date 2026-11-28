@@ -2,7 +2,7 @@ function main = () {
     const LIMIT: int = 3
     var count: int = 0
     LIMIT = 5
-    for i in 0..3 {
+    for i 3 times {
         i += 1
         var count: int = 1
     }

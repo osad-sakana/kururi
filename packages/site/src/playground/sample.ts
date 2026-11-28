@@ -4,11 +4,11 @@ function main = () {
     print("=================")
 
     // 外側のループ（i は 0 から 8 まで）
-    for i in 0..9 {
+    for i 9 times {
         var row: string = ""
 
         // 内側のループ（j は 0 から 8 まで）
-        for j in 0..9 {
+        for j 9 times {
             // ループ変数は 0 始まりなので、九九の段・列は +1 する
             var num1: int = i + 1
             var num2: int = j + 1

@@ -46,7 +46,7 @@ describe("compile: 名前の書き方（K0506）", () => {
   it("変数・関数・引数・ループ変数・フィールド・メソッドはスネークケース", () => {
     expect(codesOf(main("  var someValue: int = 1"))).toEqual(["K0506"])
     expect(codesOf("function addAll = (aB: int) {\n}\n" + main(""))).toEqual(["K0506", "K0506"])
-    expect(codesOf(main("  for loopIndex in 0..3 {\n  }"))).toEqual(["K0506"])
+    expect(codesOf(main("  for loopIndex 3 times {\n  }"))).toEqual(["K0506"])
     expect(codesOf("class A = {\n  fields = {\n    someField: int = 1\n  }\n  method doIt = () {\n  }\n}\n" + main(""))).toEqual(["K0506", "K0506"])
   })
 

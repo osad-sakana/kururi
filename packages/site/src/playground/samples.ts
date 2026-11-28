@@ -52,7 +52,7 @@ export const SAMPLES: readonly SampleProgram[] = [
     title: "4. 繰り返し（for / while）",
     source: `function main = () {
     // 0 から 4 まで（終わりの 5 は含まない）
-    for i in 0..5 {
+    for i 5 times {
         print(i)
     }
 

@@ -25,7 +25,7 @@ describe("compile (S2a): 生成", () => {
   })
 
   it("repeat は range になる", () => {
-    expect(pyBody("  for i in 0..3 + 1 {\n    print(i)\n  }")).toContain("    for i in range(3 + 1):\n        print(i)")
+    expect(pyBody("  for i 3 + 1 times {\n    print(i)\n  }")).toContain("    for i in range(3 + 1):\n        print(i)")
   })
 
   it("空のブロックは pass", () => {
@@ -58,8 +58,8 @@ describe("compile (S2a): 診断", () => {
   it("条件が boolean でないと K0306", () => {
     expect(codesOf(main("  if 1 {\n  }"))).toEqual(["K0306"])
     expect(codesOf(main("  while \"a\" {\n  }"))).toEqual(["K0306"])
-    expect(codesOf(main("  for i in 0..1.5 {\n  }"))).toEqual(["K0306"])
-    expect(codesOf(main("  for i in 0..true {\n  }"))).toEqual(["K0306"])
+    expect(codesOf(main("  for i 1.5 times {\n  }"))).toEqual(["K0306"])
+    expect(codesOf(main("  for i true times {\n  }"))).toEqual(["K0306"])
   })
 
   it("条件に = を書くと K0111", () => {
@@ -74,7 +74,7 @@ describe("compile (S2a): 診断", () => {
   it("const への再代入は K0212、repeat の変数への代入は K0213", () => {
     expect(codesOf(main("  const A: int = 1\n  A = 2"))).toEqual(["K0212"])
     expect(codesOf(`const A: int = 1\n${main("  A += 2")}`)).toEqual(["K0212"])
-    expect(codesOf(main("  for i in 0..3 {\n    i = 1\n  }"))).toEqual(["K0213"])
+    expect(codesOf(main("  for i 3 times {\n    i = 1\n  }"))).toEqual(["K0213"])
   })
 
   it("代入の型が合わなければ K0301 / K0302 / K0303", () => {
@@ -91,12 +91,12 @@ describe("compile (S2a): 診断", () => {
 
   it("ブロックの外で変数を使うと K0201", () => {
     expect(codesOf(main("  if true {\n    var a: int = 1\n  }\n  print(a)"))).toEqual(["K0201"])
-    expect(codesOf(main("  for i in 0..2 {\n  }\n  print(i)"))).toEqual(["K0201"])
+    expect(codesOf(main("  for i 2 times {\n  }\n  print(i)"))).toEqual(["K0201"])
   })
 
   it("入れ子での再宣言（シャドーイング）は K0202", () => {
     expect(codesOf(main("  var a: int = 1\n  if true {\n    var a: int = 2\n  }"))).toEqual(["K0202"])
-    expect(codesOf(main("  for i in 0..2 {\n    for i in 0..2 {\n    }\n  }"))).toEqual(["K0202"])
+    expect(codesOf(main("  for i 2 times {\n    for i 2 times {\n    }\n  }"))).toEqual(["K0202"])
   })
 
   it("兄弟のブロックで型が違う同名変数は K0211", () => {

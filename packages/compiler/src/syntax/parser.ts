@@ -197,7 +197,7 @@ function parseConstructor(c: Cursor, accessTok: Token | undefined): ConstructorD
 
 function parseType(c: Cursor): TypeRef | undefined {
   const tok = c.peek()
-  const isType = tok.kind === "ident" || (tok.kind === "keyword" && ["int", "float", "string", "boolean", "void"].includes(tok.text))
+  const isType = tok.kind === "ident" || (tok.kind === "keyword" && ["int", "float", "string", "boolean", "null"].includes(tok.text))
   if (!isType) {
     c.expected("型", "使える型は int、float、string、boolean です")
     return undefined
@@ -320,10 +320,16 @@ function parseFunctionHeader(c: Cursor): { params: readonly Param[]; returnType:
   if (params === undefined) return undefined
   const close = c.peek(-1)
   if (!c.isOp("->")) {
-    // 戻り値がなければ -> は書かない（void）
-    return { params, returnType: { name: "void", range: { start: close.range.end, end: close.range.end } } }
+    // 戻り値がなければ -> は書かない（null を返す）
+    return { params, returnType: { name: "null", range: { start: close.range.end, end: close.range.end } } }
   }
   c.next()
+  if (c.isKeyword("void")) {
+    // 古い -> void は、案内を出したうえで、戻り値なし（null）として読み進める
+    const old = c.next()
+    c.report("K0114", old.range, { old: "-> void", hint: "値を返さない関数は、-> を書きません（例: function main = () { ... }）" })
+    return { params, returnType: { name: "null", range: old.range } }
+  }
   const returnType = parseType(c)
   if (returnType === undefined) return undefined
   return { params, returnType }
@@ -366,7 +372,7 @@ function parseStatementBody(c: Cursor): Stmt | undefined {
     case "while":
       return parseWhile(c)
     case "repeat":
-      c.report("K0114", tok.range, { old: "repeat", hint: "回数で回すときは for i in 0..10 { ... } と書きます" })
+      c.report("K0114", tok.range, { old: "repeat", hint: "回数で回すときは for i 10 times { ... } と書きます" })
       return undefined
     case "foreach":
       c.report("K0114", tok.range, { old: "foreach", hint: "配列を 1 つずつ取り出すときは for x in xs { ... } と書きます" }, { title: "for に直す", text: "for" })
@@ -463,38 +469,46 @@ function parseReturn(c: Cursor): Stmt | undefined {
   return { kind: "return", value, range: { start: keyword.range.start, end: value.range.end } }
 }
 
-/** for i in 0..10 { }（回数）または for x in xs { }（配列）。 */
+const FOR_HINT = "回数で回すときは for i 10 times { ... }、配列を 1 つずつ取り出すときは for x in xs { ... } と書きます"
+
+/** for i 10 times { }（回数。i は 0 から）または for x in xs { }（配列）。 */
 function parseFor(c: Cursor): Stmt | undefined {
   const keyword = c.next()
   if (c.isOp("(")) {
-    c.report("K0114", c.peek().range, { old: "for (…; …; …)", hint: "回数で回すときは for i in 0..10 { ... }、配列を 1 つずつ取り出すときは for x in xs { ... } と書きます" })
+    c.report("K0114", c.peek().range, { old: "for (…; …; …)", hint: FOR_HINT })
     return undefined
   }
   const nameTok = c.peek()
   if (!c.checkDeclName(nameTok)) return undefined
   c.next()
-  if (!c.isKeyword("in")) {
-    c.expected("「in」", "回数で回すときは for i in 0..10 { ... }、配列を 1 つずつ取り出すときは for x in xs { ... } と書きます")
+  if (c.isKeyword("in")) return parseForEach(c, keyword, nameTok)
+  const count = parseExpr(c)
+  if (count === undefined) return undefined
+  if (!c.isKeyword("times")) {
+    c.expected("「times」", FOR_HINT)
     return undefined
   }
   c.next()
-  const first = parseExpr(c)
-  if (first === undefined) return undefined
+  const body = parseBlock(c)
+  if (body === undefined || !c.expectNewline()) return undefined
+  return {
+    kind: "times",
+    name: nameTok.text,
+    nameRange: nameTok.range,
+    count,
+    body: body.statements,
+    range: { start: keyword.range.start, end: body.end },
+  }
+}
+
+function parseForEach(c: Cursor, keyword: Token, nameTok: Token): Stmt | undefined {
+  c.next()
+  const iterable = parseExpr(c)
+  if (iterable === undefined) return undefined
   if (c.isOp("..")) {
-    c.next()
-    const end = parseExpr(c)
-    const body = end === undefined ? undefined : parseBlock(c)
-    if (end === undefined || body === undefined) return undefined
-    if (!c.expectNewline()) return undefined
-    return {
-      kind: "range",
-      name: nameTok.text,
-      nameRange: nameTok.range,
-      start: first,
-      end,
-      body: body.statements,
-      range: { start: keyword.range.start, end: body.end },
-    }
+    // 古い for i in 0..10 は、案内を出して、読み進めずに止める
+    c.report("K0114", c.peek().range, { old: "for i in 0..n", hint: "回数で回すときは for i 10 times { ... } と書きます（i は 0 から始まります）" })
+    return undefined
   }
   const body = parseBlock(c)
   if (body === undefined) return undefined
@@ -503,7 +517,7 @@ function parseFor(c: Cursor): Stmt | undefined {
     kind: "foreach",
     name: nameTok.text,
     nameRange: nameTok.range,
-    iterable: first,
+    iterable,
     body: body.statements,
     range: { start: keyword.range.start, end: body.end },
   }

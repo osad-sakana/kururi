@@ -5,7 +5,7 @@ import { checkCallable } from "./check-function"
 import { resolveType } from "./check-stmt"
 import type { FunctionContext } from "./check-stmt"
 import type { ClassInfo, Scope, Symbol } from "./scope"
-import { isNullable } from "./types"
+import { NULL_TYPE, isNullable } from "./types"
 import type { Type } from "./types"
 
 type Globals = ReadonlyMap<string, Symbol>
@@ -16,7 +16,7 @@ export function registerMembers(decl: ClassDecl, info: ClassInfo, globals: Globa
   const names = new Set<string>()
   let hasConstructor = false
   const types = (list: readonly { type: { name: string; range: ClassDecl["range"] } }[]): Type[] =>
-    list.map((p) => resolveType(p.type.name, p.type.range, reporter, false, globals))
+    list.map((p) => resolveType(p.type.name, p.type.range, reporter, globals))
 
   for (const member of decl.members) {
     if (member.kind === "constructor") {
@@ -35,14 +35,14 @@ export function registerMembers(decl: ClassDecl, info: ClassInfo, globals: Globa
       names.add(name)
       if (member.kind === "field") {
         info.fields.set(name, {
-          type: resolveType(member.type.name, member.type.range, reporter, false, globals),
+          type: resolveType(member.type.name, member.type.range, reporter, globals),
           access: member.access,
           hasInit: member.init !== undefined,
         })
       } else {
         info.methods.set(name, {
           params: types(member.fn.params),
-          returnType: resolveType(member.fn.returnType.name, member.fn.returnType.range, reporter, true, globals),
+          returnType: resolveType(member.fn.returnType.name, member.fn.returnType.range, reporter, globals),
           access: member.access,
         })
       }
@@ -82,7 +82,7 @@ export function checkClass(
     } else {
       constructor = member
       const callable = { name: "constructor", nameRange: member.keywordRange, params: member.params, body: member.body }
-      globalWrites.set(member, checkCallable(callable, info.ctorParams, newContext("void"), { isMain: false }))
+      globalWrites.set(member, checkCallable(callable, info.ctorParams, newContext(NULL_TYPE), { isMain: false }))
     }
   }
   checkFieldsAssigned(decl, info, accepted, constructor, base.reporter)

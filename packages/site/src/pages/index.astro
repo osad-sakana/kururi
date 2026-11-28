@@ -250,7 +250,7 @@ const errorHtml = escapeHtml(errorText)
               {[
                 { concept: "値の種類", code: "var age: int = 12" },
                 { concept: "分岐", code: "if age >= 20 { … }" },
-                { concept: "繰り返し", code: "for i in 0..3 { … }" },
+                { concept: "繰り返し", code: "for i 3 times { … }" },
                 { concept: "関数", code: "function f = () { … }" },
               ].map((row, i) => (
                 <g transform={`translate(0 ${34 + i * 70})`}>
@@ -335,7 +335,7 @@ const errorHtml = escapeHtml(errorText)
             {[
               "function main = () {",
               "    var total: int = 0",
-              "    for i in 0..4 {",
+              "    for i 4 times {",
               "        total = total + i",
               "    }",
               "    print(total)",
@@ -350,7 +350,7 @@ const errorHtml = escapeHtml(errorText)
             {[
               "function main = () {",
               "    var total: int = 0",
-              "    for i in 0..4 {",
+              "    for i 4 times {",
               "        total = total + i",
               "    }",
               "    print(total)",

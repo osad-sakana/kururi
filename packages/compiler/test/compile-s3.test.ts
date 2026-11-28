@@ -80,8 +80,9 @@ describe("compile (S3): 診断", () => {
     expect(codesOf(withMain("function f = () -> int {\n  while true {\n    break\n  }\n}"))).toEqual(["K0322"])
   })
 
-  it("関数の戻り値は値として使える、void は使えない", () => {
-    expect(codesOf(withMain("function f = () {\n}", "  var a: int = f()"))).toEqual(["K0304"])
+  it("戻り値がない関数は null を返すので、int には入れられない", () => {
+    expect(codesOf(withMain("function f = () {\n}", "  var a: int = f()"))).toEqual(["K0301"])
+    expect(codesOf(withMain("function f = () {\n}", "  var a: null = f()"))).toEqual([])
   })
 
   it("引数・ローカル・トップレベルと同じ名前は K0202", () => {
@@ -93,7 +94,7 @@ describe("compile (S3): 診断", () => {
 
   it("型の書き方の誤りは K0208", () => {
     expect(codesOf(withMain("function f = (a: Foo) {\n}"))).toEqual(["K0208"])
-    expect(codesOf(withMain("function f = (a: void) {\n}"))).toEqual(["K0208"])
+    expect(codesOf(withMain("function f = (a: void) {\n}"))).toEqual(["K0101"])
     expect(codesOf(withMain("function f = () -> Foo {\n}"))).toEqual(["K0208"])
   })
 

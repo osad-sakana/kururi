@@ -106,8 +106,8 @@ describe("compile (S2b): 診断", () => {
     expect(codesOf(main("  var a: int[] = [1]\n  var x: int = 0\n  for x in a {\n  }"))).toEqual(["K0202"])
   })
 
-  it("push は値を返さないので値としては使えない", () => {
-    expect(codesOf(main("  var a: int[] = [1]\n  var b: int = a.push(1)"))).toEqual(["K0304"])
+  it("push は null を返すので、int には入れられない", () => {
+    expect(codesOf(main("  var a: int[] = [1]\n  var b: int = a.push(1)"))).toEqual(["K0301"])
   })
 
   it("break / continue は for の中でも使える", () => {
@@ -116,6 +116,6 @@ describe("compile (S2b): 診断", () => {
 
   it("型の書き方の誤り", () => {
     expect(codesOf(main("  var a: Foo[] = []"))).toEqual(["K0208"])
-    expect(codesOf(main("  var a: void[] = []"))).toEqual(["K0208"])
+    expect(codesOf(main("  var a: void[] = []"))).toEqual(["K0101"])
   })
 })

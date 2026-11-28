@@ -99,8 +99,8 @@ describe("compile (S1): 型・名前の診断", () => {
     expect(codesOf(main("  print(-true)"))).toEqual(["K0303"])
   })
 
-  it("値のない呼び出しを値として使うと K0304", () => {
-    expect(codesOf(main('  var a: int = print("x")'))).toEqual(["K0304"])
+  it("値のない呼び出し（null になる）を int に入れると K0301", () => {
+    expect(codesOf(main('  var a: int = print("x")'))).toEqual(["K0301"])
   })
 
   it("引数の数が違うと K0305", () => {
@@ -108,8 +108,8 @@ describe("compile (S1): 型・名前の診断", () => {
     expect(codesOf(main("  print(1, 2)"))).toEqual(["K0305"])
   })
 
-  it("意味のない式は K0307", () => {
-    expect(codesOf(main("  1 + 2"))).toEqual(["K0307"])
+  it("値を使わない式は、エラーにならない（警告は lint が出す）", () => {
+    expect(codesOf(main("  1 + 2"))).toEqual([])
   })
 
   it("関数でないものを呼ぶと K0308、関数を値にすると K0309", () => {

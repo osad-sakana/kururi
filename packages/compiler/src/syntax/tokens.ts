@@ -23,7 +23,7 @@ export interface Token {
 export const KEYWORDS: ReadonlySet<string> = new Set([
   "const", "var", "let", "function", "method", "return", "class", "public", "private", "new", "constructor", "self",
   "if", "elseif", "else", "while", "repeat", "foreach", "in", "break", "continue", "for",
-  "true", "false", "null", "and", "or", "not", "int", "float", "string", "boolean", "void",
+  "true", "false", "null", "and", "or", "not", "int", "float", "string", "boolean", "void", "times",
 ])
 
 /** 組み込みの名前。キーワードではないが、変数名などには使えない。 */

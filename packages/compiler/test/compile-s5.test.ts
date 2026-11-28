@@ -125,7 +125,7 @@ describe("compile (S5): 絞り込み", () => {
   })
 
   it("ループの中で代入されるなら、ループの本体では絞り込まない", () => {
-    const body = "  var s: string? = null\n  if s != null {\n    for i in 0..2 {\n      print(s.length)\n      s = null\n    }\n  }"
+    const body = "  var s: string? = null\n  if s != null {\n    for i 2 times {\n      print(s.length)\n      s = null\n    }\n  }"
     expect(codesOf(main(body))).toEqual(["K0330"])
   })
 
