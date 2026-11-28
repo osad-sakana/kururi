@@ -216,6 +216,7 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: ({ name = "" }) => `${name} はループ（while か for）の中でしか使えません`,
     label: () => "ループの外です",
+    hint: ({ name = "" }) => `${name} は while か for の { } の中に書きます。ループの外なら、消すか、ループの中へ移してください`,
   },
   K0211: {
     code: "K0211",
@@ -293,6 +294,7 @@ export const DIAGNOSTIC_CATALOG = {
     message: ({ name = "", expected = "", actual = "" }) =>
       `${name} には引数が ${expected} 個必要ですが、${actual} 個書かれています`,
     label: ({ expected = "" }) => `引数は ${expected} 個です`,
+    hint: ({ expected = "" }) => `引数を ${expected} 個にそろえてください（関数を作ったときの引数の数と同じにします）`,
   },
   K0306: {
     code: "K0306",
@@ -436,6 +438,7 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: ({ name = "" }) => `「${name}」は関数ではないので、呼び出せません`,
     label: () => "関数ではありません",
+    hint: ({ name = "" }) => `「${name}」は変数やフィールドなどの値です。値として使うときは、かっこ () を付けずに書いてください`,
   },
   K0309: {
     code: "K0309",
