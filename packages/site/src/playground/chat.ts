@@ -12,8 +12,8 @@ function bubble(side: "kururin" | "you", className?: string): { readonly row: HT
     avatar.className = "avatar"
     avatar.src = AVATAR_URL
     avatar.alt = "くるりん"
-    avatar.width = 32
-    avatar.height = 32
+    avatar.width = 36
+    avatar.height = 36
     row.append(avatar)
   }
   row.append(body)

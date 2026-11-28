@@ -44,7 +44,10 @@ section + section { border-left: 1px solid var(--color-line); }
 .chat-row { flex: none; display: flex; align-items: flex-end; gap: 0.5rem; max-width: 100%; animation: chat-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 .chat-row.kururin { align-self: flex-start; transform-origin: left bottom; }
 .chat-row.you { align-self: flex-end; transform-origin: right bottom; }
-.chat-row .avatar { flex: none; width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 1px solid var(--color-line); }
+/* くるりんの絵は、白地に黒い線。枠や丸い地を付けず、地の白だけ画面になじませる（ダークは線を白くする） */
+.chat-row .avatar { flex: none; width: 36px; height: 36px; mix-blend-mode: multiply; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme]) .chat-row .avatar { filter: invert(1); mix-blend-mode: screen; } }
+:root[data-theme="dark"] .chat-row .avatar { filter: invert(1); mix-blend-mode: screen; }
 .bubble { max-width: min(80%, 36rem); padding: 0.45rem 0.8rem; border-radius: 1rem; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
 .kururin .bubble { background: var(--color-panel); border: 1px solid var(--color-line); border-bottom-left-radius: 0.25rem; color: var(--color-code); }
 .you .bubble { background: var(--color-accent); color: var(--color-accent-ink); border-bottom-right-radius: 0.25rem; }
