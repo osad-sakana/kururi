@@ -135,13 +135,9 @@ section + section { border-left: 1px solid var(--color-line); }
 .menu-list button:disabled { color: var(--color-muted); }
 .embed .menu { display: none; }
 
-/* 実行中：ロゴの電球がピカピカする */
-h1 svg { overflow: visible; }
-.logo-glass { fill: var(--color-spark); stroke: none; opacity: 0; }
-.logo-rays path { fill: none; stroke: var(--color-spark); stroke-width: 3; stroke-linecap: round; }
-.logo-rays { opacity: 0; }
-body.busy .logo-bulb { transform-box: fill-box; transform-origin: 50% 70%; animation: bulb-pop 1.2s linear infinite; }
-body.busy .logo-bulb path:not(.logo-glass) { animation: bulb-flash 1.2s ease-in-out infinite; }
-body.busy .logo-glass { animation: bulb-fill 1.2s ease-in-out infinite; }
-body.busy .logo-rays { animation: bulb-rays 1.2s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { body.busy .logo-bulb, body.busy .logo-bulb path, body.busy .logo-rays { animation: none; } body.busy .logo-rays { opacity: 1; } }
+/* 実行中：「実行」の文字が、ピカッと光る電球に変わる */
+.pane-actions .run-bulb { display: none; width: 1.7em; height: 1.7em; margin-block: -0.35em; }
+#run.running { --color-spark: var(--color-accent-ink); }
+#run.running .label { display: none; }
+#run.running .run-bulb { display: inline-block; }
+#run.running:disabled { opacity: 1; cursor: progress; }

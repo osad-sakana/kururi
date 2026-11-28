@@ -367,8 +367,8 @@ const runner = createRunner({
   },
   onStatus: (text) => {
     status.textContent = text
-    // 準備中・実行中は、ロゴの電球がピカピカする
-    document.body.classList.toggle("busy", text !== "")
+    // 準備中・実行中は、実行ボタンの文字が、ピカッと光る電球になる
+    runButton.classList.toggle("running", text !== "")
   },
   onError: (traceback) => {
     const error = mapRuntimeError(traceback, currentAnalysis.lineMap)
