@@ -119,13 +119,11 @@ section + section { border-left: 1px solid var(--color-line); }
 #boot .boot-bulb { width: 2.6rem; height: 2.6rem; }
 #boot .logo-rays { opacity: 0; }
 #status-wrap { flex: 1; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
-#busy { width: 1.5rem; height: 1.5rem; }
 
 /* 実行ボタンは、Kururi のコード欄の見出しの右端に置く */
 .pane-title-row { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; padding-block: 0.3rem; padding-right: 0.6rem; }
 .pane-actions { display: flex; align-items: center; gap: 0.4rem; }
-.pane-actions button { padding: 0.25rem 0.7rem; font-size: 12px; }
-.pane-actions button.primary { font-size: 13px; padding: 0.3rem 1rem; }
+.pane-actions button, .pane-actions button.primary { box-sizing: border-box; min-width: 6.5rem; padding: 0.3rem 0.9rem; font-size: 12px; text-align: center; }
 
 /* ハンバーガーメニュー */
 .menu { position: relative; }
@@ -136,3 +134,14 @@ section + section { border-left: 1px solid var(--color-line); }
 .menu-list button:hover:not(:disabled) { background: var(--color-ink); color: var(--color-panel); }
 .menu-list button:disabled { color: var(--color-muted); }
 .embed .menu { display: none; }
+
+/* 実行中：ロゴの電球がピカピカする */
+h1 svg { overflow: visible; }
+.logo-glass { fill: var(--color-spark); stroke: none; opacity: 0; }
+.logo-rays path { fill: none; stroke: var(--color-spark); stroke-width: 3; stroke-linecap: round; }
+.logo-rays { opacity: 0; }
+body.busy .logo-bulb { transform-box: fill-box; transform-origin: 50% 70%; animation: bulb-pop 1.2s linear infinite; }
+body.busy .logo-bulb path:not(.logo-glass) { animation: bulb-flash 1.2s ease-in-out infinite; }
+body.busy .logo-glass { animation: bulb-fill 1.2s ease-in-out infinite; }
+body.busy .logo-rays { animation: bulb-rays 1.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { body.busy .logo-bulb, body.busy .logo-bulb path, body.busy .logo-rays { animation: none; } body.busy .logo-rays { opacity: 1; } }

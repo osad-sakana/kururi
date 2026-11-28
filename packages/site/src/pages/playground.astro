@@ -49,7 +49,7 @@ const home = base.endsWith("/") ? base : `${base}/`
       </nav>
       <label class="visually-hidden" for="samples">サンプル</label>
       <select id="samples" title="サンプルを選ぶと、エディタの中身が入れ替わります（元に戻せます）"></select>
-      <span id="status-wrap"><BulbSpinner id="busy" class="busy" hidden /><span id="status" role="status"></span></span>
+      <span id="status-wrap"><span id="status" role="status"></span></span>
       <div class="controls" role="group" aria-label="文字の大きさ">
         <button id="font-down" type="button" aria-label="文字を小さくする" title="文字を小さくする">A−</button>
         <span id="font-size" aria-live="polite"></span>
