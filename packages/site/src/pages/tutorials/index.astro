@@ -1,19 +1,17 @@
 ---
 import { getCollection } from "astro:content"
 import Base from "../../layouts/Base.astro"
-import { isChapter, labelOf, slugOf, sortKey } from "../../data/tutorials"
+import { labelOf, slugOf, sortKey } from "../../data/tutorials"
 
 const base = import.meta.env.BASE_URL
 const home = base.endsWith("/") ? base : `${base}/`
 const all = (await getCollection("tutorials")).sort((a, b) => sortKey(a.data) - sortKey(b.data))
-// 新しい構成の章は、部ごとにまとめる。これまでの回は、そのあとに並べる
-const chapters = all.filter((lesson) => isChapter(lesson.data))
-const parts = [...new Set(chapters.map((lesson) => lesson.data.part))].map((part) => ({
+// 部ごとにまとめる
+const parts = [...new Set(all.map((lesson) => lesson.data.part))].map((part) => ({
   part,
-  title: chapters.find((lesson) => lesson.data.part === part)?.data.partTitle ?? "",
-  lessons: chapters.filter((lesson) => lesson.data.part === part),
+  title: all.find((lesson) => lesson.data.part === part)?.data.partTitle ?? "",
+  lessons: all.filter((lesson) => lesson.data.part === part),
 }))
-const earlier = all.filter((lesson) => !isChapter(lesson.data))
 ---
 
 <Base title="チュートリアル" current="tutorials" lightOnly footer={false} description="Kururiで、プログラミングの概念を順番に学ぶチュートリアル。どの回も、その場で動かせます。">
@@ -39,21 +37,5 @@ const earlier = all.filter((lesson) => !isChapter(lesson.data))
         </ol>
       </section>
     ))}
-    {earlier.length > 0 && (
-      <section class="part">
-        <h2>これまでの回</h2>
-        <ol class="toc">
-          {earlier.map((lesson) => (
-            <li>
-              <a class="card" href={`${home}tutorials/${slugOf(lesson.id)}`}>
-                <span class="num">{String(lesson.data.order ?? 0).padStart(2, "0")}　{lesson.data.concept}</span>
-                <h3>{lesson.data.title}</h3>
-                <p>{lesson.data.summary}</p>
-              </a>
-            </li>
-          ))}
-        </ol>
-      </section>
-    )}
   </main>
 </Base>

@@ -2,16 +2,15 @@
 import { getCollection, render } from "astro:content"
 import Base from "../../layouts/Base.astro"
 import BulbSpinner from "../../components/BulbSpinner.astro"
-import { isChapter, labelOf, slugOf, sortKey } from "../../data/tutorials"
+import { labelOf, slugOf, sortKey } from "../../data/tutorials"
 
 export async function getStaticPaths() {
   const all = (await getCollection("tutorials")).sort((a, b) => sortKey(a.data) - sortKey(b.data))
-  // 前後の回は、新しい構成の章どうし、これまでの回どうしでたどる
-  return all.map((lesson) => {
-    const family = all.filter((other) => isChapter(other.data) === isChapter(lesson.data))
-    const index = family.indexOf(lesson)
-    return { params: { slug: slugOf(lesson.id) }, props: { lesson, previous: family[index - 1], next: family[index + 1] } }
-  })
+  return all.map((lesson, index) => ({
+    params: { slug: slugOf(lesson.id) },
+    props: { lesson, previous: all[index - 1], next: all[index + 1] },
+  }))
+
 }
 
 const { lesson, previous, next } = Astro.props
@@ -24,12 +23,12 @@ const home = base.endsWith("/") ? base : `${base}/`
   <!-- 横に開くプレイグラウンドでinput() を使えるよう、必要なヘッダーをサービスワーカーで付ける（MIT） -->
   <script is:inline slot="head" src={`${home}coi-serviceworker.js`}></script>
   <div class="reader" data-playground={`${home}playground`}>
-    <main class={isChapter(lesson.data) ? "wrap prose chapter" : "wrap prose"} style={`--kururin: url(${home}kururin.png)`}>
+    <main class="wrap prose chapter" style={`--kururin: url(${home}kururin.png)`}>
       <p class="crumb">
-        <a href={home}>トップ</a> / <a href={`${home}tutorials`}>チュートリアル</a>{isChapter(lesson.data) ? ` / 第${lesson.data.part}部　${lesson.data.partTitle ?? ""}` : ""} / {labelOf(lesson.data)}
+        <a href={home}>トップ</a> / <a href={`${home}tutorials`}>チュートリアル</a>{` / 第${lesson.data.part}部　${lesson.data.partTitle}`} / {labelOf(lesson.data)}
       </p>
       <p class="crumb">学ぶ概念：{lesson.data.concept}</p>
-      <h1>{isChapter(lesson.data) && <span class="chapter-no">{labelOf(lesson.data)}</span>}{lesson.data.title}</h1>
+      <h1><span class="chapter-no">{labelOf(lesson.data)}</span>{lesson.data.title}</h1>
       {lesson.data.goal !== undefined && <p class="goal"><span>今回できるようになること</span>{lesson.data.goal}</p>}
       {(lesson.data.needs !== undefined || lesson.data.kind !== undefined) && (
         <ul class="chapter-meta">

@@ -130,20 +130,25 @@ mark.r { --mk: var(--color-code-keyword); }
 /* ---- エラーは先生 ---- */
 .teach .wrap { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
 
-/* ---- 8 回のコース ---- */
+/* ---- コース ---- */
 .course .head { max-width: 40rem; margin-bottom: 3.4rem; }
-.path { position: relative; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 0.6rem; counter-reset: lesson; }
+.path { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.6rem; counter-reset: lesson; }
 .path::before, .path::after { content: ""; position: absolute; left: 6%; right: 6%; top: 17px; height: 2px; }
 .path::before { background: repeating-linear-gradient(90deg, var(--color-line) 0 6px, transparent 6px 12px); }
 .path::after { background: linear-gradient(90deg, var(--color-accent), var(--color-spark)); transform-origin: left; }
 .js .path::after { transform: scaleX(0); transition: transform 0.9s ease 0.1s; }
 .js .path.in::after { transform: scaleX(1); }
-.path a { position: relative; display: block; text-align: center; text-decoration: none; color: var(--color-ink); font-size: 0.85rem; line-height: 1.5; padding-top: 3rem; }
-.path a::before { content: counter(lesson, decimal-leading-zero); counter-increment: lesson; position: absolute; top: 0; left: 50%; translate: -50% 0; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 700 11px var(--font-mono); background: var(--color-canvas); border: 2px solid var(--color-spark); color: var(--color-spark); z-index: 1; transition: background 0.2s, color 0.2s, scale 0.2s; }
-.js .path a::before { scale: 0; transition: scale 0.3s cubic-bezier(0.3, 1.5, 0.5, 1) calc(0.1s + var(--i) * 0.1s), background 0.2s, color 0.2s; }
-.js .path.in a::before { scale: 1; }
-.path a:hover::before { background: var(--color-spark); color: var(--color-canvas); }
-.path small { display: block; color: var(--color-muted); font-size: 0.72rem; }
+.path .step { position: relative; display: block; text-align: center; color: var(--color-ink); font-size: 0.85rem; line-height: 1.5; padding-top: 3rem; }
+.path .step::before { content: counter(lesson, decimal-leading-zero); counter-increment: lesson; position: absolute; top: 0; left: 50%; translate: -50% 0; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 700 11px var(--font-mono); background: var(--color-canvas); border: 2px solid var(--color-spark); color: var(--color-spark); z-index: 1; transition: background 0.2s, color 0.2s, scale 0.2s; }
+.js .path .step::before { scale: 0; transition: scale 0.3s cubic-bezier(0.3, 1.5, 0.5, 1) calc(0.1s + var(--i) * 0.1s), background 0.2s, color 0.2s; }
+.js .path.in .step::before { scale: 1; }
+.path .step:hover::before { background: var(--color-spark); color: var(--color-canvas); }
+.path .step h3 { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.path .step ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
+.path .step li a { display: block; padding: 0.15rem 0.3rem; border-radius: 6px; color: var(--color-muted); font-size: 0.74rem; text-decoration: none; transition: background 0.15s, color 0.15s; }
+.path .step li a span { margin-right: 0.35rem; font: 700 0.68rem var(--font-mono); color: var(--color-accent); }
+.path .step li a:hover { background: var(--color-ink); color: var(--color-canvas); }
+.path .step li a:hover span { color: inherit; }
 
 /* ---- 言語の表 ---- */
 .langs-sec { }
@@ -162,7 +167,7 @@ mark.r { --mk: var(--color-code-keyword); }
   .reason:nth-of-type(odd) .reason-text { order: 0; }
   .orbit-wrap { max-width: 28rem; margin-inline: auto; }
   .why .intro { grid-template-columns: 1fr; }
-    .path { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 1.6rem; }
+    .path { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 1.6rem; }
   .path::before, .path::after { display: none; }
 }
 @media (max-width: 520px) {
@@ -334,7 +339,7 @@ svg .t, #demo .t { font-feature-settings: "palt" 1; letter-spacing: 0.02em; }
   .hc-pre { font-size: 10.5px; padding-inline: 0.9rem; }
   .snippet { padding: 1rem; }
   .snippet pre { font-size: 10.4px; }
-  /* 8 回のコースは、2 列にして、文字を折り返さないようにする */
+  /* コースは、2 列にして、文字を折り返さないようにする */
   .path { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.8rem; }
   /* 学び方の画面図は、縮めると読めないので、横にスクロールできるようにする */
   .annot .shot { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-inline: calc(var(--head-gap) * -0.4); padding-inline: calc(var(--head-gap) * 0.4); }

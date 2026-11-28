@@ -6,12 +6,10 @@ const tutorials = defineCollection({
   loader: glob({ pattern: "*.md", base: "./src/content/tutorials" }),
   schema: z.object({
     title: z.string(),
-    /** これまでの回の番号（新しい構成の章では書かない） */
-    order: z.number().int().optional(),
-    /** 新しい構成：第 N 部の、M 番目の章（N-M） */
-    part: z.number().int().optional(),
-    partTitle: z.string().optional(),
-    chapter: z.number().int().optional(),
+    /** 第 N 部の、M 番目の章（N-M） */
+    part: z.number().int(),
+    partTitle: z.string(),
+    chapter: z.number().int(),
     /** 一覧に出す 1 行の説明 */
     summary: z.string(),
     /** この回で学ぶ概念 */

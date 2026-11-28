@@ -10,11 +10,17 @@ import Logo from "../components/Logo.astro"
 import LogoInline from "../components/LogoInline.astro"
 import { LANGUAGES } from "../data/languages"
 import { renderInline } from "../data/inline"
-import { isChapter, slugOf, sortKey } from "../data/tutorials"
+import { labelOf, slugOf, sortKey } from "../data/tutorials"
 
 const base = import.meta.env.BASE_URL
 const home = base.endsWith("/") ? base : `${base}/`
-const lessons = (await getCollection("tutorials")).filter((lesson) => !isChapter(lesson.data)).sort((a, b) => sortKey(a.data) - sortKey(b.data))
+const lessons = (await getCollection("tutorials")).sort((a, b) => sortKey(a.data) - sortKey(b.data))
+// コースの図：部ごとに、章を並べる
+const parts = [...new Set(lessons.map((lesson) => lesson.data.part))].map((part) => ({
+  part,
+  title: lessons.find((lesson) => lesson.data.part === part)?.data.partTitle ?? "",
+  chapters: lessons.filter((lesson) => lesson.data.part === part),
+}))
 
 // ---- ヒーローの図：中心のロゴ（概念）を、内側の概念と外側の言語がつなぐ ----
 const CENTER = 260
@@ -326,12 +332,12 @@ const problems = problemSources.flatMap((source) => {
             <line x1="1" y1="45" x2="999" y2="45" class="stroke" />
             <circle cx="26" cy="23" r="6" fill="#ed5350" /><circle cx="46" cy="23" r="6" fill="#fbbf24" /><circle cx="66" cy="23" r="6" fill="#45b164" />
             <rect x="380" y="11" width="240" height="24" rx="12" class="editor" />
-            <text class="t dim" x="500" y="28" text-anchor="middle" font-size="12">チュートリアル ／ 繰り返し</text>
+            <text class="t dim" x="500" y="28" text-anchor="middle" font-size="12">チュートリアル ／ 3-3 for（回数で繰り返す）</text>
             <line x1="360" y1="45" x2="360" y2="399" class="stroke" />
             <line x1="680" y1="45" x2="680" y2="399" class="stroke" />
 
             <!-- 左：チュートリアル -->
-            <text class="t dim" x="134" y="76" font-size="11">第4回　繰り返し</text>
+            <text class="t dim" x="134" y="76" font-size="11">3-3　繰り返し</text>
             <text class="t" x="28" y="108" font-size="22" font-weight="800">繰り返し</text>
             <text class="t dim" x="28" y="134" font-size="12">同じことを何度も書かずに、</text>
             <text class="t dim" x="28" y="152" font-size="12">forとwhileで繰り返す。</text>
@@ -446,20 +452,24 @@ const problems = problemSources.flatMap((source) => {
       </div>
     </section>
 
-    <!-- 8回のコース -->
+    <!-- コース -->
     <section class="course seamed">
       <div class="wrap">
         <div class="head" data-reveal>
           <p class="kicker">Course</p>
-          <h2>8回で、概念をひとまわり</h2>
-          <p class="body">手順から始めて、値と型、分岐、繰り返し、関数、配列、クラス、そして「値がない」こと。順番に進めば、プログラミングの土台がそろいます。</p>
+          <h2>{parts.length}つの部、{lessons.length}回で、概念をひとまわり</h2>
+          <p class="body">手順と式から始めて、値と名前、繰り返し、条件、関数、そしてクラスまで。順番に進めば、プログラミングの土台がそろいます。</p>
         </div>
         <nav class="path" data-reveal aria-label="チュートリアルの一覧">
-          {lessons.map((lesson, i) => (
-            <a style={`--i:${i}`} href={`${home}tutorials/${slugOf(lesson.id)}`}>
-              {lesson.data.title}
-              <small>{lesson.data.concept}</small>
-            </a>
+          {parts.map((group, i) => (
+            <div class="step" style={`--i:${i}`}>
+              <h3>{group.title}</h3>
+              <ol>
+                {group.chapters.map((lesson) => (
+                  <li><a href={`${home}tutorials/${slugOf(lesson.id)}`}><span>{labelOf(lesson.data)}</span>{lesson.data.title}</a></li>
+                ))}
+              </ol>
+            </div>
           ))}
         </nav>
       </div>
