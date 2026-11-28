@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 310 130" role="img" aria-label="Kururi">
   <title>Kururi</title>
   <g fill="none" stroke="#e6e6ea" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 22V90M62 24C47 40 34 50 24 58M34 52C48 62 58 76 66 90"/><path d="M84 50V72C84 86 92 92 104 92 116 92 124 86 124 74M124 50V90"/><path d="M142 50V90M142 68C142 56 150 50 162 52"/><path d="M180 50V72C180 86 188 92 200 92 212 92 220 86 220 74M220 50V90"/><path d="M238 50V90M238 68C238 56 246 50 258 52"/><path d="M276 58V90"/><path d="M24 108C90 120 190 120 262 106 276 103 283 112 275 116 268 119 262 112 268 109" stroke-width="5"/></g>
+  <g fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"><path d="M276 -2V4M259 2L262 6M293 2L290 6"/></g>
   <g transform="translate(276 20) scale(1.15) rotate(180 0 7)"><g fill="none" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M-6 0V4A11 11 0 1 0 6 4V0Z"/><path d="M-5 -5H5M-3 -10H3"/></g></g>
 </svg>

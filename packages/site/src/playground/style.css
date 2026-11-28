@@ -10,7 +10,7 @@ header { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1rem; 
 .site-links a:hover { color: var(--color-ink); transform: translateY(-2px); }
 .brand { display: flex; flex-direction: column; line-height: 1; }
 h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
-h1 svg { display: block; height: 30px; width: auto; }
+h1 svg { display: block; height: 30px; width: auto; overflow: visible; }
 .controls { display: flex; align-items: center; gap: 0.25rem; border: 1px solid var(--color-line); border-radius: 8px; overflow: hidden; }
 .controls button { border: 0; border-radius: 0; padding: 0.4rem 0.6rem; }
 #font-size { min-width: 2.2rem; text-align: center; font: 12px var(--font-mono); color: var(--color-muted); user-select: none; }
@@ -95,7 +95,6 @@ section + section { border-left: 1px solid var(--color-line); }
 #boot .boot-logo { width: min(15rem, 60vw); height: auto; overflow: visible; }
 #boot p { margin: 0; font-size: 12px; letter-spacing: 0.16em; color: var(--color-muted); }
 #boot .boot-bulb { width: 2.6rem; height: 2.6rem; }
-#boot .logo-rays { opacity: 0; }
 #status-wrap { flex: 1; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
 
 /* 実行ボタンは、Kururi のコード欄の見出しの右端に置く */

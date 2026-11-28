@@ -25,6 +25,7 @@ const { class: className = "" } = Astro.props
     <path d="M238 50V90M238 68C238 56 246 50 258 52" />
     <path d="M276 58V90" />
   </g>
+  <g class="rays" fill="none" stroke="var(--color-spark)" stroke-linecap="round"><path d="M276 -2V4M259 2L262 6M293 2L290 6" /></g>
   <g transform="translate(276 20) scale(1.15) rotate(180 0 7)">
     <g fill="none" stroke="var(--color-spark)" stroke-linecap="round" stroke-linejoin="round" class="bulb">
       <path d="M-6 0V4A11 11 0 1 0 6 4V0Z" />
@@ -46,6 +47,7 @@ const { class: className = "" } = Astro.props
   }
   .logo-inline .word { stroke-width: var(--logo-stroke, 9); }
   .logo-inline .bulb { stroke-width: calc(var(--logo-stroke, 9) * 0.5); }
+  .logo-inline .rays { stroke-width: calc(var(--logo-stroke, 9) * 0.38); }
   /* 太字・見出しの中では、周りの文字に合わせて線を太くする */
   :global(strong) .logo-inline,
   :global(h1) .logo-inline,
