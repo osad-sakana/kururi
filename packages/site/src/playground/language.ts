@@ -1,6 +1,6 @@
 import { BUILTIN_NAMES, KEYWORDS } from "@kururi/compiler"
 
-const TYPE_NAMES = new Set(["int", "float", "string", "boolean", "void"])
+const TYPE_NAMES = new Set(["int", "float", "string", "boolean"])
 const LITERAL_NAMES = new Set(["true", "false", "null"])
 
 /** Monaco（Monarch）の字句定義。色付けだけで、構文の検査はコンパイラが行う。 */

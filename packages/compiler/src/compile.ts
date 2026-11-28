@@ -37,12 +37,12 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
   if (syntaxDiagnostics.length > 0) return result("", syntaxDiagnostics, [])
 
   const reporter = new Reporter(source)
-  const { types, widened, globalWrites } = check(parsed.program, reporter)
+  const { types, widened, safeIndexes, globalWrites } = check(parsed.program, reporter)
   if (reporter.count > 0) return result("", reporter.list(), [])
 
   const warnings = new Reporter(source)
   if (options.warnings === true) lint(parsed.program, warnings, types)
-  const output = emitPython(parsed.program, { types, widened }, globalWrites, source)
+  const output = emitPython(parsed.program, { types, widened, safeIndexes }, globalWrites, source)
   return result(output.python, warnings.list(), output.lineMap)
 }
 

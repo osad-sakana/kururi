@@ -305,12 +305,12 @@ export const DIAGNOSTIC_CATALOG = {
   K0313: {
     code: "K0313",
     severity: "error",
-    message: ({ what = "配列" }) => `${what}はそのまま表示できません`,
-    label: ({ what = "配列" }) => `${what}です`,
-    hint: ({ what = "配列" }) =>
-      what === "配列"
-        ? "for で 1 つずつ print してください（例: for x in xs { print(x) }）"
-        : "表示したいフィールドを取り出して、print してください（例: print(p.name)）",
+    message: ({ what = "オブジェクト" }) => `${what}はそのまま表示できません`,
+    label: ({ what = "オブジェクト" }) => `${what}です`,
+    hint: ({ what = "オブジェクト" }) =>
+      what === "オブジェクト"
+        ? "表示したいフィールドを取り出して、print してください（例: print(p.name)）"
+        : "for で 1 つずつ取り出して、表示したいフィールドを print してください（例: for p in ps { print(p.name) }）",
   },
   K0314: {
     code: "K0314",

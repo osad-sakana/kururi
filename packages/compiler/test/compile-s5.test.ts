@@ -26,7 +26,7 @@ describe("compile (S5): T? と null の生成", () => {
 
   it("T? と boolean の表示には補助関数を使い、必要なときだけ出す", () => {
     const py = pyOf(main("  var a: int? = null\n  print(a)\n  print(to_string(a))\n  print(`${a}`)"))
-    expect(py).toContain("def __kururi_show(value):")
+    expect(py).toContain("def __kururi_show(value, inner=False):")
     expect(py).toContain("print(__kururi_show(a))")
     expect(compile(main('  print("x")')).python).not.toContain("__kururi_show")
   })
@@ -96,8 +96,9 @@ describe("compile (S5): null の検査", () => {
     expect(codesOf(main("  var a: int?[] = [1, null]\n  var b: int[] = a"))).toEqual(["K0301"])
   })
 
-  it("配列・オブジェクトの T? も表示できない", () => {
-    expect(codesOf(main("  var a: int[]? = null\n  print(a)"))).toEqual(["K0313"])
+  it("配列の T? は表示できる。オブジェクトの T? は表示できない", () => {
+    expect(codesOf(main("  var a: int[]? = null\n  print(a)"))).toEqual([])
+    expect(codesOf("class A = {\n}\n" + main("  var a: A? = null\n  print(a)"))).toEqual(["K0313"])
   })
 })
 
@@ -129,11 +130,8 @@ describe("compile (S5): 絞り込み", () => {
     expect(codesOf(main(body))).toEqual(["K0330"])
   })
 
-  it("引数も絞り込める。フィールドとトップレベルの変数は絞り込まない", () => {
+  it("引数も絞り込める。トップレベルの変数は絞り込まない", () => {
     expect(codesOf("function f = (s: string?) -> int {\n  if s != null {\n    return s.length\n  }\n  return 0\n}\n" + main(""))).toEqual([])
-    expect(
-      codesOf("class A = {\n  fields = {\n    public s: string? = null\n  }\n  public method f = () {\n    if self.s != null {\n      print(self.s.length)\n    }\n  }\n}\n" + main("")),
-    ).toEqual(["K0330"])
     expect(codesOf('var g: string? = null\n' + main("  if g != null {\n    print(g.length)\n  }"))).toEqual(["K0330"])
   })
 

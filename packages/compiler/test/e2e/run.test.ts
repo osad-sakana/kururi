@@ -199,3 +199,19 @@ describe.skipIf(python === undefined)("E2E: null・組み込み", () => {
     expect(out).toBe("7\n")
   })
 })
+
+describe.skipIf(python === undefined)("E2E: 配列の表示と添字の検査", () => {
+  it("配列は Kururi の書き方で表示される", () => {
+    expect(run(main('  var a: string[] = ["a", "b"]\n  var g: int[][] = [[1, 2], [3]]\n  var f: boolean[] = [true]\n  print(a)\n  print(g)\n  print(f)'))).toBe(
+      '["a", "b"]\n[[1, 2], [3]]\n[true]\n',
+    )
+  })
+
+  it("負の添字は、後ろから数えず、実行時エラーになる", () => {
+    expect(() => run(main("  var xs: int[] = [1, 2, 3]\n  var n: int = 1\n  print(xs[n - 3])"))).toThrow(/位置が 0 より小さい/)
+  })
+
+  it("for の変数や length を使った添字は、そのまま動く", () => {
+    expect(run(main("  var xs: int[] = [5, 6]\n  for i xs.length times {\n    print(xs[i])\n  }"))).toBe("5\n6\n")
+  })
+})

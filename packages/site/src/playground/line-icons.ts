@@ -18,7 +18,7 @@ export const HINTS: Readonly<Record<IconKind, string>> = {
   fields: "fields: クラスが持つデータの宣言",
   if: "if: 条件が成り立つときだけ実行する",
   else: "else: if の条件が成り立たないときに実行する",
-  for: "for: 範囲や配列の要素を順に繰り返す",
+  for: "for: 回数や配列の要素の分だけ繰り返す",
   while: "while: 条件が成り立つあいだ繰り返す",
   return: "return: 値を返して関数を終える",
 }

@@ -36,6 +36,8 @@ export interface Local {
   readonly type: Type
   /** let / const / ループ（repeat・foreach）の変数（代入できない） */
   readonly kind: "let" | "const" | "loop"
+  /** 0 以上と分かっている整数（for i n times の i）。添字の検査を省ける */
+  readonly nonNegative?: boolean
 }
 
 /** 名前の表。トップレベルの名前と、今チェックしている関数のローカル変数を持つ。 */

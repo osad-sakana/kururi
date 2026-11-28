@@ -31,7 +31,7 @@ const TYPE_DOCS: Readonly<Record<string, string>> = {
   float: "float: 小数",
   string: "string: 文字列",
   boolean: "boolean: true か false",
-  void: "void: 値を返さない",
+  null: "null: 値がないこと（-> を書かない関数が返す値でもある）",
 }
 
 const ARRAY_MEMBERS: Readonly<Record<string, string>> = {
@@ -91,7 +91,7 @@ export function indexSymbols(source: string): readonly KSymbol[] {
     if (/^\S/.test(text) && !text.startsWith("}")) owner = undefined
     const fn = FUNCTION.exec(text)
     if (fn !== null) {
-      symbols.push({ name: fn[1] as string, kind: "function", params: fn[2] ?? "", type: fn[3] ?? "void", line })
+      symbols.push({ name: fn[1] as string, kind: "function", params: fn[2] ?? "", type: fn[3] ?? "null", line })
       symbols.push(...paramSymbols(fn[2] ?? "", line, undefined))
       return
     }
@@ -101,7 +101,7 @@ export function indexSymbols(source: string): readonly KSymbol[] {
         name: method[2] as string,
         kind: "method",
         params: method[3] ?? "",
-        type: method[4] ?? "void",
+        type: method[4] ?? "null",
         access: method[1] === "private" ? "private" : "public",
         line,
         ...(owner === undefined ? {} : { owner }),
@@ -137,9 +137,9 @@ export function signature(symbol: KSymbol): string {
     case "param":
       return `${symbol.name}: ${symbol.type ?? ""}（引数）`
     case "function":
-      return `function ${symbol.name}(${symbol.params ?? ""}) -> ${symbol.type ?? "void"}`
+      return `function ${symbol.name}(${symbol.params ?? ""}) -> ${symbol.type ?? "null"}`
     case "method":
-      return `${symbol.access ?? "public"} method ${symbol.owner === undefined ? "" : `${symbol.owner}.`}${symbol.name}(${symbol.params ?? ""}) -> ${symbol.type ?? "void"}`
+      return `${symbol.access ?? "public"} method ${symbol.owner === undefined ? "" : `${symbol.owner}.`}${symbol.name}(${symbol.params ?? ""}) -> ${symbol.type ?? "null"}`
     case "constructor":
       return `constructor(${symbol.params ?? ""})`
     case "class":
@@ -171,7 +171,7 @@ export interface Suggestion {
   readonly insert?: string
 }
 
-const KEYWORD_LABELS = ["var", "const", "function", "class", "constructor", "method", "fields", "public", "private", "if", "else", "for", "while", "return", "break", "continue", "new", "self", "in", "true", "false", "null", "and", "or", "not"]
+const KEYWORD_LABELS = ["var", "const", "function", "class", "constructor", "method", "fields", "public", "private", "if", "else", "for", "while", "return", "break", "continue", "new", "self", "in", "times", "true", "false", "null", "and", "or", "not"]
 
 function typeOfObject(symbols: readonly KSymbol[], object: string, line: number): string | undefined {
   if (object === "self") return enclosingClass(symbols, line)

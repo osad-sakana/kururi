@@ -8,6 +8,14 @@ export interface TypeInfo {
   readonly types: ReadonlyMap<Expr, Type>
   /** int → float の変換が要る式 */
   readonly widened: ReadonlySet<Expr>
+  /** 0 以上と分かっている添字の式（これ以外の添字は、実行時に負の数を検査する） */
+  readonly safeIndexes: ReadonlySet<Expr>
+}
+
+/** 添字の Python コード。負の数になりうるときは、検査の関数を通す（Python は負の添字を「後ろから数える」ため）。 */
+function emitIndex(index: Expr, info: TypeInfo): string {
+  const code = emitExpr(index, info)
+  return info.safeIndexes.has(index) ? code : `__kururi_index(${code})`
 }
 
 /** boolean は true / false と表示する（Python の True / False のままにしない）。 */
@@ -46,7 +54,7 @@ function emitRaw(expr: Expr, info: TypeInfo): string {
     case "array":
       return `[${expr.elements.map((e) => emitExpr(e, info)).join(", ")}]`
     case "index":
-      return `${emitExpr(expr.target, info)}[${emitExpr(expr.index, info)}]`
+      return `${emitExpr(expr.target, info)}[${emitIndex(expr.index, info)}]`
     case "member":
       return isLength(expr, info) ? `len(${emitExpr(expr.object, info)})` : `${emitExpr(expr.object, info)}.${expr.name}`
     case "self":
@@ -69,7 +77,7 @@ function emitBinary(expr: Extract<Expr, { kind: "binary" }>, info: TypeInfo): st
 
 function isShownByHelper(expr: Expr, info: TypeInfo): boolean {
   const type = info.types.get(expr)
-  return type === "null" || (type !== undefined && isNullable(type))
+  return type === "null" || (type !== undefined && (isNullable(type) || isArray(type)))
 }
 
 /** 文字列として表示するときの Python コード（括弧なし）。boolean と T? は true / false / null と表示する。 */
@@ -115,7 +123,7 @@ function emitMethodCall(expr: Extract<Expr, { kind: "call" }>, callee: Extract<E
   }
   const [arg] = expr.args
   if (arg === undefined) return ""
-  if (callee.name === "remove_at") return `${object}.pop(${emitExpr(arg, info)})`
+  if (callee.name === "remove_at") return `${object}.pop(${emitIndex(arg, info)})`
   return `${object}.append(${emitExpr(arg, info)})`
 }
 

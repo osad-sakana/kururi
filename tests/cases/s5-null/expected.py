@@ -1,13 +1,17 @@
 import random
 
 
-def __kururi_show(value):
+def __kururi_show(value, inner=False):
     if value is None:
         return "null"
     if value is True:
         return "true"
     if value is False:
         return "false"
+    if isinstance(value, list):
+        return "[" + ", ".join(__kururi_show(item, True) for item in value) + "]"
+    if inner and isinstance(value, str):
+        return '"' + value.replace('\\', '\\\\').replace('"', '\\"') + '"'
     return str(value)
 
 

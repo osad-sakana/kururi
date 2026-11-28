@@ -2,7 +2,7 @@ import type { Reporter } from "../reporter"
 import type { AssignStmt, Expr, Stmt } from "../syntax/ast"
 import type { Range } from "../syntax/tokens"
 import type { ExprChecker } from "./check-expr"
-import { assignedNames, union, whenFalse, whenTrue, without } from "./narrowing"
+import { assignedNames, mayChangeFields, pathOf, union, whenFalse, whenTrue, without, withoutFields } from "./narrowing"
 import type { ClassInfo, Local, Scope, Symbol } from "./scope"
 import { NULL_TYPE, VALUE_TYPE_NAMES, elementType, isArray, isAssignable, isClassType, nonNull, typeLabel } from "./types"
 import type { Type } from "./types"
@@ -55,8 +55,10 @@ export function checkBlock(
   let narrowed = outerNarrowed
   for (const stmt of stmts) {
     locals = checkStatement(stmt, locals, loopDepth, ctx, narrowed)
-    // 代入された変数は、その後は null かもしれない値に戻る
+    // 代入された変数・フィールドは、その後は null かもしれない値に戻る。
+    // メソッドなどを呼んだあとは、フィールドが書き換わったかもしれないので、フィールドの絞り込みも外す
     narrowed = without(narrowed, assignedNames([stmt]))
+    if (mayChangeFields([stmt])) narrowed = withoutFields(narrowed)
   }
 }
 
@@ -66,7 +68,8 @@ function scopeOf(locals: Locals, ctx: FunctionContext, narrowed: ReadonlySet<str
 
 /** ループの本体では、本体の中で代入される変数の絞り込みを外す（2 周目には null かもしれないため）。 */
 function loopNarrowing(narrowed: ReadonlySet<string>, body: readonly Stmt[]): ReadonlySet<string> {
-  return without(narrowed, assignedNames(body))
+  const kept = without(narrowed, assignedNames(body))
+  return mayChangeFields(body) ? withoutFields(kept) : kept
 }
 
 function checkStatement(
@@ -106,7 +109,7 @@ function checkStatement(
       return locals
     case "times": {
       checkCondition(stmt.count, "for の回数", "int", scope, ctx)
-      const inner = declare(stmt.name, "int", "loop", stmt.nameRange, locals, ctx)
+      const inner = declare(stmt.name, "int", "loop", stmt.nameRange, locals, ctx, true)
       checkBlock(stmt.body, inner, loopDepth + 1, ctx, loopNarrowing(narrowed, stmt.body))
       return locals
     }
@@ -137,7 +140,15 @@ function checkVar(stmt: Extract<Stmt, { kind: "var" }>, locals: Locals, scope: S
 }
 
 /** 名前を宣言する。シャドーイングと、兄弟のブロックでの型の食い違いを調べる。 */
-export function declare(name: string, type: Type, kind: Local["kind"], range: Range, locals: Locals, ctx: FunctionContext): Locals {
+export function declare(
+  name: string,
+  type: Type,
+  kind: Local["kind"],
+  range: Range,
+  locals: Locals,
+  ctx: FunctionContext,
+  nonNegative = false,
+): Locals {
   if (locals.has(name) || ctx.globals.has(name)) {
     ctx.reporter.report("K0202", range, { name })
     return locals
@@ -147,7 +158,7 @@ export function declare(name: string, type: Type, kind: Local["kind"], range: Ra
     ctx.reporter.report("K0211", range, { name, other, actual: type })
   }
   ctx.declared.set(name, type)
-  return new Map([...locals, [name, { type, kind }]])
+  return new Map([...locals, [name, nonNegative ? { type, kind, nonNegative } : { type, kind }]])
 }
 
 function checkCondition(expr: Expr, what: string, expected: Type, scope: Scope, ctx: FunctionContext): void {
@@ -202,7 +213,10 @@ function fieldTargetType(target: Extract<Expr, { kind: "member" }>, scope: Scope
     ctx.reporter.report("K0112", target.range)
     return "error"
   }
-  return ctx.exprs.typeOf(target, scope)
+  // 代入先そのものは、絞り込まれていても、宣言した型（T?）で見る
+  const path = pathOf(target)
+  const narrowed = path === undefined ? scope.narrowed : without(scope.narrowed ?? new Set(), new Set([path]))
+  return ctx.exprs.typeOf(target, { ...scope, narrowed })
 }
 
 function checkAssign(stmt: AssignStmt, scope: Scope, ctx: FunctionContext): void {

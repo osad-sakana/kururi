@@ -5,7 +5,7 @@ import type { Expr } from "../syntax/ast"
 import type { Range } from "../syntax/tokens"
 import type { ClassInfo, Scope, Symbol } from "./scope"
 import { BUILTIN_FUNCTIONS } from "./scope"
-import { union, whenFalse, whenTrue } from "./narrowing"
+import { pathOf, union, whenFalse, whenTrue } from "./narrowing"
 import { EMPTY_ARRAY, NULL_TYPE, elementType, isArray, isAssignable, isClassType, isNullable, isNumeric, nonNull, typeLabel } from "./types"
 import type { Type } from "./types"
 
@@ -19,6 +19,8 @@ export class ExprChecker {
   readonly types = new Map<Expr, Type>()
   /** int の値を float の場所に入れる式（Python では float(...) への変換が要る） */
   readonly widened = new Set<Expr>()
+  /** 0 以上と分かっている添字の式（Python では、負の数を検査しなくてよい） */
+  readonly safeIndexes = new Set<Expr>()
 
   constructor(private readonly reporter: Reporter) {}
 
@@ -65,12 +67,11 @@ export class ExprChecker {
     return actual
   }
 
-  /** 画面に出せる値の型（配列は出せない）。print・to_string・補間で使う。 */
+  /** 画面に出せる値の型（配列は、要素が出せるものなら出せる。オブジェクトは出せない）。print・to_string・補間で使う。 */
   displayType(expr: Expr, scope: Scope): Type {
     const type = this.valueType(expr, scope)
-    const base = nonNull(type)
-    if (!isArray(base) && !isClassType(base)) return type
-    this.reporter.report("K0313", expr.range, { what: isArray(base) ? "配列" : "オブジェクト" })
+    if (isDisplayable(type)) return type
+    this.reporter.report("K0313", expr.range, { what: isArray(nonNull(type)) ? "オブジェクトの入った配列" : "オブジェクト" })
     return this.fail(expr)
   }
 
@@ -114,8 +115,11 @@ export class ExprChecker {
         return this.arrayType(expr, scope)
       case "index":
         return this.indexType(expr, scope)
-      case "member":
-        return this.memberType(expr, scope)
+      case "member": {
+        const type = this.memberType(expr, scope)
+        const path = pathOf(expr)
+        return path !== undefined && scope.narrowed?.has(path) === true ? nonNull(type) : type
+      }
       case "self":
         return this.selfType(expr, scope)
       case "new":
@@ -276,6 +280,7 @@ export class ExprChecker {
     } else if (index.kind === "unary" && index.op === "-" && index.operand.kind === "int") {
       this.reporter.report("K0315", index.range)
     }
+    if (isNonNegative(index, scope, this.types)) this.safeIndexes.add(index)
   }
 
   /** .length（メソッドの呼び出しは callType が扱う）。 */
@@ -453,6 +458,36 @@ const FIXED_BUILTINS: Readonly<Record<string, { accepts: readonly (readonly Type
   to_float: { accepts: [["string", "int", "float"]], returns: "float" },
   div: { accepts: [["int"], ["int"]], returns: "int" },
   random: { accepts: [["int"], ["int"]], returns: "int" },
+}
+
+/** 画面に出せる型か。配列は、中身をたどって、オブジェクトが入っていなければ出せる。 */
+function isDisplayable(type: Type): boolean {
+  const base = nonNull(type)
+  if (isArray(base)) return isDisplayable(elementType(base))
+  return !isClassType(base)
+}
+
+/** 値が 0 以上だと、式の形だけから言えるか。言えない添字は、実行時に負の数を検査する。 */
+function isNonNegative(expr: Expr, scope: Scope, types: ReadonlyMap<Expr, Type>): boolean {
+  switch (expr.kind) {
+    case "int":
+      return true
+    case "ident":
+      return scope.locals.get(expr.name)?.nonNegative === true
+    case "paren":
+      return isNonNegative(expr.inner, scope, types)
+    case "member": {
+      // 配列・文字列の length だけ（クラスのフィールドの length は負になりうる）
+      const type = types.get(expr.object)
+      return expr.name === "length" && type !== undefined && (type === "string" || isArray(type))
+    }
+    case "binary":
+      if (expr.op === "+" || expr.op === "*") return isNonNegative(expr.left, scope, types) && isNonNegative(expr.right, scope, types)
+      // 正の数で割った余りは、Python では 0 以上になる
+      return expr.op === "%" && expr.right.kind === "int" && expr.right.text !== "0"
+    default:
+      return false
+  }
 }
 
 function calleeName(expr: Extract<Expr, { kind: "call" }>): string {

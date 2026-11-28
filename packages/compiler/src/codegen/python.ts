@@ -14,16 +14,28 @@ interface Line {
   readonly offset?: number
 }
 
-/** boolean と T? を true / false / null と表示するための補助関数。使うときだけ出力する。 */
+/** boolean・T?・配列を Kururi の書き方（true / false / null / ["a", 1]）で表示するための補助関数。使うときだけ出力する。 */
 const SHOW_HELPER: readonly string[] = [
-  "def __kururi_show(value):",
+  "def __kururi_show(value, inner=False):",
   "    if value is None:",
   '        return "null"',
   "    if value is True:",
   '        return "true"',
   "    if value is False:",
   '        return "false"',
+  "    if isinstance(value, list):",
+  '        return "[" + ", ".join(__kururi_show(item, True) for item in value) + "]"',
+  "    if inner and isinstance(value, str):",
+  String.raw`        return '"' + value.replace('\\', '\\\\').replace('"', '\\"') + '"'`,
   "    return str(value)",
+]
+
+/** 添字が負のとき、Python の「後ろから数える」動きにならないよう、実行時にエラーにする補助関数。使うときだけ出力する。 */
+const INDEX_HELPER: readonly string[] = [
+  "def __kururi_index(i):",
+  "    if i < 0:",
+  '        raise IndexError(f"位置が 0 より小さいので使えません（{i}）")',
+  "    return i",
 ]
 
 /** 型検査を通ったプログラムを Python にする。 */
@@ -58,6 +70,7 @@ export function emitPython(
   const preamble: Line[][] = []
   if (body.includes("random.randint(")) preamble.push([{ text: "import random" }])
   if (body.includes("__kururi_show(")) preamble.push(SHOW_HELPER.map((text) => ({ text })))
+  if (body.includes("__kururi_index(")) preamble.push(INDEX_HELPER.map((text) => ({ text })))
   blocks.unshift(...preamble)
 
   const lines: Line[] = []

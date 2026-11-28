@@ -81,10 +81,11 @@ describe("compile (S2b): 診断", () => {
     expect(codesOf(main('  var s: string = "ab"\n  s[0] = "x"'))).toEqual(["K0316"])
   })
 
-  it("配列を表示すると K0313", () => {
-    expect(codesOf(main("  var a: int[] = [1]\n  print(a)"))).toEqual(["K0313"])
-    expect(codesOf(main("  var a: int[] = [1]\n  print(`${a}`)"))).toEqual(["K0313"])
-    expect(codesOf(main("  var a: int[] = [1]\n  print(to_string(a))"))).toEqual(["K0313"])
+  it("配列は表示できる。オブジェクトの入った配列は K0313", () => {
+    expect(codesOf(main("  var a: int[] = [1]\n  print(a)"))).toEqual([])
+    expect(codesOf(main("  var a: int[] = [1]\n  print(`${a}`)"))).toEqual([])
+    expect(codesOf(main("  var a: int[] = [1]\n  print(to_string(a))"))).toEqual([])
+    expect(codesOf("class A = {\n}\n" + main("  var a: A[] = [new A()]\n  print(a)"))).toEqual(["K0313"])
   })
 
   it("使えないメンバ・添字は K0317 / K0319", () => {
