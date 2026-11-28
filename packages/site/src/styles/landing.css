@@ -323,3 +323,12 @@ svg .t, #demo .t { font-feature-settings: "palt" 1; letter-spacing: 0.02em; }
 .lp .kicker { line-height: 1; }
 .lp .how .window { margin-bottom: 0; }
 .lp .kicker { display: flex; width: max-content; max-width: 100%; }
+
+/* ---- 弧のある切れ目の余白 ----
+   弧は、前後のセクションの余白に食い込む。弧の頂点（境目）から、前後の内容までの距離を、同じ（--sec）にするため、
+   帯の内側の余白は弧のぶんだけ減らし、帯に接する側のセクションの余白は、弧のぶんだけ増やす。合計は変わらない。 */
+.lp { --sec: clamp(4.5rem, 10vw, 8rem); }
+.lp section.tint { padding-block: calc(var(--sec) - var(--arc)); }
+.lp section.cta { padding-top: calc(var(--sec) - var(--arc)); padding-bottom: var(--sec); }
+.lp .lp-hero, .lp .same, .lp .course, .lp .scope-sec { padding-bottom: calc(var(--sec) + var(--arc)); }
+.lp .same, .lp .teach, .lp .scope-sec { padding-top: calc(var(--sec) + var(--arc)); }
