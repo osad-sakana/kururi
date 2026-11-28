@@ -22,7 +22,7 @@ class Counter = {
     }
 
     public method show = () {
-        print(`${self.label}: ${self.count}`)
+        print("${self.label}: ${self.count}")
     }
 }
 

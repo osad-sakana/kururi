@@ -16,7 +16,7 @@ class Player = {
     }
 
     public method describe = () -> string {
-        return `${self.name}（${self.age}歳）`
+        return "${self.name}（${self.age}歳）"
     }
 
     method draw = () {

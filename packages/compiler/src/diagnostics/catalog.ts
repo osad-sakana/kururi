@@ -271,7 +271,7 @@ export const DIAGNOSTIC_CATALOG = {
     severity: "error",
     message: () => "文字列と数値は + でつなげません",
     label: ({ actual = "" }) => `この値は ${actual} です`,
-    hint: () => "to_string(値) で文字列にするか、文字列補間 `${値}` を使ってください",
+    hint: () => 'to_string(値) で文字列にするか、文字列補間 "${値}" を使ってください',
   },
   K0303: {
     code: "K0303",

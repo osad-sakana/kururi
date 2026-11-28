@@ -14,8 +14,7 @@ export function monarchDefinition() {
     tokenizer: {
       root: [
         [/\/\/.*$/, "comment"],
-        [/"([^"\\]|\\.)*"/, "string"],
-        [/`/, { token: "string", next: "@template" }],
+        [/"/, { token: "string", next: "@template" }],
         [/\d+\.\d+/, "number.float"],
         [/\d+/, "number"],
         [
@@ -34,8 +33,8 @@ export function monarchDefinition() {
       template: [
         [/\$\{/, { token: "delimiter.bracket", next: "@templateExpr" }],
         [/\\./, "string.escape"],
-        [/`/, { token: "string", next: "@pop" }],
-        [/[^`$\\]+|\$/, "string"],
+        [/"/, { token: "string", next: "@pop" }],
+        [/[^"$\\]+|\$/, "string"],
       ],
       templateExpr: [
         [/\}/, { token: "delimiter.bracket", next: "@pop" }],

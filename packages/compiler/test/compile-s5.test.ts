@@ -25,7 +25,7 @@ describe("compile (S5): T? と null の生成", () => {
   })
 
   it("T? と boolean の表示には補助関数を使い、必要なときだけ出す", () => {
-    const py = pyOf(main("  var a: int? = null\n  print(a)\n  print(to_string(a))\n  print(`${a}`)"))
+    const py = pyOf(main("  var a: int? = null\n  print(a)\n  print(to_string(a))\n  print(\"${a}\")"))
     expect(py).toContain("def __kururi_show(value, inner=False):")
     expect(py).toContain("print(__kururi_show(a))")
     expect(compile(main('  print("x")')).python).not.toContain("__kururi_show")

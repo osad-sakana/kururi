@@ -22,7 +22,7 @@ summary: Python・JavaScript・Javaの書き方との対応と、迷いやすい
 | 長さ | `xs.length` | `len(xs)` | `xs.length` | `xs.length` |
 | 末尾に足す | `xs.push(1)` | `xs.append(1)` | `xs.push(1)` | `list.add(1)` |
 | 値がない | `null`、型は`T?` | `None` | `null` / `undefined` | `null` |
-| 文字列に埋め込む | `` `x は ${x}` `` | `f"x は {x}"` | `` `x は ${x}` `` | `"x は " + x` |
+| 文字列に埋め込む | `"x は ${x}"` | `f"x は {x}"` | `` `x は ${x}` `` | `"x は " + x` |
 | 整数の割り算 | `div(a, b)` | `a // b` | `Math.floor(a / b)` | `a / b` |
 | 型の変換 | `to_int(s)`、`to_string(n)` | `int(s)`、`str(n)` | `parseInt(s)`、`String(n)` | `Integer.parseInt(s)` |
 | クラス | `class A = { ... }` | `class A:` | `class A { }` | `class A { }` |
@@ -40,7 +40,7 @@ summary: Python・JavaScript・Javaの書き方との対応と、迷いやすい
 
 ### 文字列と数は混ざらない
 
-`"年齢は" + 20`はエラーです。`to_string(20)`か、文字列補間（`` `年齢は${20}` ``）を使います。`int`から`float`だけが、自動で変わります。
+`"年齢は" + 20`はエラーです。`to_string(20)`か、文字列補間（`"年齢は${20}"`）を使います。`int`から`float`だけが、自動で変わります。
 
 ### `/` は常に小数
 

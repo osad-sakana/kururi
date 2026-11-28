@@ -83,7 +83,7 @@ describe("compile (S2b): 診断", () => {
 
   it("配列は表示できる。オブジェクトの入った配列は K0313", () => {
     expect(codesOf(main("  var a: int[] = [1]\n  print(a)"))).toEqual([])
-    expect(codesOf(main("  var a: int[] = [1]\n  print(`${a}`)"))).toEqual([])
+    expect(codesOf(main("  var a: int[] = [1]\n  print(\"${a}\")"))).toEqual([])
     expect(codesOf(main("  var a: int[] = [1]\n  print(to_string(a))"))).toEqual([])
     expect(codesOf("class A = {\n}\n" + main("  var a: A[] = [new A()]\n  print(a)"))).toEqual(["K0313"])
   })

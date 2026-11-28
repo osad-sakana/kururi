@@ -17,9 +17,9 @@ function main = () {
             // 結果を行に追加
             // 幅を揃えるため、結果が1桁の場合はスペースを追加
             if result < 10 {
-                row = row + \` \${result} \`
+                row = row + " \${result} "
             } else {
-                row = row + \`\${result} \`
+                row = row + "\${result} "
             }
         }
 

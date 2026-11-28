@@ -29,7 +29,7 @@ function add = (a: int, b: int) -> int {
 function main = () {
     var count: int = add(1, 2)
     const NAME: string = "kururi"
-    print(`${NAME}: ${count}`)
+    print("${NAME}: ${count}")
 }
 ```
 

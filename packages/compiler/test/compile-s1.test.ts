@@ -59,12 +59,12 @@ describe("compile (S1): 生成", () => {
   })
 
   it("文字列補間は f 文字列になり、{ } は二重にする", () => {
-    const { python } = compile(main('  var n: int = 1\n  var b: boolean = false\n  print(`{n} ${n + 1} ${b} "x"`)'))
+    const { python } = compile(main('  var n: int = 1\n  var b: boolean = false\n  print("{n} ${n + 1} ${b} \\"x\\"")'))
     expect(python).toContain('print(f"{{n}} {n + 1} {("true" if b else "false")} \\"x\\"")')
   })
 
   it("式を含まない補間は普通の文字列にする", () => {
-    expect(compile(main("  print(`abc`)")).python).toContain('print("abc")')
+    expect(compile(main('  print("abc")')).python).toContain('print("abc")')
   })
 
   it("行の対応表を作る", () => {

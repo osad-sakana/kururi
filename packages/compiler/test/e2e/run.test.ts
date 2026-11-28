@@ -45,19 +45,19 @@ describe.skipIf(python === undefined)("E2E: 生成した Python を 3.12 で実�
   })
 
   it("boolean は true / false と表示する", () => {
-    const out = run(main("  print(1 < 2)\n  print(to_string(2 < 1))\n  print(`${true and false} ${not false}`)"))
+    const out = run(main("  print(1 < 2)\n  print(to_string(2 < 1))\n  print(\"${true and false} ${not false}\")"))
     expect(out).toBe("true\nfalse\nfalse true\n")
   })
 
   it("文字列補間・{ } ・エスケープ・日本語名", () => {
     const out = run(
-      main('  var 名前: string = "太郎"\n  var n: int = 3\n  print(`{${名前}} は ${n * 2} 点 "引用" \\\\ \\${x}`)\n  print("a\\tb\\nc")'),
+      main('  var 名前: string = "太郎"\n  var n: int = 3\n  print("{${名前}} は ${n * 2} 点 \\"引用\\" \\\\ \\${x}")\n  print("a\\tb\\nc")'),
     )
     expect(out).toBe('{太郎} は 6 点 "引用" \\ ${x}\na\tb\nc\n')
   })
 
   it("入れ子の補間", () => {
-    expect(run(main("  var a: int = 1\n  print(`x${`y${a}`}z`)"))).toBe("xy1z\n")
+    expect(run(main('  var a: int = 1\n  print("x${"y${a}"}z")'))).toBe("xy1z\n")
   })
 
   it("トップレベルの変数と float への暗黙変換", () => {
@@ -149,7 +149,7 @@ describe.skipIf(python === undefined)("E2E: 関数", () => {
 describe.skipIf(python === undefined)("E2E: クラス", () => {
   it("PLAN のクラスの例", () => {
     const out = run(
-      `class Player = {\n  fields = {\n    name: string\n    public age: int = 20\n    private nickname: string = "none"\n  }\n  constructor = (name: string) {\n    self.name = name\n  }\n  public method run = () {\n    self.draw()\n    self.age += 1\n  }\n  public method show = () -> string {\n    return \`\${self.name} (\${self.age}) \${self.nickname}\`\n  }\n  method draw = () {\n    print("draw")\n  }\n}\n${main('  var pl: Player = new Player("taro")\n  pl.run()\n  print(pl.show())')}`,
+      `class Player = {\n  fields = {\n    name: string\n    public age: int = 20\n    private nickname: string = "none"\n  }\n  constructor = (name: string) {\n    self.name = name\n  }\n  public method run = () {\n    self.draw()\n    self.age += 1\n  }\n  public method show = () -> string {\n    return "\${self.name} (\${self.age}) \${self.nickname}"\n  }\n  method draw = () {\n    print("draw")\n  }\n}\n${main('  var pl: Player = new Player("taro")\n  pl.run()\n  print(pl.show())')}`,
     )
     expect(out).toBe("draw\ntaro (21) none\n")
   })
@@ -172,7 +172,7 @@ describe.skipIf(python === undefined)("E2E: クラス", () => {
 describe.skipIf(python === undefined)("E2E: null・組み込み", () => {
   it("null と boolean の表示", () => {
     const out = run(
-      main('  var a: string? = null\n  var b: int? = 5\n  var c: boolean? = false\n  print(a)\n  print(b)\n  print(c)\n  print(`${a} ${b} ${c}`)\n  a = "x"\n  print(to_string(a))'),
+      main('  var a: string? = null\n  var b: int? = 5\n  var c: boolean? = false\n  print(a)\n  print(b)\n  print(c)\n  print(\"${a} ${b} ${c}\")\n  a = "x"\n  print(to_string(a))'),
     )
     expect(out).toBe("null\n5\nfalse\nnull 5 false\nx\n")
   })

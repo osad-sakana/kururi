@@ -8,8 +8,12 @@ describe("renameIdentifier", () => {
     expect(renameIdentifier(source, "someValue", "some_value")).toBe('var some_value: int = 1\n// someValue\noutput("someValue")\noutput(some_value)\n')
   })
 
-  it("テンプレート文字列は、文字の部分は変えず、${ } の中だけ置き換える", () => {
-    expect(renameIdentifier("print(`someValue ${someValue}`)", "someValue", "some_value")).toBe("print(`someValue ${some_value}`)")
+  it("文字列の補間は、文字の部分は変えず、${ } の中だけ置き換える", () => {
+    expect(renameIdentifier('print("someValue ${someValue}")', "someValue", "some_value")).toBe('print("someValue ${some_value}")')
+  })
+
+  it("補間の中の文字列と、そのあとの文字列も正しく読む", () => {
+    expect(renameIdentifier('print("a ${f("someValue")} someValue") someValue', "someValue", "x")).toBe('print("a ${f("someValue")} someValue") x')
   })
 
   it("別の名前の一部は変えない", () => {

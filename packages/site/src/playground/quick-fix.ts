@@ -20,11 +20,11 @@ function offsetOf(source: string, line: number, column: number): number {
 
 const IDENTIFIER = /[\p{L}_][\p{L}\p{N}_]*/uy
 
-/** 文字列とコメントの中は変えずに、名前（識別子）だけを置き換える。補間 `${ }` の中は、コードとして扱う。 */
+/** 文字列とコメントの中は変えずに、名前（識別子）だけを置き換える。補間 "${ }" の中は、コードとして扱う。 */
 export function renameIdentifier(source: string, from: string, to: string): string {
   let out = ""
   let i = 0
-  // 補間の中にいるあいだ、`${` に対応する `}` を探すための深さ（外側から順に積む）
+  // 補間の中にいるあいだ、${ に対応する `}` を探すための深さ（外側から順に積む）
   const braceStack: number[] = []
   let depth = 0
   let inTemplate = false
@@ -35,7 +35,7 @@ export function renameIdentifier(source: string, from: string, to: string): stri
       if (ch === "\\") {
         out += source.slice(i, i + 2)
         i += 2
-      } else if (ch === "`") {
+      } else if (ch === '"' || ch === "\n") {
         inTemplate = false
         out += ch
         i += 1
@@ -57,11 +57,6 @@ export function renameIdentifier(source: string, from: string, to: string): stri
       out += source.slice(i, stop)
       i = stop
     } else if (ch === '"') {
-      let j = i + 1
-      while (j < source.length && source[j] !== '"' && source[j] !== "\n") j += source[j] === "\\" ? 2 : 1
-      out += source.slice(i, j + 1)
-      i = j + 1
-    } else if (ch === "`") {
       inTemplate = true
       out += ch
       i += 1

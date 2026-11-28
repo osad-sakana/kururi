@@ -22,7 +22,7 @@ class Counter = {
     }
 
     public method show = () {
-        print(`いまの数は ${self.count}`)
+        print("いまの数は ${self.count}")
     }
 }
 

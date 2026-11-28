@@ -23,7 +23,7 @@ function main = () {
     const PI: float = 3.14
     var is_student: boolean = true
 
-    print(`${name}さんは ${age} 歳です`)
+    print("${name}さんは ${age} 歳です")
     print(PI)
     print(is_student)
 
@@ -34,7 +34,7 @@ function main = () {
 
 - `var 名前: 型 = 値`で、**あとから変えられる**入れ物を作ります。
 - `const`は、**変えられない**入れ物（定数）です。名前は大文字にします。
-- `` `... ${式} ...` ``は、文字列の中に値を埋め込みます（補間）。
+- `"... ${式} ..."`のように、文字列の中の`${式}`には、値が埋め込まれます（補間）。
 
 ## 概念：型が合わないと弾かれる
 

@@ -13,7 +13,7 @@ function add = (a: int, b: int) -> int {
 }
 
 function greet = (name: string) {
-    print(`こんにちは、${name}さん`)
+    print("こんにちは、${name}さん")
 }
 
 function main = () {

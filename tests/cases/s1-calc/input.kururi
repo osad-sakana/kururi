@@ -9,7 +9,7 @@ function main = () {
     var big: boolean = total > 3000 and not (count == 0)
 
     print("小計: " + to_string(total))
-    print(`税込: ${with_tax} 円（個数 ${count}、{そのまま}）`)
+    print("税込: ${with_tax} 円（個数 ${count}、{そのまま}）")
     print(big)
     print(7 / 2)
     print(-7 % 3)

@@ -107,7 +107,7 @@ describe("lex: 文字列", () => {
 
 describe("lex: 文字列補間", () => {
   it("文字と式に分ける", () => {
-    const token = lex("`a ${x + 1} b`").tokens[0]
+    const token = lex('"a ${x + 1} b"').tokens[0]
     expect(token?.kind).toBe("template")
     const parts = token?.parts ?? []
     expect(parts.map((p) => p.kind)).toEqual(["text", "expr", "text"])
@@ -117,21 +117,30 @@ describe("lex: 文字列補間", () => {
   })
 
   it("{ } と エスケープを文字として書ける", () => {
-    const token = lex("`{x} \\` \\${y}`").tokens[0]
-    const parts = token?.parts ?? []
-    expect(parts).toHaveLength(1)
-    expect(parts[0]?.kind === "text" && parts[0].value).toBe("{x} ` ${y}")
+    const token = lex('"{x} \\" \\${y}"').tokens[0]
+    expect(token?.kind).toBe("string")
+    expect(token?.value).toBe('{x} " ${y}')
+  })
+
+  it("補間がない文字列は、string のまま", () => {
+    const token = lex('"{x} $100"').tokens[0]
+    expect(token?.kind).toBe("string")
+    expect(token?.value).toBe("{x} $100")
   })
 
   it("補間の中に補間を入れられる", () => {
-    const result = lex("`a ${`b ${c}`} d`")
+    const result = lex('"a ${"b ${c}"} d"')
     expect(result.diagnostics).toEqual([])
     expect(result.tokens[0]?.kind).toBe("template")
   })
 
   it("閉じていない補間は K0102", () => {
-    expect(codes("`abc")).toEqual(["K0102"])
-    expect(codes("`a ${b")).toEqual(["K0102"])
+    expect(codes('"a ${b')).toEqual(["K0102"])
+    expect(codes('"a ${b"')).toContain("K0102")
+  })
+
+  it("バッククォートの文字列は古い書き方として K0114 で案内する（読み進めはする）", () => {
+    expect(codes("`a ${b}`")).toEqual(["K0114"])
   })
 })
 

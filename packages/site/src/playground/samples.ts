@@ -23,11 +23,11 @@ export const SAMPLES: readonly SampleProgram[] = [
     var height: float = 148.5
     var is_student: boolean = true
 
-    print(\`\${name}さんは \${age} 歳、身長は \${height} cm です\`)
+    print("\${name}さんは \${age} 歳、身長は \${height} cm です")
     print(is_student)
 
     age = age + 1
-    print(\`来年は \${age} 歳\`)
+    print("来年は \${age} 歳")
 }
 `,
   },
@@ -81,7 +81,7 @@ export const SAMPLES: readonly SampleProgram[] = [
     for n in numbers {
         total = total + n
     }
-    print(\`\${numbers.length} 個の合計は \${total}\`)
+    print("\${numbers.length} 個の合計は \${total}")
 }
 `,
   },
@@ -93,7 +93,7 @@ export const SAMPLES: readonly SampleProgram[] = [
 }
 
 function greet = (name: string) {
-    print(\`こんにちは、\${name}さん\`)
+    print("こんにちは、\${name}さん")
 }
 
 function main = () {
@@ -119,7 +119,7 @@ function main = () {
     }
 
     public method show = () {
-        print(\`いまの数は \${self.count}\`)
+        print("いまの数は \${self.count}")
     }
 }
 
@@ -137,7 +137,7 @@ function main = () {
     source: `function main = () {
     var text: string = input()
     var number: int = to_int(text)
-    print(\`2 倍は \${number * 2}\`)
+    print("2 倍は \${number * 2}")
 }
 `,
   },

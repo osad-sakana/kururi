@@ -10,7 +10,7 @@ export interface LexResult {
 
 const TWO_CHAR_OPS: ReadonlySet<string> = new Set(["==", "!=", "<=", ">=", "+=", "-=", "*=", "/=", "%=", "..", "->"])
 const ONE_CHAR_OPS: ReadonlySet<string> = new Set("+-*/%=<>()[]{},.:?".split(""))
-const STRING_ESCAPES: Readonly<Record<string, string>> = { '"': '"', "\\": "\\", n: "\n", t: "\t" }
+const STRING_ESCAPES: Readonly<Record<string, string>> = { '"': '"', "\\": "\\", $: "$", n: "\n", t: "\t" }
 const TEMPLATE_ESCAPES: Readonly<Record<string, string>> = { "`": "`", $: "$", "\\": "\\", n: "\n", t: "\t" }
 const IDENT_START = /[\p{XID_Start}_]/uy
 const IDENT_REST = /\p{XID_Continue}*/uy
@@ -60,9 +60,11 @@ export function lex(source: string): LexResult {
       } else if (ch === "/" && source[pos + 1] === "*") {
         skipBlockComment()
       } else if (ch === '"') {
-        readString(push)
+        readString(push, '"')
       } else if (ch === "`") {
-        readTemplate(push)
+        // 古い書き方。案内を出したうえで、最後まで読み進める
+        reporter.report("K0114", { start, end: start + 1 }, { old: "バッククォートの文字列", hint: '文字列は "..." で囲みます。補間は "x は ${x}" と書きます' })
+        readString(push, "`")
       } else if (ch >= "0" && ch <= "9") {
         readNumber(push)
       } else if (matchAt(IDENT_START) !== undefined) {
@@ -160,36 +162,13 @@ export function lex(source: string): LexResult {
     push(KEYWORDS.has(text) ? "keyword" : "ident", start, pos)
   }
 
-  function readString(push: (kind: TokenKind, s: number, e: number, extra?: Partial<Token>) => void): void {
-    const start = pos
-    pos += 1
-    let value = ""
-    while (pos < source.length) {
-      const ch = source[pos] ?? ""
-      if (ch === '"') {
-        pos += 1
-        push("string", start, pos, { value })
-        return
-      }
-      if (ch === "\n" || ch === "\r") break
-      if (ch === "\\") {
-        const escaped = STRING_ESCAPES[source[pos + 1] ?? ""]
-        if (escaped === undefined) {
-          const text = source.slice(pos, pos + 2)
-          reporter.report("K0104", { start: pos, end: pos + text.length }, { text })
-        }
-        value += escaped ?? ""
-        pos += 2
-      } else {
-        value += ch
-        pos += 1
-      }
-    }
-    reporter.report("K0102", { start, end: start + 1 }, { kind: "文字列", close: '"' })
-    push("string", start, pos, { value })
-  }
-
-  function readTemplate(push: (kind: TokenKind, s: number, e: number, extra?: Partial<Token>) => void): void {
+  /**
+   * 文字列を読む。"..." の中の ${式} は補間になる（文字として書くときは \$）。
+   * 補間がなければ string、あれば template のトークンにする。
+   * quote が ` のときは、古い書き方のバッククォートの文字列（複数行も読む）。
+   */
+  function readString(push: (kind: TokenKind, s: number, e: number, extra?: Partial<Token>) => void, quote: '"' | "`"): void {
+    const escapes = quote === '"' ? STRING_ESCAPES : TEMPLATE_ESCAPES
     const start = pos
     pos += 1
     const parts: TemplatePart[] = []
@@ -199,16 +178,24 @@ export function lex(source: string): LexResult {
       if (text !== "") parts.push({ kind: "text", value: text, range: { start: textStart, end } })
       text = ""
     }
+    const finish = (): void => {
+      if (parts.every((part) => part.kind === "text")) {
+        push("string", start, pos, { value: parts.map((part) => (part.kind === "text" ? part.value : "")).join("") })
+      } else {
+        push("template", start, pos, { parts })
+      }
+    }
     while (pos < source.length) {
       const ch = source[pos] ?? ""
-      if (ch === "`") {
+      if (ch === quote) {
         flush(pos)
         pos += 1
-        push("template", start, pos, { parts })
+        finish()
         return
       }
+      if (quote === '"' && (ch === "\n" || ch === "\r")) break
       if (ch === "\\") {
-        const escaped = TEMPLATE_ESCAPES[source[pos + 1] ?? ""]
+        const escaped = escapes[source[pos + 1] ?? ""]
         if (escaped === undefined) {
           const bad = source.slice(pos, pos + 2)
           reporter.report("K0104", { start: pos, end: pos + bad.length }, { text: bad })
@@ -229,8 +216,10 @@ export function lex(source: string): LexResult {
         pos += 1
       }
     }
-    reporter.report("K0102", { start, end: start + 1 }, { kind: "文字列補間", close: "`" })
-    push("template", start, pos, { parts })
+    const hasInterpolation = parts.some((part) => part.kind === "expr")
+    reporter.report("K0102", { start, end: start + 1 }, { kind: hasInterpolation ? "文字列補間" : "文字列", close: quote })
+    flush(pos)
+    finish()
   }
 
   let lastSemicolon = -1

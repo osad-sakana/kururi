@@ -17,7 +17,7 @@ function main = () {
     for n in numbers {
         total = total + n
     }
-    print(`${numbers.length} 個の合計は ${total}`)
+    print("${numbers.length} 個の合計は ${total}")
 }
 ```
 

@@ -23,7 +23,7 @@ function main = () {
     var age: int = to_int(input())
     var found: string? = find_first_long([name, "ab", "abcdef"])
     if found != null {
-        print(`長い名前: ${found}（${found.length} 文字）`)
+        print("長い名前: ${found}（${found.length} 文字）")
     } else {
         print("なし")
     }

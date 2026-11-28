@@ -20,7 +20,7 @@ describe("警告（K0601 使っていない変数 / K0602 実行されない行�
   it("読んでいる変数には出ない（式・条件・引数・補間・複合代入）", () => {
     expect(warningsOf(main("  var a: int = 1\n  print(a)"))).toEqual([])
     expect(warningsOf(main("  var a: int = 1\n  if a > 0 {\n    print(1)\n  }"))).toEqual([])
-    expect(warningsOf(main("  var a: int = 1\n  print(`${a}`)"))).toEqual([])
+    expect(warningsOf(main("  var a: int = 1\n  print(\"${a}\")"))).toEqual([])
     expect(warningsOf(main("  var a: int = 1\n  a += 1"))).toEqual([])
     expect(warningsOf(main("  var xs: int[] = [1]\n  xs[0] = 2"))).toEqual([])
   })

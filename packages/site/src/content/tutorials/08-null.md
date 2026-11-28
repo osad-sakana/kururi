@@ -18,7 +18,7 @@ function find_name = (id: int) -> string? {
 function main = () {
     var name: string? = find_name(2)
     if name != null {
-        print(`こんにちは、${name}さん`)
+        print("こんにちは、${name}さん")
     } else {
         print("見つかりません")
     }
