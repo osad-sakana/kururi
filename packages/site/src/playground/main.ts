@@ -204,15 +204,8 @@ sampleSelect.addEventListener("change", () => {
   if (sample !== undefined) replaceSource(sample.source, true)
 })
 
-// チュートリアルの横に埋め込まれたとき：ロゴやサイトのリンクを隠し、親ページからコードを受け取る
-if (new URLSearchParams(location.search).has("embed")) {
-  document.body.classList.add("embed")
-  window.addEventListener("message", (event: MessageEvent<unknown>) => {
-    if (event.origin !== location.origin) return
-    const data = event.data as { type?: unknown; source?: unknown } | null
-    if (data?.type === "kururi:set-source" && typeof data.source === "string") replaceSource(data.source, false)
-  })
-}
+// チュートリアルの横に埋め込まれたとき：ロゴやサイトのリンクを隠す
+if (new URLSearchParams(location.search).has("embed")) document.body.classList.add("embed")
 
 const BUBBLE_DELAY_MS = 300
 let outputChain: Promise<void> = Promise.resolve()

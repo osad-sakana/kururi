@@ -52,8 +52,6 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
   </div>
   <button type="button" class="side-toggle">プレイグラウンドを開く</button>
   <script>
-    import { codeHash, sourceFromHash } from "../../playground/share"
-
     const WIDTH_KEY = "kururi.panelWidth"
     const reader = document.querySelector<HTMLElement>(".reader")
     const iframe = document.querySelector<HTMLIFrameElement>(".side iframe")
@@ -74,41 +72,17 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
     const savedWidth = Number(store.get(WIDTH_KEY))
     if (reader && Number.isFinite(savedWidth) && savedWidth >= 360) reader.style.setProperty("--panel", `${savedWidth}px`)
 
-    let loaded = false
-    const send = (source: string) => iframe?.contentWindow?.postMessage({ type: "kururi:set-source", source }, location.origin)
-
-    /** パネルを開く。codeがあれば、そのコードを入れる（初回はURLで、2回目からはpostMessageで） */
-    const open = (code?: string) => {
+    /** パネルを開く（コードは入れない。初回だけ読み込む） */
+    const open = () => {
       if (!reader || !iframe) return
       reader.classList.add("open")
-      if (!loaded) {
-        loaded = true
-        iframe.src = `${target}?embed=1${code === undefined ? "" : codeHash(code)}`
-      } else if (code !== undefined) send(code)
+      if (iframe.src === "") iframe.src = `${target}?embed=1`
     }
     const close = () => {
       reader?.classList.remove("open")
     }
-    toggle?.addEventListener("click", () => open())
+    toggle?.addEventListener("click", open)
     closeButton?.addEventListener("click", close)
-
-    // Kururiのコードブロックに「プレイグラウンドで試す」を付ける。押すと、横のパネルにそのコードが入る
-    for (const pre of document.querySelectorAll<HTMLElement>("pre[data-language='kururi']")) {
-      const code = (pre.textContent ?? "").replace(/\n$/, "") + "\n"
-      const wrapper = document.createElement("div")
-      wrapper.className = "code-block"
-      pre.replaceWith(wrapper)
-      const link = document.createElement("a")
-      link.className = "try"
-      link.href = `${target}${codeHash(code)}`
-      link.textContent = "プレイグラウンドで試す"
-      link.addEventListener("click", (event) => {
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return
-        event.preventDefault()
-        open(code)
-      })
-      wrapper.append(pre, link)
-    }
 
     // 幅をドラッグで変える
     resize?.addEventListener("pointerdown", (event) => {
@@ -129,11 +103,7 @@ const slugOf = (id: string) => id.replace(/^\d+-/, "")
       addEventListener("pointerup", stop)
     })
 
-    // チュートリアルを開いたら、広い画面では必ず横にプレイグラウンドを開く。
-    // 最初は、この回の最初のコードを入れておく（#code= で来たときは、そのコード）
-    const firstCode = document.querySelector<HTMLAnchorElement>("a.try")
-    const fromHash = sourceFromHash(location.hash)
-    const initial = fromHash ?? (firstCode === null ? undefined : sourceFromHash(new URL(firstCode.href).hash) ?? undefined)
-    if (fromHash !== null || innerWidth > 1100) open(initial)
+    // チュートリアルを開いたら、広い画面では横にプレイグラウンドを開く（コードは自動で入れない）
+    if (innerWidth > 1100) open()
   </script>
 </Base>
