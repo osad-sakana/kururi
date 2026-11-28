@@ -432,8 +432,9 @@ function render(): void {
   }
   // Python にできない間は、Python 欄にエラーを出し続ける
   const pythonModel = pythonView.getModel()
-  if (pythonModel !== null) monaco.editor.setModelLanguage(pythonModel, analysis.errorCount > 0 ? "plaintext" : "python")
-  pythonView.setValue(analysis.errorCount > 0 ? analysis.errorText : analysis.python)
+  // エラーは「実行結果」の欄に出す。Python 欄は、変換できないあいだ、その旨だけ出す
+  if (pythonModel !== null) monaco.editor.setModelLanguage(pythonModel, "python")
+  pythonView.setValue(analysis.errorCount > 0 ? "# エラーを直すと、ここに Python が出ます\n" : analysis.python)
 
   try {
     currentUrl = narapyUrl(source, analysis)

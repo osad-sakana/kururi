@@ -28,16 +28,15 @@ section { display: flex; flex-direction: column; min-width: 0; min-height: 0; ba
 section + section { border-left: 1px solid var(--color-line); }
 .pane-title { padding: 0.5rem 1rem; font-size: 11px; letter-spacing: 0.08em; color: var(--color-muted); background: var(--color-panel); border-bottom: 1px solid var(--color-line); flex-shrink: 0; }
 #editor { flex: 1; min-height: 0; }
-.right { display: grid; grid-template-rows: auto 1fr auto auto; }
+.right { display: grid; grid-template-rows: auto minmax(0, 1fr) auto minmax(0, 42%); }
 .pane-toggle { display: flex; align-items: center; gap: 0.5rem; width: 100%; margin: 0; border: 0; border-radius: 0; border-bottom: 1px solid var(--color-line); font-family: inherit; text-align: left; cursor: pointer; }
-.pane-toggle::before { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; rotate: 45deg; translate: 0 -2px; transition: rotate 0.2s; }
+.pane-toggle::before { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; rotate: 45deg; translate: 0 -2px; }
 .pane-toggle[aria-expanded="false"]::before { rotate: -45deg; translate: -1px 0; }
-.pane-toggle:hover { background: var(--color-ink); color: var(--color-canvas); }
-.right.python-closed { grid-template-rows: auto auto 1fr; }
+.right.python-closed { grid-template-rows: auto minmax(0, 1fr) auto; }
 .right.python-closed #python { display: none; }
-.right.python-closed #console { height: auto !important; min-height: 0; }
 #python { min-height: 0; }
-#console { display: flex; flex-direction: column; padding: 0.5rem 1rem; height: 11rem; background: var(--color-editor); }
+#console { display: flex; flex-direction: column; min-height: 0; padding: 0.5rem 1rem; background: var(--color-editor); overflow: auto; }
+#python { border-top: 1px solid var(--color-line); }
 #output { flex: 1; margin: 0; overflow: auto; font: var(--code-size, 13px) var(--font-mono); color: var(--color-code); white-space: pre-wrap; }
 #output .error { color: var(--color-danger); }
 #output .prompt-line { display: flex; }
@@ -69,14 +68,12 @@ section + section { border-left: 1px solid var(--color-line); }
 .problem.warning .ex-label { color: var(--color-warn); }
 .problem-help { display: flex; gap: 0.7rem; align-items: baseline; color: var(--color-ink); }
 .problem-help-tag { flex: none; padding: 0.05rem 0.5rem; border-radius: 6px; background: color-mix(in srgb, var(--color-spark) 22%, transparent); color: var(--color-ink); font-size: 11px; font-weight: 700; }
-#console:has(#problems:not([hidden])) { height: 19rem; }
-.right.python-closed #problems { max-height: none; flex: 1 1 auto; border-bottom: 0; }
+#problems { max-height: none; }
 /* カーソルのある行と、対応する反対側の行（Kururi ↔ Python） */
 .kururi-link-line { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
 /* ステップ実行：行の強調と操作盤 */
 .kururi-step-line { background: color-mix(in srgb, var(--color-accent) 22%, transparent); }
 #stepper { flex-shrink: 0; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--color-line); max-height: 9rem; overflow: auto; outline: none; }
-#console:has(#stepper:not([hidden])) { height: 17rem; }
 .step-controls { display: flex; gap: 0.35rem; margin-bottom: 0.4rem; }
 .step-controls button { padding: 0.25rem 0.6rem; }
 .step-close { margin-left: auto; }
@@ -95,9 +92,8 @@ section + section { border-left: 1px solid var(--color-line); }
   main { display: block; overflow-y: auto; }
   section + section { border-left: 0; border-top: 1px solid var(--color-line); }
   section:first-child { height: 60dvh; min-height: 16rem; }
-  .right { height: 32rem; }
-  .right.python-closed { height: 24rem; }
-  #console { height: 9rem; }
+  .right { height: 36rem; }
+  .right.python-closed { height: 30rem; }
 }
 
 /* チュートリアルの横に埋め込んだとき */
