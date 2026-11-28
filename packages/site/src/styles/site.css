@@ -95,7 +95,6 @@ ul.plain li { margin: 0.3rem 0; }
 
 @media (max-width: 520px) {
   .site-header nav { gap: 0.9rem; font-size: 13px; }
-  .site-header nav a:last-child { display: none; }
 }
 @media (max-width: 700px) {
   .compare { grid-template-columns: 1fr; }
@@ -149,3 +148,18 @@ ul.plain li { margin: 0.3rem 0; }
 /* チュートリアルの本文：読みやすい字間 */
 .prose h1, .prose h2, .prose h3 { font-feature-settings: "palt" 1; letter-spacing: -0.02em; }
 .prose p, .prose li { letter-spacing: 0.03em; line-height: 1.95; }
+
+/* ---- スマホ幅：チュートリアル ---- */
+.prose { overflow-x: clip; }
+.code-block { max-width: 100%; }
+@media (max-width: 700px) {
+  /* 「プレイグラウンドで試す」は、コードにかぶらないよう、コードの上に置く */
+  .code-block { display: flex; flex-direction: column-reverse; gap: 0.5rem; }
+  .code-block .try { position: static; align-self: flex-end; }
+}
+
+/* GitHub はアイコンだけ */
+.site-header nav a.icon-link, .site-footer a.icon-link { display: inline-flex; align-items: center; justify-content: center; }
+.site-header nav a.icon-link { padding: 0.35rem 0.5rem; }
+.site-header nav a.icon-link svg { display: block; }
+.site-footer a.icon-link { padding: 0.25rem 0.5rem; }

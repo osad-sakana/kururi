@@ -333,3 +333,39 @@ svg .t, #demo .t { font-feature-settings: "palt" 1; letter-spacing: 0.02em; }
 .lp section.cta { padding-top: calc(var(--sec) - var(--arc)); padding-bottom: var(--sec); }
 .lp .lp-hero, .lp .same, .lp .course, .lp .scope-sec { padding-bottom: calc(var(--sec) + var(--arc)); }
 .lp .same, .lp .teach, .lp .scope-sec { padding-top: calc(var(--sec) + var(--arc)); }
+
+/* ---- コード比較欄の見出し：ロゴだけ大きく、ほかは小さなラベルにする ---- */
+.snippet h4 { font: 700 11px var(--font-mono); letter-spacing: 0.14em; line-height: 1.3; color: var(--color-muted); }
+.snippet.kururi h4 { font-size: 26px; font-family: var(--font-sans); letter-spacing: 0; }
+
+/* ---- スマホ幅（〜520px）----- */
+@media (max-width: 520px) {
+  /* ヒーローのコード例・コード比較・エラー例は、小さい文字にして、行が切れないようにする */
+  .hc-pre { font-size: 10.5px; padding-inline: 0.9rem; }
+  .snippet { padding: 1rem; }
+  .snippet pre { font-size: 10.4px; }
+  .terminal pre { font-size: 11px; padding-inline: 1rem; }
+  /* 8 回のコースは、2 列にして、文字を折り返さないようにする */
+  .path { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.8rem; }
+  /* 学び方の画面図は、縮めると読めないので、横にスクロールできるようにする */
+  .annot .shot { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-inline: calc(var(--head-gap) * -0.4); padding-inline: calc(var(--head-gap) * 0.4); }
+  .annot .shot > svg { min-width: 720px; }
+}
+
+/* ---- 言語の表：狭い画面では、行ごとのカードの縦並びにする ---- */
+@media (max-width: 700px) {
+  .lp .table-scroll { overflow: visible; }
+  .lp table.langs, .lp table.langs tbody, .lp table.langs tr, .lp table.langs td { display: block; min-width: 0; width: 100%; }
+  .lp table.langs thead { display: none; }
+  .lp table.langs tr { padding: 1.1rem 0; border-bottom: 1px solid var(--color-line); }
+  .lp table.langs td { border: 0; padding: 0.15rem 0; }
+  .lp table.langs td:first-child { padding-bottom: 0.5rem; }
+  .lp table.langs td:nth-child(n+2)::before { display: block; margin-top: 0.4rem; font-size: 0.72rem; letter-spacing: 0.08em; color: var(--color-muted); }
+  .lp table.langs td:nth-child(2)::before { content: "そのまま通じること"; }
+  .lp table.langs td:nth-child(3)::before { content: "違うこと（最初に戸惑う点）"; }
+}
+
+/* ---- タブレット幅（〜900px）：ヒーローのコード例を、中央に寄せる ---- */
+@media (max-width: 900px) and (min-width: 521px) {
+  .hero-code { max-width: 36rem; margin-inline: auto; width: 100%; }
+}
