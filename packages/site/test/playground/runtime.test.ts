@@ -30,8 +30,23 @@ describe("mapRuntimeError", () => {
   it("一番内側の <exec> のフレームを Kururi の行にする", () => {
     expect(mapRuntimeError(traceback, MAP)).toEqual({
       kururiLine: 5,
-      summary: "ZeroDivisionError: division by zero",
+      summary: "ZeroDivisionError: 0 では割れません",
     })
+  })
+
+  it("補助関数（Kururi の行に対応がない所）の中で起きたエラーは、呼んだ行にする", () => {
+    const helper = [
+      "Traceback (most recent call last):",
+      '  File "<exec>", line 14, in <module>',
+      '  File "<exec>", line 7, in main',
+      '  File "<exec>", line 2, in __kururi_index',
+      "IndexError: 位置が 0 より小さいので使えません（-2）",
+    ].join("\n")
+    expect(mapRuntimeError(helper, MAP).kururiLine).toBe(5)
+  })
+
+  it("配列の長さを超えた添字は、日本語にする", () => {
+    expect(mapRuntimeError("IndexError: list index out of range", MAP).summary).toBe("IndexError: 位置が配列の長さを超えています")
   })
 
   it("<exec> のフレームがなければ行は null", () => {

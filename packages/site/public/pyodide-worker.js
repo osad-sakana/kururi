@@ -92,7 +92,7 @@ def _kururi_vars(frame):
 
 def _kururi_tracer(frame, event, arg):
     global _kururi_count
-    if frame.f_globals.get("__name__") != "__main__" or frame.f_code.co_name.startswith("_kururi_"):
+    if frame.f_globals.get("__name__") != "__main__" or frame.f_code.co_name.startswith(("_kururi_", "__kururi_")):
         return None
     if event == "line":
         if _kururi_count >= ${MAX_TRACE_STEPS}:
