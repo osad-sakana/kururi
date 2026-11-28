@@ -9,10 +9,10 @@ goal: 式が、評価されて値になる流れを、説明できる。
 needs: 1-2 プログラムは文の並び
 kind: 式文
 words:
-  - { term: 式, spec: expressions }
-  - { term: 値, spec: types }
-  - { term: 評価, spec: expressions }
-  - { term: 演算子, spec: expressions }
+  - "式"
+  - "値"
+  - "評価"
+  - "演算子"
 ---
 
 ## なぜ必要か

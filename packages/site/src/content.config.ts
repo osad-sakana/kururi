@@ -22,8 +22,8 @@ const tutorials = defineCollection({
     needs: z.string().optional(),
     /** この章で出る文の種類（式文・宣言代入文・ブロック文・ジャンプ文） */
     kind: z.string().optional(),
-    /** 新しい言葉。spec は、言語仕様のページ（例: expressions） */
-    words: z.array(z.object({ term: z.string(), spec: z.string().optional() })).optional(),
+    /** 新しい言葉（リンクは付けない。学習者を、難しい言語仕様に飛ばさないため） */
+    words: z.array(z.string()).optional(),
   }),
 })
 

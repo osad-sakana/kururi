@@ -8,11 +8,11 @@ concept: プログラムと手順
 goal: くるりんに、好きな言葉を話させられる。
 kind: 式文
 words:
-  - { term: プログラム, spec: philosophy }
-  - { term: main, spec: program }
-  - { term: print, spec: functions }
-  - { term: 関数, spec: functions }
-  - { term: 文字列, spec: program }
+  - "プログラム"
+  - "main"
+  - "print"
+  - "関数"
+  - "文字列"
 ---
 
 ## なぜ必要か

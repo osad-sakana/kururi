@@ -9,9 +9,9 @@ goal: 文が、上から順に実行されることを、説明できる。
 needs: 1-1 最初のプログラム
 kind: 式文
 words:
-  - { term: 文, spec: statements }
-  - { term: 式文, spec: statements }
-  - { term: コメント, spec: program }
+  - "文"
+  - "式文"
+  - "コメント"
 ---
 
 ## なぜ必要か

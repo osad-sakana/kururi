@@ -44,7 +44,7 @@ const home = base.endsWith("/") ? base : `${base}/`
           <h2>新しい言葉</h2>
           <ul>
             {lesson.data.words.map((word) => (
-              <li>{word.spec === undefined ? word.term : <a href={`${home}spec/${word.spec}`}>{word.term}</a>}</li>
+              <li>{word}</li>
             ))}
           </ul>
         </section>

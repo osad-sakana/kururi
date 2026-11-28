@@ -9,10 +9,10 @@ goal: 関数の呼び出しも式で、評価すると戻り値になること�
 needs: 1-3 式と値
 kind: 式文
 words:
-  - { term: 戻り値, spec: functions }
-  - { term: 関数の呼び出し, spec: expressions }
-  - { term: input, spec: functions }
-  - { term: "null", spec: "null" }
+  - "戻り値"
+  - "関数の呼び出し"
+  - "input"
+  - "null"
 ---
 
 ## なぜ必要か
