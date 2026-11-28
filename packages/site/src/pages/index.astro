@@ -49,7 +49,7 @@ const heroPythonLines = heroPython.split("\n").map(highlight)
 const flowItems = [
   { n: 1, title: "読む", text: "チュートリアルで、概念を1つずつ学びます。横のプレイグラウンドを開いて、書いてあるコードをその場で動かせます。", x: 11, y: 17.75, width: 26 },
   { n: 2, title: "書く", text: "リアルタイムで、エラーが出て、直し方も添えられます。変換後のPythonも、横に並べて見られます。", x: 38.4, y: 17.75, width: 28 },
-  { n: 3, title: "確かめる", text: "ステップ実行で、1行ずつ進めながら、変数の値が変わる様子を目で追えます。", x: 68.4, y: 17.75, width: 30 },
+  { n: 3, title: "確かめる", text: "「実行」を押すと、くるりんが答えます。結果をその場で確かめて、また書き直せます。", x: 68.4, y: 17.75, width: 30 },
 ]
 
 // ---- 理由1の図：AIが書き、人が読んで直す ----
@@ -319,7 +319,7 @@ const problems = problemSources.flatMap((source) => {
         </div>
         <div class="window annot" data-reveal>
           <div class="shot">
-          <svg id="demo" viewBox="0 0 1000 400" role="img" aria-label="チュートリアルを読みながら、右のプレイグラウンドでコードを書き、ステップ実行で変数の値の変わり方を確かめる画面">
+          <svg id="demo" viewBox="0 0 1000 400" role="img" aria-label="チュートリアルを読みながら、プレイグラウンドでコードを書き、実行すると、くるりんが答えを順に話す画面">
             <rect x="1" y="1" width="998" height="398" rx="18" class="editor" />
             <rect x="1" y="1" width="998" height="44" rx="18" class="panel" />
             <rect x="1" y="30" width="998" height="15" class="panel" style="stroke: none" />
@@ -339,11 +339,10 @@ const problems = problemSources.flatMap((source) => {
             <rect x="28" y="198" width="304" height="184" rx="10" class="panel" />
             {[
               "function main = () {",
-              "    var total: int = 0",
-              "    for i 4 times {",
-              "        total = total + i",
+              '    print("こんにちは、くるりん！")',
+              "    for i 3 times {",
+              "        print(i + 1)",
               "    }",
-              "    print(total)",
               "}",
             ].map((line, i) => (
               <text class="m" x="42" y={252 + i * 18} font-size="11.5">{line}</text>
@@ -354,11 +353,10 @@ const problems = problemSources.flatMap((source) => {
             <rect id="demo-hl" class="demo-hl" x="361" y="0" width="319" height="30" style="transform: translateY(96px)" />
             {[
               "function main = () {",
-              "    var total: int = 0",
-              "    for i 4 times {",
-              "        total = total + i",
+              '    print("こんにちは、くるりん！")',
+              "    for i 3 times {",
+              "        print(i + 1)",
               "    }",
-              "    print(total)",
               "}",
             ].map((line, i) => (
               <g>
@@ -367,21 +365,20 @@ const problems = problemSources.flatMap((source) => {
               </g>
             ))}
 
-            <!-- 右：ステップ実行 -->
-            <text class="m dim" x="708" y="76" font-size="11" letter-spacing="2">ステップ実行</text>
-            {["最初へ", "戻る", "進む", "最後へ"].map((label, i) => (
-              <g class="demo-btn" id={i === 2 ? "demo-next" : undefined}>
-                <rect x={708 + i * 72} y="92" width="66" height="28" rx="8" class="panel" style={i === 2 ? "stroke: var(--color-spark)" : ""} />
-                <text class="t" x={708 + i * 72 + 33} y="110" text-anchor="middle" font-size="11">{label}</text>
+            <!-- 右：実行結果（くるりんが話す） -->
+            <text class="m dim" x="708" y="76" font-size="11" letter-spacing="2">実行結果</text>
+            {[
+              "こんにちは、くるりん！",
+              "1",
+              "2",
+              "3",
+            ].map((line, i) => (
+              <g class="demo-b" id={`demo-b${i + 1}`}>
+                <image href={`${home}kururin.png`} x="706" y={96 + i * 58} width="36" height="36" />
+                <rect x="750" y={98 + i * 58} width={line.length > 3 ? 214 : 56} height="32" rx="14" class="panel" />
+                <text class="t" x="764" y={119 + i * 58} font-size="13">{line}</text>
               </g>
             ))}
-            <text id="demo-count" class="m dim" x="708" y="154" font-size="11">1 / 7　main　2行目（この行を実行する前）</text>
-            <text class="m dim" x="708" y="196" font-size="11">変数</text><text class="m dim" x="818" y="196" font-size="11">型</text><text class="m dim" x="890" y="196" font-size="11">値</text>
-            <line x1="708" y1="206" x2="976" y2="206" class="stroke" />
-            <g id="demo-v1" class="demo-var" opacity="0"><text id="demo-n1" class="m sp" x="708" y="234" font-size="15">total</text><text class="m" x="818" y="234" font-size="15">int</text><text id="demo-x1" class="m demo-val" x="890" y="234" font-size="15" font-weight="700">0</text></g>
-            <g id="demo-v2" class="demo-var" opacity="0"><text id="demo-n2" class="m sp" x="708" y="268" font-size="15">i</text><text class="m" x="818" y="268" font-size="15">int</text><text id="demo-x2" class="m demo-val" x="890" y="268" font-size="15" font-weight="700">0</text></g>
-            <text class="m dim" x="708" y="338" font-size="11" letter-spacing="2">出力</text>
-            <text id="demo-out" class="m" x="708" y="362" font-size="13" opacity="0.6">（まだ何も出ていません）</text>
 
             <g class="badge"><circle cx="110" cy="71" r="14" /><text x="110" y="71">1</text></g>
             <g class="badge"><circle cx="384" cy="71" r="14" /><text x="384" y="71">2</text></g>
@@ -561,49 +558,26 @@ const problems = problemSources.flatMap((source) => {
     )
     reveals.forEach((el) => reveal.observe(el))
 
-    // ---- ステップ実行のデモ（見えているあいだ、1歩ずつ進める）----
-    type Row = readonly [string, string]
-    interface Step { readonly line: number; readonly vars: readonly Row[]; readonly out?: string }
+    // ---- 実行のデモ（見えているあいだ、1 行ずつ進めて、くるりんが話す）----
+    interface Step { readonly line: number; readonly said: number }
+    // line は、いま光っている行。said は、くるりんが話した吹き出しの数
     const steps: readonly Step[] = [
-      { line: 2, vars: [] },
-      { line: 3, vars: [["total", "0"]] },
-      { line: 4, vars: [["total", "0"], ["i", "0"]] },
-      { line: 4, vars: [["total", "0"], ["i", "1"]] },
-      { line: 4, vars: [["total", "1"], ["i", "2"]] },
-      { line: 4, vars: [["total", "3"], ["i", "3"]] },
-      { line: 6, vars: [["total", "6"], ["i", "3"]], out: "6" },
+      { line: 1, said: 0 },
+      { line: 2, said: 1 },
+      { line: 3, said: 1 },
+      { line: 4, said: 2 },
+      { line: 4, said: 3 },
+      { line: 4, said: 4 },
+      { line: 6, said: 4 },
     ]
     const q = <T extends Element>(id: string) => document.getElementById(id) as unknown as T | null
-    const demo = { hl: q<SVGElement>("demo-hl"), count: q<SVGTextElement>("demo-count"), next: q<SVGElement>("demo-next"), out: q<SVGTextElement>("demo-out") }
-    const slots = [1, 2].map((n) => ({ group: q<SVGElement>(`demo-v${n}`), name: q<SVGTextElement>(`demo-n${n}`), value: q<SVGTextElement>(`demo-x${n}`) }))
-    let previous: Step | undefined
+    const highlight = q<SVGElement>("demo-hl")
+    const bubbles = [1, 2, 3, 4].map((n) => q<SVGElement>(`demo-b${n}`))
     const show = (index: number) => {
       const step = steps[index]
       if (step === undefined) return
-      demo.hl?.setAttribute("style", `transform: translateY(${96 + (step.line - 1) * 34}px)`)
-      if (demo.count) demo.count.textContent = `${index + 1} / ${steps.length}　main　${step.line} 行目（この行を実行する前）`
-      slots.forEach((slot, i) => {
-        const row = step.vars[i]
-        slot.group?.setAttribute("opacity", row === undefined ? "0" : "1")
-        if (row === undefined || !slot.name || !slot.value) return
-        slot.name.textContent = row[0]
-        const changed = previous?.vars[i]?.[1] !== row[1]
-        slot.value.textContent = row[1]
-        if (changed) {
-          slot.value.classList.remove("flash")
-          void slot.value.getBoundingClientRect()
-          slot.value.classList.add("flash")
-        }
-      })
-      if (demo.out) {
-        demo.out.textContent = step.out ?? "（まだ何も出ていません）"
-        demo.out.setAttribute("opacity", step.out === undefined ? "0.6" : "1")
-      }
-      previous = step
-    }
-    const press = (el: Element | null) => {
-      el?.classList.add("press")
-      setTimeout(() => el?.classList.remove("press"), 220)
+      highlight?.setAttribute("style", `transform: translateY(${96 + (step.line - 1) * 34}px)`)
+      bubbles.forEach((bubble, i) => bubble?.classList.toggle("on", i < step.said))
     }
     const demoSvg = document.getElementById("demo")
     if (demoSvg && !reduced) {
@@ -614,9 +588,10 @@ const problems = problemSources.flatMap((source) => {
       setInterval(() => {
         if (!visible) return
         index = (index + 1) % steps.length
-        if (index > 0) press(demo.next)
         show(index)
-      }, 1500)
+      }, 1400)
+    } else {
+      show(steps.length - 1)
     }
   </script>
 </Base>

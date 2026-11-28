@@ -120,9 +120,9 @@ mark.r { --mk: var(--color-code-keyword); }
 .how .window { margin: 0 0 3rem; }
 .how .window svg { width: 100%; height: auto; display: block; }
 .demo-hl { fill: var(--color-spark); fill-opacity: 0.18; transition: transform 0.45s cubic-bezier(0.3, 1, 0.4, 1); }
-.demo-btn { transition: transform 0.15s, fill 0.15s; transform-box: fill-box; transform-origin: center; }
-.demo-btn.press { transform: scale(0.92); fill: color-mix(in srgb, var(--color-spark) 40%, var(--color-panel)); }
-.demo-var { transition: opacity 0.4s; }
+.demo-b { opacity: 0; transform: scale(0.7); transform-box: fill-box; transform-origin: left center; transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.demo-b.on { opacity: 1; transform: none; }
+#demo image { mix-blend-mode: multiply; }
 .demo-val.flash { animation: flash 0.6s ease; }
 @keyframes flash { 0% { fill: var(--color-spark); transform: scale(1.4); } 100% { transform: scale(1); } }
 .demo-val { transform-box: fill-box; transform-origin: left center; }
