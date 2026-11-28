@@ -1,6 +1,6 @@
 /* トップページ（LP）専用の見た目とアニメーション。色・書体の変数は tokens.css */
 .lp { overflow-x: clip; }
-.lp section { position: relative; padding: clamp(4.5rem, 10vw, 8rem) 0; }
+.lp section { position: relative; padding: var(--sec) 0; }
 .lp .wrap { width: min(100% - 2.5rem, 70rem); }
 .lp h1, .lp h2, .lp h3 { text-wrap: balance; word-break: auto-phrase; }
 .lp h2 { font-size: clamp(1.8rem, 3.8vw, 2.8rem); line-height: 1.35; letter-spacing: -0.015em; margin: 0 0 1rem; font-weight: 800; }
@@ -327,7 +327,8 @@ svg .t, #demo .t { font-feature-settings: "palt" 1; letter-spacing: 0.02em; }
 /* ---- 弧のある切れ目の余白 ----
    弧は、前後のセクションの余白に食い込む。弧の頂点（境目）から、前後の内容までの距離を、同じ（--sec）にするため、
    帯の内側の余白は弧のぶんだけ減らし、帯に接する側のセクションの余白は、弧のぶんだけ増やす。合計は変わらない。 */
-.lp { --sec: clamp(4.5rem, 10vw, 8rem); }
+/* セクションの上下の余白：幅 1280px 以上で 96px */
+.lp { --sec: clamp(3.5rem, 7.5vw, 6rem); }
 .lp section.tint { padding-block: calc(var(--sec) - var(--arc)); }
 .lp section.cta { padding-top: calc(var(--sec) - var(--arc)); padding-bottom: var(--sec); }
 .lp .lp-hero, .lp .same, .lp .course, .lp .scope-sec { padding-bottom: calc(var(--sec) + var(--arc)); }
