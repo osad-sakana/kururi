@@ -53,28 +53,16 @@ function main = () {
 `main`の`{ }`の中には、文を何行でも並べられます。プログラムは、**上から下へ、1つずつ**文を実行します。
 
 <figure class="diagram">
-<svg viewBox="0 0 560 200" role="img" aria-label="3つの文が、上から順に実行され、くるりんが順番に話す図">
+<svg viewBox="0 0 560 200" role="img" aria-label="3つの文が、上から順に実行され、同じ色の吹き出しで、くるりんが順番に話す図">
 <rect x="10" y="14" width="330" height="172" rx="12" style="fill: var(--color-editor); stroke: var(--color-line)" />
-<g style="font: 14px var(--font-mono); fill: var(--color-ink)">
-<text x="64" y="60"><tspan fill="#005CC5">print</tspan>(<tspan fill="#032F62">"おはよう"</tspan>)</text>
-<text x="64" y="104"><tspan fill="#005CC5">print</tspan>(<tspan fill="#032F62">"今日もがんばろう"</tspan>)</text>
-<text x="64" y="148"><tspan fill="#005CC5">print</tspan>(<tspan fill="#032F62">"いってらっしゃい"</tspan>)</text>
-</g>
-<g style="font: 700 13px var(--font-sans); fill: var(--color-accent-ink)">
-<circle cx="38" cy="55" r="12" style="fill: var(--color-accent)" /><text x="38" y="60" text-anchor="middle">1</text>
-<circle cx="38" cy="99" r="12" style="fill: var(--color-accent)" /><text x="38" y="104" text-anchor="middle">2</text>
-<circle cx="38" cy="143" r="12" style="fill: var(--color-accent)" /><text x="38" y="148" text-anchor="middle">3</text>
-</g>
+<g style="stroke: none"><rect x="11" y="34" width="328" height="40" rx="6" style="fill: color-mix(in srgb, var(--color-accent) 18%, transparent)" /><rect x="11" y="78" width="328" height="40" rx="6" style="fill: color-mix(in srgb, var(--color-spark) 18%, transparent)" /><rect x="11" y="122" width="328" height="40" rx="6" style="fill: color-mix(in srgb, var(--color-success) 18%, transparent)" /></g>
+<g style="font: 14px var(--font-mono); fill: var(--color-code)"><text x="64" y="60"><tspan style="fill: var(--color-code-func)">print</tspan>(<tspan style="fill: var(--color-code-string)">"おはよう"</tspan>)</text><text x="64" y="104"><tspan style="fill: var(--color-code-func)">print</tspan>(<tspan style="fill: var(--color-code-string)">"今日もがんばろう"</tspan>)</text><text x="64" y="148"><tspan style="fill: var(--color-code-func)">print</tspan>(<tspan style="fill: var(--color-code-string)">"いってらっしゃい"</tspan>)</text></g>
+<g style="stroke: none"><circle cx="38" cy="55" r="12" style="fill: var(--color-accent)" /><text x="38" y="60" text-anchor="middle" style="fill: #fff; font: 700 13px var(--font-sans)">1</text><circle cx="38" cy="99" r="12" style="fill: var(--color-spark)" /><text x="38" y="104" text-anchor="middle" style="fill: #fff; font: 700 13px var(--font-sans)">2</text><circle cx="38" cy="143" r="12" style="fill: var(--color-success)" /><text x="38" y="148" text-anchor="middle" style="fill: #fff; font: 700 13px var(--font-sans)">3</text></g>
 <g style="fill: none; stroke: var(--color-muted); stroke-width: 1.6; stroke-linecap: round"><path d="M38 70 V84 M33 79 L38 85 L43 79" /><path d="M38 114 V128 M33 123 L38 129 L43 123" /></g>
-<g style="fill: none; stroke: var(--color-line); stroke-width: 1.6; stroke-dasharray: 4 4"><path d="M346 55 H380" /><path d="M346 99 H380" /><path d="M346 143 H380" /></g>
-<g style="fill: var(--color-panel); stroke: var(--color-line)">
-<rect x="386" y="38" width="150" height="34" rx="16" /><rect x="386" y="82" width="150" height="34" rx="16" /><rect x="386" y="126" width="150" height="34" rx="16" />
-</g>
-<g style="font: 13px var(--font-sans); fill: var(--color-ink)">
-<text x="461" y="60" text-anchor="middle">おはよう</text><text x="461" y="104" text-anchor="middle">今日もがんばろう</text><text x="461" y="148" text-anchor="middle">いってらっしゃい</text>
-</g>
+<g style="fill: none; stroke-width: 1.8; stroke-dasharray: 4 4"><path d="M346 55 H380" style="stroke: var(--color-accent)" /><path d="M346 99 H380" style="stroke: var(--color-spark)" /><path d="M346 143 H380" style="stroke: var(--color-success)" /></g>
+<g style="stroke-width: 1.4"><rect x="386" y="38" width="160" height="34" rx="16" style="fill: color-mix(in srgb, var(--color-accent) 18%, var(--color-panel)); stroke: var(--color-accent)" /><text x="466" y="60" text-anchor="middle" style="font: 13px var(--font-sans); fill: var(--color-ink)">おはよう</text><rect x="386" y="82" width="160" height="34" rx="16" style="fill: color-mix(in srgb, var(--color-spark) 18%, var(--color-panel)); stroke: var(--color-spark)" /><text x="466" y="104" text-anchor="middle" style="font: 13px var(--font-sans); fill: var(--color-ink)">今日もがんばろう</text><rect x="386" y="126" width="160" height="34" rx="16" style="fill: color-mix(in srgb, var(--color-success) 18%, var(--color-panel)); stroke: var(--color-success)" /><text x="466" y="148" text-anchor="middle" style="font: 13px var(--font-sans); fill: var(--color-ink)">いってらっしゃい</text></g>
 </svg>
-<figcaption>書いた順に、1、2、3と実行されて、くるりんが話します。</figcaption>
+<figcaption>書いた順に、1、2、3と実行されます。同じ色の文と吹き出しが、対応しています。</figcaption>
 </figure>
 
 `print(...)`のように、関数の呼び出しだけを書いた文を、**式文**と呼びます。この教材の最初の何章かは、式文だけでプログラムを作ります。

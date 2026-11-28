@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs"
 import { defineConfig } from "astro/config"
+import { KURURI_SHIKI_THEMES } from "./src/shiki-theme.ts"
 
 // コードブロックの色付け。Kururi の文法（TextMate 形式）は、サイトの中に置いてある
 const kururi = JSON.parse(readFileSync(new URL("./src/kururi.tmLanguage.json", import.meta.url), "utf8"))
@@ -13,5 +14,5 @@ export default defineConfig({
   base: process.env.SITE_BASE ?? "/",
   trailingSlash: "ignore",
   server: { headers: isolation },
-  markdown: { shikiConfig: { langs: [kururi], langAlias: { "kururi-error": "kururi", "kururi-warning": "kururi" }, themes: { light: "github-light", dark: "github-dark" } } },
+  markdown: { shikiConfig: { langs: [kururi], langAlias: { "kururi-error": "kururi", "kururi-warning": "kururi" }, themes: KURURI_SHIKI_THEMES } },
 })

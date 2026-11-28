@@ -48,28 +48,31 @@ function main = () {
 このプログラムは、2つの部分でできています。
 
 <figure class="diagram">
-<svg viewBox="0 0 560 190" role="img" aria-label="function main の行が入口、print の行が手順であることを示す図">
-<rect x="10" y="20" width="350" height="140" rx="12" style="fill: var(--color-editor); stroke: var(--color-line)" />
-<g style="font: 15px var(--font-mono); fill: var(--color-ink)">
-<text x="28" y="58"><tspan fill="#D73A49">function</tspan> <tspan fill="#6F42C1">main</tspan> = () {</text>
-<text x="28" y="94">&#160;&#160;&#160;&#160;<tspan fill="#005CC5">print</tspan>(<tspan fill="#032F62">"こんにちは、くるりん！"</tspan>)</text>
-<text x="28" y="130">}</text>
+<svg viewBox="0 0 580 160" role="img" aria-label="function main の行と閉じかっこが入口（青）、print の行が手順（だいだい色）であることを示す図">
+<rect x="10" y="14" width="370" height="132" rx="12" style="fill: var(--color-editor); stroke: var(--color-line)" />
+<g style="stroke: none">
+<rect x="11" y="26" width="368" height="36" style="fill: color-mix(in srgb, var(--color-accent) 16%, transparent)" />
+<rect x="11" y="62" width="368" height="36" style="fill: color-mix(in srgb, var(--color-spark) 22%, transparent)" />
+<rect x="11" y="98" width="368" height="36" style="fill: color-mix(in srgb, var(--color-accent) 16%, transparent)" />
 </g>
-<g style="fill: none; stroke: var(--color-accent); stroke-width: 2">
-<path d="M368 54 H398" /><path d="M368 94 H398" />
+<polygon points="22,37 22,51 34,44" style="fill: var(--color-accent)" />
+<g style="font: 15px var(--font-mono); fill: var(--color-code)">
+<text x="46" y="49"><tspan style="fill: var(--color-code-keyword)">function</tspan> main = () {</text>
+<text x="46" y="85">&#160;&#160;&#160;&#160;<tspan style="fill: var(--color-code-func)">print</tspan>(<tspan style="fill: var(--color-code-string)">"こんにちは、くるりん！"</tspan>)</text>
+<text x="46" y="121">}</text>
 </g>
-<g style="font: 700 14px var(--font-sans); fill: var(--color-ink)">
-<circle cx="412" cy="54" r="12" style="fill: var(--color-accent)" /><text x="412" y="59" text-anchor="middle" style="fill: var(--color-accent-ink); font-size: 13px">1</text>
-<text x="434" y="59">入口</text>
-<circle cx="412" cy="94" r="12" style="fill: var(--color-accent)" /><text x="412" y="99" text-anchor="middle" style="fill: var(--color-accent-ink); font-size: 13px">2</text>
-<text x="434" y="99">手順</text>
+<g style="fill: none; stroke-width: 2"><path d="M386 44 H414" style="stroke: var(--color-accent)" /><path d="M386 80 H414" style="stroke: var(--color-spark)" /><path d="M386 116 H414" style="stroke: var(--color-accent)" /></g>
+<g style="font: 700 15px var(--font-sans)">
+<text x="424" y="42" style="fill: var(--color-accent)">入口</text>
+<text x="424" y="78" style="fill: var(--color-spark)">手順</text>
+<text x="424" y="114" style="fill: var(--color-accent)">入口の終わり</text>
 </g>
 <g style="font: 12px var(--font-sans); fill: var(--color-muted)">
-<text x="434" y="76">ここから始まる</text>
-<text x="434" y="116">くるりんに話させる</text>
+<text x="424" y="58">ここから実行が始まる</text>
+<text x="424" y="94">くるりんに話させる</text>
 </g>
 </svg>
-<figcaption>1行目が「入口」、2行目が「手順」です。</figcaption>
+<figcaption>青い行が「入口」（<code>main</code>）、だいだい色の行が、入口の中の「手順」です。</figcaption>
 </figure>
 
 - `function main = () { ... }`：プログラムの**入口**です。実行すると、ここから始まります。`{ }`の中に、してほしいことを書きます。
