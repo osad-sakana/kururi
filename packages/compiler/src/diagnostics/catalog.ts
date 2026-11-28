@@ -508,6 +508,20 @@ export const DIAGNOSTIC_CATALOG = {
     label: () => "値がありません",
     hint: ({ name = "" }) => `${name} は文として、単独で書くのがふつうです。この値を使うのは、間違いかもしれません`,
   },
+  K0605: {
+    code: "K0605",
+    severity: "warning",
+    message: () => "この繰り返しは、終わらないかもしれません",
+    label: () => "出口がありません",
+    hint: () => "while true の中に、break か return を書いて、条件で抜けられるようにしてください（例: if x > 10 { break }）",
+  },
+  K0606: {
+    code: "K0606",
+    severity: "warning",
+    message: () => "この条件は、繰り返しの中で変わらないので、終わらないかもしれません",
+    label: () => "条件の中の値が変わりません",
+    hint: ({ names = "" }) => `条件に使っている「${names}」を、繰り返しの中で変えていますか？（例: i += 1）。変えない値だけで決まる条件は、いつまでも成り立ちます`,
+  },
 } as const satisfies Readonly<Record<string, CatalogEntry>>
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CATALOG

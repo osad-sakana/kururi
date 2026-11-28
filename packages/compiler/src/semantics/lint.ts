@@ -2,6 +2,7 @@ import type { Expr, FunctionDecl, Program, Stmt } from "../syntax/ast"
 import type { Reporter } from "../reporter"
 import type { Type } from "./types"
 import { NULL_TYPE } from "./types"
+import { lintLoops } from "./lint-loops"
 import { childrenOf } from "./walk"
 
 /** 式の中にある名前を、読むものとして全部集める。 */
@@ -172,21 +173,24 @@ function lintReachability(body: readonly Stmt[], reporter: Reporter): void {
   for (const stmt of body) bodiesOf(stmt).forEach((inner) => lintReachability(inner, reporter))
 }
 
-function lintFunction(fn: FunctionDecl, reporter: Reporter, types: ReadonlyMap<Expr, Type>): void {
+function lintFunction(fn: FunctionDecl, reporter: Reporter, types: ReadonlyMap<Expr, Type>, globalVars: ReadonlySet<string>): void {
   lintBody(fn.body, reporter)
   lintStatementExprs(fn.body, types, reporter)
+  lintLoops(fn.body, reporter, globalVars)
 }
 
 /** 動くが見直したほうがよい書き方を、警告として集める（使っていない変数、実行されない行）。エラーがないときだけ呼ぶ。 */
 export function lint(program: Program, reporter: Reporter, types: ReadonlyMap<Expr, Type>): void {
+  const globalVars = new Set(program.items.flatMap((item) => (item.kind === "var" && item.mutable ? [item.name] : [])))
   for (const item of program.items) {
-    if (item.kind === "function") lintFunction(item, reporter, types)
+    if (item.kind === "function") lintFunction(item, reporter, types, globalVars)
     else if (item.kind === "class") {
       for (const member of item.members) {
-        if (member.kind === "method") lintFunction(member.fn, reporter, types)
+        if (member.kind === "method") lintFunction(member.fn, reporter, types, globalVars)
         else if (member.kind === "constructor") {
           lintBody(member.body, reporter)
           lintStatementExprs(member.body, types, reporter)
+          lintLoops(member.body, reporter, globalVars)
         }
       }
     }
