@@ -15,11 +15,17 @@ words:
   - "文字列"
 ---
 
+<div class="say">
+
+はじめまして、くるりんです！　これから、あなたの書いたプログラムの通りに、わたしが話すよ。まずは、わたしに声を出させてみてね。
+
+</div>
+
 ## なぜ必要か
 
 コンピューターは、自分では何もしません。**何を、どの順番でするか**を、人が書いて渡したとき、はじめて動きます。その書いたものが**プログラム**です。
 
-この教材では、くるりんが、あなたの書いたプログラムの通りに話します。まずは、くるりんに声を出させてみましょう。
+この教材では、くるりんが、あなたの書いたプログラムの通りに話します。
 
 ## やってみる
 
@@ -31,11 +37,40 @@ function main = () {
 }
 ```
 
-実行すると、くるりんが、吹き出しで「こんにちは、くるりん！」と話します。
+実行すると、くるりんが、吹き出しで話します。
+
+<div class="chat" role="img" aria-label="くるりんが「こんにちは、くるりん！」と話している">
+<p class="k">こんにちは、くるりん！</p>
+</div>
 
 ## しくみ
 
 このプログラムは、2つの部分でできています。
+
+<figure class="diagram">
+<svg viewBox="0 0 560 190" role="img" aria-label="function main の行が入口、print の行が手順であることを示す図">
+<rect x="10" y="20" width="350" height="140" rx="12" style="fill: var(--color-editor); stroke: var(--color-line)" />
+<g style="font: 15px var(--font-mono); fill: var(--color-ink)">
+<text x="28" y="58">function main = () {</text>
+<text x="28" y="94">&#160;&#160;&#160;&#160;print("こんにちは、くるりん！")</text>
+<text x="28" y="130">}</text>
+</g>
+<g style="fill: none; stroke: var(--color-accent); stroke-width: 2">
+<path d="M368 54 H398" /><path d="M368 94 H398" />
+</g>
+<g style="font: 700 14px var(--font-sans); fill: var(--color-ink)">
+<circle cx="412" cy="54" r="12" style="fill: var(--color-accent)" /><text x="412" y="59" text-anchor="middle" style="fill: var(--color-accent-ink); font-size: 13px">1</text>
+<text x="434" y="59">入口</text>
+<circle cx="412" cy="94" r="12" style="fill: var(--color-accent)" /><text x="412" y="99" text-anchor="middle" style="fill: var(--color-accent-ink); font-size: 13px">2</text>
+<text x="434" y="99">手順</text>
+</g>
+<g style="font: 12px var(--font-sans); fill: var(--color-muted)">
+<text x="434" y="76">ここから始まる</text>
+<text x="434" y="116">くるりんに話させる</text>
+</g>
+</svg>
+<figcaption>1行目が「入口」、2行目が「手順」です。</figcaption>
+</figure>
 
 - `function main = () { ... }`：プログラムの**入口**です。実行すると、ここから始まります。`{ }`の中に、してほしいことを書きます。
 - `print("こんにちは、くるりん！")`：くるりんに、言葉を話させる手順です。
@@ -60,6 +95,12 @@ function main = () {
 
 エラーも、プログラミングの大事な道具です。わざと、かっこの閉じ忘れをしてみましょう。
 
+<div class="say">
+
+エラーは、怒っているんじゃなくて、**直し方を教えてくれている**んだよ。
+
+</div>
+
 ```kururi-error K0101
 function main = () {
     print("こんにちは"
@@ -75,6 +116,12 @@ function main = () {
 読み方が分かれば、エラーは怖くありません。「)」を足して、直してみてください。
 
 ## まとめ
+
+<div class="say">
+
+やったね、最初のプログラムが動いた！　わたしの声、ちゃんと聞こえたかな？
+
+</div>
 
 - プログラムは、コンピューターへの**手順**です。
 - `function main = () { ... }`が入口で、`{ }`の中に手順を書きます。

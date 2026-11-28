@@ -14,6 +14,12 @@ words:
   - "コメント"
 ---
 
+<div class="say">
+
+わたしは、書いてある順番に、ひとつずつ話すよ。順番を入れ替えると、どうなるかな？
+
+</div>
+
 ## なぜ必要か
 
 手順は、**順番**が大事です。たとえば、朝の支度で「家を出る」の後に「顔を洗う」と書いたら、困ります。
@@ -34,17 +40,42 @@ function main = () {
 
 くるりんが、書いた順に、1つずつ話します。
 
+<div class="chat" role="img" aria-label="くるりんが、おはよう、今日もがんばろう、いってらっしゃい、の順に話している">
+<p class="k">おはよう</p>
+<p class="k">今日もがんばろう</p>
+<p class="k">いってらっしゃい</p>
+</div>
+
 ## しくみ
 
 `print(...)`の1行は、**文**です。文は、**1行に1つ**書きます。改行が、文の終わりの印です（`;`は書きません）。
 
 `main`の`{ }`の中には、文を何行でも並べられます。プログラムは、**上から下へ、1つずつ**文を実行します。
 
-```text
-print("おはよう")          ← 最初に実行
-print("今日もがんばろう")  ← 次に実行
-print("いってらっしゃい")  ← 最後に実行
-```
+<figure class="diagram">
+<svg viewBox="0 0 560 200" role="img" aria-label="3つの文が、上から順に実行され、くるりんが順番に話す図">
+<rect x="10" y="14" width="330" height="172" rx="12" style="fill: var(--color-editor); stroke: var(--color-line)" />
+<g style="font: 14px var(--font-mono); fill: var(--color-ink)">
+<text x="64" y="60">print("おはよう")</text>
+<text x="64" y="104">print("今日もがんばろう")</text>
+<text x="64" y="148">print("いってらっしゃい")</text>
+</g>
+<g style="font: 700 13px var(--font-sans); fill: var(--color-accent-ink)">
+<circle cx="38" cy="55" r="12" style="fill: var(--color-accent)" /><text x="38" y="60" text-anchor="middle">1</text>
+<circle cx="38" cy="99" r="12" style="fill: var(--color-accent)" /><text x="38" y="104" text-anchor="middle">2</text>
+<circle cx="38" cy="143" r="12" style="fill: var(--color-accent)" /><text x="38" y="148" text-anchor="middle">3</text>
+</g>
+<g style="fill: none; stroke: var(--color-muted); stroke-width: 1.6; stroke-linecap: round"><path d="M38 70 V84 M33 79 L38 85 L43 79" /><path d="M38 114 V128 M33 123 L38 129 L43 123" /></g>
+<g style="fill: none; stroke: var(--color-line); stroke-width: 1.6; stroke-dasharray: 4 4"><path d="M346 55 H380" /><path d="M346 99 H380" /><path d="M346 143 H380" /></g>
+<g style="fill: var(--color-panel); stroke: var(--color-line)">
+<rect x="386" y="38" width="150" height="34" rx="16" /><rect x="386" y="82" width="150" height="34" rx="16" /><rect x="386" y="126" width="150" height="34" rx="16" />
+</g>
+<g style="font: 13px var(--font-sans); fill: var(--color-ink)">
+<text x="461" y="60" text-anchor="middle">おはよう</text><text x="461" y="104" text-anchor="middle">今日もがんばろう</text><text x="461" y="148" text-anchor="middle">いってらっしゃい</text>
+</g>
+</svg>
+<figcaption>書いた順に、1、2、3と実行されて、くるりんが話します。</figcaption>
+</figure>
 
 `print(...)`のように、関数の呼び出しだけを書いた文を、**式文**と呼びます。この教材の最初の何章かは、式文だけでプログラムを作ります。
 
@@ -79,6 +110,12 @@ function main = () {
     print("おはよう") print("いってらっしゃい")
 }
 ```
+
+<div class="say">
+
+「ここには改行が必要です」って教えてくれたね。**1行に、1つの文**、がルールだよ。
+
+</div>
 
 「ここには改行が必要ですが、「print」がありました」と教えてくれます。文と文のあいだには、**改行**が必要です。
 

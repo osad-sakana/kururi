@@ -15,6 +15,12 @@ words:
   - "null"
 ---
 
+<div class="say">
+
+ここまでは、わたしが一方的に話していたね。今度は、**あなたの答えを聞かせて**！
+
+</div>
+
 ## なぜ必要か
 
 ここまでの`print`は、決まった言葉しか話せませんでした。くるりんと**会話**するには、こちらの答えを、プログラムが受け取る必要があります。
@@ -32,19 +38,41 @@ function main = () {
 }
 ```
 
-実行すると、くるりんが名前を聞いて、右側に入力する欄が出ます。名前を入れて Enter を押すと、くるりんが、その名前であいさつします。
+実行すると、くるりんが名前を聞いて、入力する欄が出ます。名前を入れて Enter を押すと、くるりんが、その名前であいさつします。
+
+<div class="chat" role="img" aria-label="くるりんが名前を聞き、さくらと答えると、こんにちは、さくらさん、と返す">
+<p class="k">お名前は？</p>
+<p class="y">さくら</p>
+<p class="k">こんにちは、さくらさん</p>
+</div>
 
 ## しくみ
 
 `input()`は、キーボードから入力された1行を、文字列として**返す**関数です。呼び出した式は、評価すると、**入力された文字列**になります。
 
-```text
-"こんにちは、" + input() + "さん"
-→ "こんにちは、" + "さくら" + "さん"   （入力が「さくら」のとき）
-→ "こんにちは、さくらさん"
-```
+<div class="eval" aria-label="入力が「さくら」のとき、input() が「さくら」になり、文字列がつながる">
+<span>"こんにちは、" + input() + "さん"</span><i>→</i><span>"こんにちは、" + "さくら" + "さん"</span><i>→</i><span>"こんにちは、さくらさん"</span>
+<small>input() を評価すると、入力した文字列（ここでは「さくら」）になります。</small>
+</div>
 
 このように、関数の呼び出し`f(x)`は、**式**です。評価すると、関数が返す値（**戻り値**）になります。
+
+<figure class="diagram">
+<svg viewBox="0 0 560 210" role="img" aria-label="関数に値を渡すと戻り値が返る図。to_int は 12 を返し、print は null を返す">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" style="fill: var(--color-muted)" /></marker></defs>
+<g style="font: 14px var(--font-mono); fill: var(--color-ink)">
+<text x="20" y="52">"12"</text><text x="20" y="152">"こんにちは"</text>
+</g>
+<g style="fill: none; stroke: var(--color-muted); stroke-width: 1.6"><path d="M100 46 H168" marker-end="url(#ah)" /><path d="M148 146 H168" marker-end="url(#ah)" /><path d="M320 46 H388" marker-end="url(#ah)" /><path d="M320 146 H388" marker-end="url(#ah)" /></g>
+<g style="fill: var(--color-panel); stroke: var(--color-line); stroke-width: 1.4"><rect x="172" y="22" width="148" height="48" rx="12" /><rect x="172" y="122" width="148" height="48" rx="12" /></g>
+<g style="font: 700 14px var(--font-mono); fill: var(--color-ink)"><text x="246" y="52" text-anchor="middle">to_int</text><text x="246" y="152" text-anchor="middle">print</text></g>
+<g style="fill: var(--color-accent)"><rect x="392" y="28" width="90" height="36" rx="10" /></g>
+<g style="fill: var(--color-editor); stroke: var(--color-line)"><rect x="392" y="128" width="90" height="36" rx="10" /></g>
+<g style="font: 700 15px var(--font-mono)"><text x="437" y="52" text-anchor="middle" style="fill: var(--color-accent-ink)">12</text><text x="437" y="152" text-anchor="middle" style="fill: var(--color-muted)">null</text></g>
+<g style="font: 12px var(--font-sans); fill: var(--color-muted)"><text x="490" y="52">戻り値</text><text x="490" y="152">値は返さない</text><text x="20" y="196">くるりんが「こんにちは」と話すのが、print のしごとです。</text></g>
+</svg>
+<figcaption>関数に値を渡すと、戻り値が返ってきます。<code>print</code>は、値を返さないので<code>null</code>です。</figcaption>
+</figure>
 
 関数には、2種類あります。
 
@@ -89,9 +117,21 @@ function main = () {
 }
 ```
 
+<div class="say">
+
+あれ？　わたし、「null」って言っちゃった。`print`は、**値を返さない**から、中身が「ない」んだ。
+
+</div>
+
 くるりんは、「こんにちは」のあとに、「null」と話します。内側の`print`が、値を返さない関数だからです。エラーではありませんが、「値を返しません（nullになります）」という警告が出ます。
 
 ## まとめ
+
+<div class="say">
+
+関数を呼び出すのも、**式**。評価すると、**戻り値**になるよ。次は、その値に名前を付けて取っておこう！
+
+</div>
 
 - **関数の呼び出しも、式**です。評価すると、**戻り値**になります。
 - `input()`は、入力された文字列を返します。

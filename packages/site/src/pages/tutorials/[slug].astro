@@ -24,7 +24,7 @@ const home = base.endsWith("/") ? base : `${base}/`
   <!-- 横に開くプレイグラウンドでinput() を使えるよう、必要なヘッダーをサービスワーカーで付ける（MIT） -->
   <script is:inline slot="head" src={`${home}coi-serviceworker.js`}></script>
   <div class="reader" data-playground={`${home}playground`}>
-    <main class="wrap prose">
+    <main class="wrap prose" style={`--kururin: url(${home}kururin.png)`}>
       <p class="crumb">
         <a href={home}>トップ</a> / <a href={`${home}tutorials`}>チュートリアル</a>{isChapter(lesson.data) ? ` / 第${lesson.data.part}部　${lesson.data.partTitle ?? ""}` : ""} / {labelOf(lesson.data)}
       </p>
