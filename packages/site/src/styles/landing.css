@@ -273,7 +273,7 @@ svg .t, #demo .t { font-feature-settings: "palt" 1; letter-spacing: 0.02em; }
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-14 -19 28 45'%3E%3Cg transform='rotate(180 0 7)' fill='none' stroke='%23d97706' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M-6 0V4A11 11 0 1 0 6 4V0Z'/%3E%3Cpath d='M-5 -5H5M-3 -10H3'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d97706' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M0 -17V-13M-12.7 -11.9L-9.9 -9.1M12.7 -11.9L9.9 -9.1'/%3E%3C/g%3E%3C/svg%3E") center / 1.25rem 2rem no-repeat,
     linear-gradient(to right, transparent 1.25rem, var(--color-line) 1.25rem calc(50% - 1.3rem), transparent calc(50% - 1.3rem) calc(50% + 1.3rem), var(--color-line) calc(50% + 1.3rem) calc(100% - 1.25rem), transparent calc(100% - 1.25rem)) center / 100% 1px no-repeat; } }
 /* ---- 終わりの帯：暗い部屋に、電球が灯る ---- */
-.lp section.cta { --room-off: #08202a; --room-on: #0c2f3c; background: var(--room-off); color: #fff; text-align: center; padding-block: clamp(5.5rem, 12vw, 9.5rem); margin-top: var(--arc); transition: background 0.6s ease; }
+.lp section.cta { --room-off: #08202a; --room-on: #0c2f3c; background: var(--room-off); color: #fff; text-align: center; transition: background 0.6s ease; }
 .lp section.cta:has(.cta-inner.in) { background: var(--room-on); }
 .lp section.cta::before { content: ""; position: absolute; left: 0; right: 0; top: calc(var(--arc) * -1 + 1px); height: var(--arc); background: var(--room-off); border-radius: 50% 50% 0 0 / 100% 100% 0 0; transition: background 0.6s ease; pointer-events: none; }
 .lp section.cta:has(.cta-inner.in)::before { background: var(--room-on); }
@@ -303,3 +303,23 @@ svg .t, #demo .t { font-feature-settings: "palt" 1; letter-spacing: 0.02em; }
 }
 @keyframes bulb-lit { 0%, 34% { opacity: 0; } 42%, 100% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .js .cta-bulb .lit { opacity: 1; animation: none; } .js .cta-inner.in .cta-bulb svg { animation: none; } }
+
+/* ---- 余白をそろえる ----
+   セクションの上下の余白は padding だけで決める（中の最初・最後の要素の margin は 0 にする）。
+   見出しのまとまりと本体の間は --head-gap、帯の中の理由どうしの間は --reason-gap にそろえる。 */
+.lp { --head-gap: clamp(2rem, 4vw, 3rem); --reason-gap: clamp(2.4rem, 5vw, 4rem); }
+.lp section > .wrap > :first-child { margin-top: 0; }
+.lp section > .wrap > :last-child { margin-bottom: 0; }
+.lp .head > :last-child, .lp .intro p:last-child, .lp .scope > :last-child, .lp .cta-inner > :last-child, .lp .reason-text > :last-child { margin-bottom: 0; }
+.lp .head, .lp .same .head, .lp .how .head, .lp .course .head, .lp .langs-sec .head { margin-bottom: var(--head-gap); }
+.lp .why .intro { margin-bottom: calc(var(--reason-gap) * 1); }
+.lp .reason { padding-block: var(--reason-gap); }
+.lp .reason:last-of-type { padding-bottom: 0; }
+.lp .how .head { margin-bottom: 0; }
+.annot .shot { margin-top: calc(9.2rem + var(--head-gap)); }
+.lp .hero-logo { margin-top: 0; }
+@media (max-width: 900px) { .annot .shot { margin-top: var(--head-gap); } }
+/* kicker の行の高さで、最初の要素の位置がずれないようにする（上の余白を、どのセクションも同じにする） */
+.lp .kicker { line-height: 1; }
+.lp .how .window { margin-bottom: 0; }
+.lp .kicker { display: flex; width: max-content; max-width: 100%; }
