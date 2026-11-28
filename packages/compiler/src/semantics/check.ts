@@ -11,6 +11,8 @@ import type { Type } from "./types"
 export interface CheckResult {
   /** 式ごとの型 */
   readonly types: ReadonlyMap<Expr, Type>
+  /** int → float の変換が要る式 */
+  readonly widened: ReadonlySet<Expr>
   /** 0 以上と分かっている添字の式 */
   readonly safeIndexes: ReadonlySet<Expr>
   /** 関数・メソッド・constructor ごとの、中で書き換えるトップレベルの let（global 宣言が必要なもの） */
@@ -50,7 +52,7 @@ export function check(program: Program, reporter: Reporter): CheckResult {
   const hasMain = program.items.some((item) => item.kind === "function" && item.name === "main")
   if (first !== undefined && !hasMain) reporter.report("K0204", first.nameRange)
 
-  return { types: exprs.types, safeIndexes: exprs.safeIndexes, globalWrites: globalWrites as CheckResult["globalWrites"] }
+  return { types: exprs.types, widened: exprs.widened, safeIndexes: exprs.safeIndexes, globalWrites: globalWrites as CheckResult["globalWrites"] }
 }
 
 /** main は引数なしで、戻り値はなし（-> を書かない）。 */

@@ -6,7 +6,7 @@ def main():
     price = 1200
     count = 3
     total = price * count
-    with_tax = float(total) * (1.0 + TAX_RATE)
+    with_tax = total * (1 + TAX_RATE)
     big = total > 3000 and not (count == 0)
     print("小計: " + str(total))
     print(f"税込: {with_tax} 円（個数 {count}、{{そのまま}}）")

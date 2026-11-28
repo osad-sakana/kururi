@@ -29,14 +29,14 @@ describe("compile (S1): 生成", () => {
   })
 
   it("var と const は型注釈つきの代入になる", () => {
-    const { python } = compile(main("  var a: int = 1\n  const B: float = 2.0\n  var c: boolean = true"))
+    const { python } = compile(main("  var a: int = 1\n  const B: float = 2\n  var c: boolean = true"))
     expect(python).toContain("    a = 1")
     expect(python).toContain("    B = 2.0")
     expect(python).toContain("    c = True")
   })
 
-  it("float の変数には float を入れる。to_float で明示的に変換できる", () => {
-    const { python } = compile(main("  var a: int = 1\n  var b: float = to_float(a + 1)\n  var c: float = 1.5"))
+  it("int を float に入れるときは float に変換する", () => {
+    const { python } = compile(main("  var a: int = 1\n  var b: float = a + 1\n  var c: float = 1.5"))
     expect(python).toContain("b = float(a + 1)")
     expect(python).toContain("c = 1.5")
   })
@@ -83,25 +83,8 @@ describe("compile (S1): 型・名前の診断", () => {
     expect(codesOf(main("  var a: int = 1.5"))).toEqual(["K0301"])
   })
 
-  it("暗黙の型変換はしない：int を float に入れるのは K0301", () => {
-    expect(codesOf(main("  var a: float = 1"))).toEqual(["K0301"])
-    expect(codesOf(main("  var n: int = 1\n  var a: float = n"))).toEqual(["K0301"])
-    expect(codesOf(main("  var a: float = 1.0"))).toEqual([])
-  })
-
-  it("int と float を混ぜた演算は K0303（to_float / to_int で型をそろえる）", () => {
-    expect(codesOf(main("  print(1 + 2.5)"))).toEqual(["K0303"])
-    expect(codesOf(main("  print(2.5 * 2)"))).toEqual(["K0303"])
-    expect(codesOf(main("  print(1 < 2.5)"))).toEqual(["K0303"])
-    expect(codesOf(main("  print(1 == 1.0)"))).toEqual(["K0303"])
-    expect(codesOf(main("  print(to_float(1) + 2.5)"))).toEqual([])
-    expect(codesOf(main("  var f: float = 1.5\n  f += 1"))).toEqual(["K0303"])
-  })
-
-  it("/ は、int どうしでも float どうしでも、結果は float", () => {
-    expect(codesOf(main("  var a: float = 7 / 2"))).toEqual([])
-    expect(codesOf(main("  var a: float = 7.0 / 2.0"))).toEqual([])
-    expect(codesOf(main("  var a: int = 7 / 2"))).toEqual(["K0301"])
+  it("int を float に入れるのは許す", () => {
+    expect(codesOf(main("  var a: float = 1"))).toEqual([])
   })
 
   it("文字列と数値の + は K0302", () => {

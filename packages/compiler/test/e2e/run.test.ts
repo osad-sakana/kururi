@@ -40,8 +40,8 @@ describe.skipIf(python === undefined)("E2E: 生成した Python を 3.12 で実�
   })
 
   it("算術は Python と同じ結果になる", () => {
-    const out = run(main("  print(7 / 2)\n  print(-7 % 3)\n  print(2 + 3 * 4)\n  print((2 + 3) * 4)\n  print(1.5 + 2.5)"))
-    expect(out).toBe("3.5\n2\n14\n20\n4.0\n")
+    const out = run(main("  print(7 / 2)\n  print(-7 % 3)\n  print(2 + 3 * 4)\n  print((2 + 3) * 4)\n  print(1 + 2.5)"))
+    expect(out).toBe("3.5\n2\n14\n20\n3.5\n")
   })
 
   it("boolean は true / false と表示する", () => {
@@ -60,8 +60,8 @@ describe.skipIf(python === undefined)("E2E: 生成した Python を 3.12 で実�
     expect(run(main('  var a: int = 1\n  print("x${"y${a}"}z")'))).toBe("xy1z\n")
   })
 
-  it("トップレベルの変数と、to_float での明示的な変換", () => {
-    const out = run(`const RATE: float = 2.0\nvar base: int = 10\n${main("  print(to_float(base) * RATE)")}`)
+  it("トップレベルの変数と float への暗黙変換", () => {
+    const out = run(`const RATE: float = 2\nvar base: int = 10\n${main("  print(base * RATE)")}`)
     expect(out).toBe("20.0\n")
   })
 
@@ -94,7 +94,7 @@ describe.skipIf(python === undefined)("E2E: 制御構文", () => {
   })
 
   it("float への代入は float になる", () => {
-    expect(run(main("  var f: float = 1.5\n  var n: int = 4\n  f = to_float(n)\n  print(f)\n  f /= 8.0\n  print(f)"))).toBe("4.0\n0.5\n")
+    expect(run(main("  var f: float = 1.5\n  var n: int = 4\n  f = n\n  print(f)\n  f /= 8\n  print(f)"))).toBe("4.0\n0.5\n")
   })
 })
 
@@ -109,7 +109,7 @@ describe.skipIf(python === undefined)("E2E: 配列", () => {
   })
 
   it("float の配列は float として表示される", () => {
-    expect(run(main("  var a: float[] = [1.0, 2.0]\n  a.push(3.0)\n  for x in a {\n    print(x)\n  }"))).toBe("1.0\n2.0\n3.0\n")
+    expect(run(main("  var a: float[] = [1, 2]\n  a.push(3)\n  for x in a {\n    print(x)\n  }"))).toBe("1.0\n2.0\n3.0\n")
   })
 
   it("入れ子の配列と合計", () => {
@@ -135,7 +135,7 @@ describe.skipIf(python === undefined)("E2E: 関数", () => {
   })
 
   it("float の引数・戻り値", () => {
-    expect(run(`function half = (x: float) -> float {\n  return x / 2.0\n}\nfunction one = () -> float {\n  return 1.0\n}\n${main("  print(half(5.0))\n  print(one())")}`)).toBe("2.5\n1.0\n")
+    expect(run(`function half = (x: float) -> float {\n  return x / 2\n}\nfunction one = () -> float {\n  return 1\n}\n${main("  print(half(5))\n  print(one())")}`)).toBe("2.5\n1.0\n")
   })
 
   it("配列を渡して書き換える・グローバルを更新する", () => {
@@ -189,7 +189,7 @@ describe.skipIf(python === undefined)("E2E: null・組み込み", () => {
   })
 
   it("to_int / to_float / random", () => {
-    const out = run(main('  print(to_int("42") + 1)\n  print(to_float("1.5") * 2.0)\n  var r: int = random(3, 3)\n  print(r)\n  print(to_int(2.9))'))
+    const out = run(main('  print(to_int("42") + 1)\n  print(to_float("1.5") * 2)\n  var r: int = random(3, 3)\n  print(r)\n  print(to_int(2.9))'))
     expect(out).toBe("43\n3.0\n3\n2\n")
   })
 

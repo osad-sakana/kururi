@@ -33,9 +33,9 @@ describe("compile (S2a): 生成", () => {
   })
 
   it("代入と複合代入", () => {
-    const py = pyBody("  var a: int = 1\n  a = 2\n  a += 1\n  a -= 1\n  a *= 2\n  a %= 3\n  var f: float = 1.5\n  f /= 2.0\n  f = to_float(a)")
+    const py = pyBody("  var a: int = 1\n  a = 2\n  a += 1\n  a -= 1\n  a *= 2\n  a %= 3\n  var f: float = 1.5\n  f /= 2\n  f = a")
     expect(py).toContain("    a = 2\n    a += 1\n    a -= 1\n    a *= 2\n    a %= 3")
-    expect(py).toContain("    f /= 2.0\n    f = float(a)")
+    expect(py).toContain("    f /= 2\n    f = float(a)")
   })
 
   it("関数の中で書き換えるトップレベルの var に global を付ける", () => {

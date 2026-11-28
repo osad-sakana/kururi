@@ -17,6 +17,8 @@ const ORDERING: ReadonlySet<string> = new Set(["<", "<=", ">", ">="])
 /** 式の型を調べる。調べた型は types に記録する（Python 生成が使う）。 */
 export class ExprChecker {
   readonly types = new Map<Expr, Type>()
+  /** int の値を float の場所に入れる式（Python では float(...) への変換が要る） */
+  readonly widened = new Set<Expr>()
   /** 0 以上と分かっている添字の式（Python では、負の数を検査しなくてよい） */
   readonly safeIndexes = new Set<Expr>()
 
@@ -61,6 +63,7 @@ export class ExprChecker {
       this.reporter.report("K0301", expr.range, { expected, actual: typeLabel(actual), ...(callee === undefined ? {} : { callee }) })
       return this.fail(expr)
     }
+    if (target === "float" && actual === "int") this.widened.add(expr)
     return actual
   }
 
@@ -170,7 +173,7 @@ export class ExprChecker {
     return expr.className
   }
 
-  /** 引数の数と型を調べる。 */
+  /** 引数の数と型を調べる（int は float の引数に渡せる）。 */
   private checkArgs(name: string, args: readonly Expr[], params: readonly Type[], range: Range, scope: Scope): void {
     if (args.length !== params.length) {
       args.forEach((arg) => this.valueType(arg, scope, true))
@@ -233,9 +236,7 @@ export class ExprChecker {
         return "error"
       }
     }
-    // int と float を混ぜた演算は、暗黙の変換をしないのでエラー（to_float / to_int で型をそろえる）
-    const mixed = isNumeric(nonNull(left)) && isNumeric(nonNull(right)) && nonNull(left) !== nonNull(right)
-    this.reporter.report("K0303", range, { op, left: typeLabel(left), right: typeLabel(right), ...(mixed ? { mixed: "1" } : {}) })
+    this.reporter.report("K0303", range, { op, left: typeLabel(left), right: typeLabel(right) })
     return "error"
   }
 
@@ -247,10 +248,14 @@ export class ExprChecker {
     const values = types.filter((type) => type !== NULL_TYPE)
     const [first] = values
     if (first === undefined) return types.length === 0 ? EMPTY_ARRAY : `${NULL_TYPE}[]`
-    // 要素は同じ型だけ（int と float を混ぜた [1, 2.5] はエラー）
-    const common: Type = first
+    // int と float が混ざっていれば float の配列にする
+    let common: Type = first
     for (const [i, type] of values.entries()) {
       if (type === common) continue
+      if (isNumeric(type) && isNumeric(common)) {
+        common = "float"
+        continue
+      }
       this.reporter.report("K0301", expr.elements[i]?.range ?? expr.range, { expected: common, actual: type })
       return "error"
     }
@@ -491,14 +496,14 @@ function calleeName(expr: Extract<Expr, { kind: "call" }>): string {
 
 /** 二項演算の結果の型。その組み合わせが使えなければ undefined。 */
 function binaryResult(op: string, left: Type, right: Type): Type | undefined {
-  // 数の演算は、同じ型どうし（int と int、float と float）だけ。混ぜたいときは to_float / to_int で型をそろえる
-  const sameNumeric = isNumeric(left) && left === right
+  const bothNumeric = isNumeric(left) && isNumeric(right)
+  const widest: Type = left === "float" || right === "float" ? "float" : "int"
   if (op === "and" || op === "or") return left === "boolean" && right === "boolean" ? "boolean" : undefined
   if (op === "==" || op === "!=") return equalityResult(left, right)
-  if (ORDERING.has(op)) return sameNumeric || (left === "string" && right === "string") ? "boolean" : undefined
-  if (op === "+") return left === "string" && right === "string" ? "string" : sameNumeric ? left : undefined
-  if (op === "/") return sameNumeric ? "float" : undefined
-  if (ARITHMETIC.has(op)) return sameNumeric ? left : undefined
+  if (ORDERING.has(op)) return bothNumeric || (left === "string" && right === "string") ? "boolean" : undefined
+  if (op === "+") return left === "string" && right === "string" ? "string" : bothNumeric ? widest : undefined
+  if (op === "/") return bothNumeric ? "float" : undefined
+  if (ARITHMETIC.has(op)) return bothNumeric ? widest : undefined
   return undefined
 }
 
@@ -509,5 +514,5 @@ function equalityResult(left: Type, right: Type): Type | undefined {
     return other === NULL_TYPE || isNullable(other) ? "boolean" : undefined
   }
   const [l, r] = [nonNull(left), nonNull(right)]
-  return l === r ? "boolean" : undefined
+  return (isNumeric(l) && isNumeric(r)) || l === r ? "boolean" : undefined
 }

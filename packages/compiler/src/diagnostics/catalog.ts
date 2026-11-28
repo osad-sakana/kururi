@@ -47,8 +47,8 @@ const LOGICAL_OPS: ReadonlySet<string> = new Set(["and", "or", "not"])
 
 function operatorHint(op: string): string {
   if (LOGICAL_OPS.has(op)) return "and / or / not は boolean（true か false）どうしで使います"
-  if (COMPARISON_OPS.has(op)) return "比べられるのは、同じ型どうしです（int と float は、to_float(x) などでそろえます）"
-  return "「+」は同じ型の数どうしか文字列どうし、「- * / %」は同じ型の数どうしで使えます（int と float は混ぜられません）"
+  if (COMPARISON_OPS.has(op)) return "比べられるのは、数値どうしか、同じ型どうしです"
+  return "「+」は数値どうしか文字列どうし、「- * / %」は数値（int か float）だけで使えます"
 }
 
 function unknownCharHint(text: string): string | undefined {
@@ -263,8 +263,6 @@ export const DIAGNOSTIC_CATALOG = {
       if (callee !== undefined) return `${callee} は文として、単独で書いてください。値を返したいときは、-> ${expected} のように戻り値の型を書いて、return で返します`
       if (actual === "null") return `null を入れたいときは、型の後ろに ? を付けてください（例: ${expected}?）`
       if (actual.endsWith("?")) return "null かもしれない値は、if x != null { ... } の中なら使えます"
-      if (expected === "float" && actual === "int") return "int は自動では float になりません。to_float(x) で変えるか、小数で 1.0 のように書いてください"
-      if (expected === "int" && actual === "float") return "float は自動では int になりません。to_int(x) で変えてください（小数点以下は切り捨てられます）"
       return `${expected} の値を書くか、型を ${actual} に変えてください`
     },
   },
@@ -283,10 +281,7 @@ export const DIAGNOSTIC_CATALOG = {
         ? `${left} には「${op}」を使えません`
         : `${left} と ${right} には「${op}」を使えません`,
     label: ({ op = "" }) => `「${op}」が使えません`,
-    hint: ({ op = "", mixed }) =>
-      mixed === undefined
-        ? operatorHint(op)
-        : "int と float は混ぜられません。to_float(x) で float に、to_int(x) で int にして、型をそろえてください",
+    hint: ({ op = "" }) => operatorHint(op),
   },
   K0305: {
     code: "K0305",

@@ -5,7 +5,7 @@ function main = () {
     var price: int = 1200
     var count: int = 3
     var total: int = price * count
-    var with_tax: float = to_float(total) * (1.0 + TAX_RATE)
+    var with_tax: float = total * (1 + TAX_RATE)
     var big: boolean = total > 3000 and not (count == 0)
 
     print("小計: " + to_string(total))
