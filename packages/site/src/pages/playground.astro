@@ -49,8 +49,7 @@ const home = base.endsWith("/") ? base : `${base}/`
         <a href={`${home}tutorials`}>チュートリアル</a>
         <a href={`${home}spec`}>言語仕様</a>
       </nav>
-      <label class="visually-hidden" for="samples">サンプル</label>
-      <select id="samples" title="サンプルを選ぶと、エディタの中身が入れ替わります（元に戻せます）"></select>
+      <button id="new-file" type="button" title="新しいプログラムを始めます（今のコードは消えます）">新規作成</button>
       <span id="status-wrap"><span id="status" role="status"></span></span>
       <div class="controls" role="group" aria-label="文字の大きさ">
         <button id="font-down" type="button" aria-label="文字を小さくする" title="文字を小さくする">A−</button>
@@ -64,6 +63,8 @@ const home = base.endsWith("/") ? base : `${base}/`
         </button>
         <div id="menu-list" class="menu-list" role="menu" hidden>
           <button id="open-narapy" type="button" role="menuitem" disabled>narapy で開く</button>
+          <p class="menu-heading" role="presentation">サンプルを開く</p>
+          <div id="sample-list" role="group" aria-label="サンプル"></div>
         </div>
       </div>
     </header>

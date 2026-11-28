@@ -56,9 +56,13 @@ function loadSource(): string {
   }
 }
 
+/** #code= のリンクで開いたときは、自分で書き換えるまで保存しない（前に書いていたコードを、上書きしないため） */
+let canSave = sourceFromHash(location.hash) === null
+
 function saveSource(source: string): void {
   // チュートリアルの横に埋め込まれているときは、自分のプレイグラウンドのコードを上書きしない
   if (new URLSearchParams(location.search).has("embed")) return
+  if (!canSave) return
   try {
     localStorage.setItem(STORAGE_KEY, source)
   } catch {
@@ -184,8 +188,6 @@ themeButton.addEventListener("click", () => {
 })
 showPreferences()
 
-const sampleSelect = element<HTMLSelectElement>("samples")
-sampleSelect.append(new Option("サンプルを選ぶ…", ""), ...SAMPLES.map((sample) => new Option(sample.title, sample.id)))
 /** エディタの中身を入れ替える（元に戻す操作で、書いていたコードに戻せる） */
 function replaceSource(text: string, focus: boolean): void {
   const model = editor.getModel()
@@ -197,11 +199,33 @@ function replaceSource(text: string, focus: boolean): void {
   if (focus) editor.focus()
 }
 
-sampleSelect.addEventListener("change", () => {
-  const sample = SAMPLES.find((candidate) => candidate.id === sampleSelect.value)
-  sampleSelect.value = ""
-  if (sample !== undefined) replaceSource(sample.source, true)
+/** 今のコードを消してよいか、確かめる。まだ何も書いていない（最初のままか、空）なら、聞かない。 */
+function confirmDiscard(): boolean {
+  const current = editor.getValue()
+  if (current.trim() === "" || current === START_SOURCE) return true
+  return window.confirm("今のコードは消えます。新しく始めてよいですか？\n（Ctrl+Z / ⌘+Z で、元に戻せます）")
+}
+
+element("new-file").addEventListener("click", () => {
+  if (!confirmDiscard()) return
+  replaceSource(START_SOURCE, true)
+  editor.setPosition(START_CURSOR)
 })
+
+// サンプルは、メニューから開く（今のコードは、確かめてから入れ替える）
+const sampleList = element("sample-list")
+for (const sample of SAMPLES) {
+  const item = document.createElement("button")
+  item.type = "button"
+  item.setAttribute("role", "menuitem")
+  item.textContent = sample.title
+  item.addEventListener("click", () => {
+    setMenu(false)
+    if (!confirmDiscard()) return
+    replaceSource(sample.source, true)
+  })
+  sampleList.append(item)
+}
 
 // チュートリアルの横に埋め込まれたとき：ロゴやサイトのリンクを隠す
 if (new URLSearchParams(location.search).has("embed")) document.body.classList.add("embed")
@@ -446,7 +470,10 @@ function render(): void {
   saveSource(source)
 }
 
-editor.onDidChangeModelContent(() => stepPanel.close())
+editor.onDidChangeModelContent(() => {
+  canSave = true
+  stepPanel.close()
+})
 editor.onDidChangeModelContent(debounce(render, 200))
 const menuButton = element<HTMLButtonElement>("menu-button")
 const menuList = element("menu-list")
