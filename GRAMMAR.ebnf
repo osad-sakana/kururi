@@ -1,5 +1,5 @@
 (* ============================================================
-   Kururi 文法 草案 v0.3（S10: 宣言を「種類 名前 = 中身」の形にそろえた）
+   Kururi 文法 草案 v0.4（関数はすべて式。for は n times。範囲 .. をやめた）
 
    記法
      =        定義          |      または
@@ -44,7 +44,7 @@ IDENT     = idStart { idContinue } ;
                    NFKC 正規化で形が変わる文字（全角英数字・半角カナなど）はエラー *)
 
 INT       = "0" | nonZeroDigit { digit } ;               (* 007 は書けない *)
-FLOAT     = INT "." digit { digit } ;               (* 0..10 の ".." は範囲の記号で、小数点ではない *)
+FLOAT     = INT "." digit { digit } ;
 digit     = "0" … "9" ;
 nonZeroDigit = "1" … "9" ;
 
@@ -62,10 +62,10 @@ templateEscape = "\" ( "`" | "$" | "\" | "n" | "t" ) ;   (* \` と \${ で文字
 
 (* 予約語（IDENT にできない）
    const var function method return class public private new constructor self
-   if else while for in break continue
-   （古い書き方の案内用に let repeat foreach elseif も予約語のまま残す）
+   if else while for in times break continue
+   （古い書き方の案内用に let repeat foreach elseif void も予約語のまま残す）
    true false null and or not
-   int float string boolean void
+   int float string boolean
    組み込み名: print input to_string to_int to_float div random（配列は push remove_at length） *)
 
 
@@ -84,9 +84,9 @@ topLevel     = functionDecl | classDecl | varDecl ;
 
 type         = baseType [ "?" ] { "[" "]" [ "?" ] } ;
                 (* string?   string[]   string[]?   string?[]   int[][] *)
-baseType     = "int" | "float" | "string" | "boolean" | IDENT ;
-                (* IDENT はクラス名 *)
-returnType   = "void" | type ;                        (* void は戻り値の型にだけ書ける *)
+baseType     = "int" | "float" | "string" | "boolean" | "null" | IDENT ;
+                (* IDENT はクラス名。null は「null だけを入れられる型」で、値を返さない関数の型 *)
+returnType   = type ;
 
 
 (* ------------------------------------------------------------
@@ -96,7 +96,10 @@ returnType   = "void" | type ;                        (* void は戻り値の型
 varDecl      = ( "var" | "const" ) IDENT ":" type "=" expr NL ;
 
 functionDecl = "function" IDENT "=" "(" [ params ] ")" [ "->" returnType ] block ;
-                (* "->" を省くと戻り値なし（void）。"-> void" と書いてもよい *)
+                (* "->" を省くと、null を返す関数（戻り値なし）になる。
+                   関数の呼び出しはすべて式で、評価すると値になる。値を返さない関数（print など）は null になる。
+                   旧 "-> void" は K0114 で案内する。
+                   main だけは特別：引数なし・戻り値なしで、"->" は書けない（K0207） *)
 params       = param { "," param } ;
 param        = IDENT ":" type ;
 
@@ -126,9 +129,16 @@ statement    = varDecl
              | "break" NL
              | "continue" NL ;
 
+(* 文の 4 つの種類（呼び名）
+     式文        式だけの文（print("a")、xs.push(1)）
+     宣言代入文  名前に値を入れる文（var / const の宣言、代入）
+     ブロック文  式とブロックでできた文（if、while、for）。ブロックの中に文を入れられる
+     ジャンプ文  流れを飛ばす文（return、break、continue）
+   プログラムは、宣言（function / class / トップレベルの var・const）の並びで、関数の中は文の並び。 *)
+
 (* 代入 または 式文。
    意味検査:  代入の左辺は 変数 / a[i] / a.b のみ。
-              式文は関数・メソッド呼び出しのみ（それ以外は「意味のない式」エラー）。
+              式文は、どの式でも書ける。関数・メソッドの呼び出し以外は、値が使われないので警告（K0603）。
               x += 1 は x = x + 1 と同じ（左辺は 1 回だけ評価）。型は x = x + 1 と同じ規則で検査する
               （例: int の x に x /= 2 は float になるのでエラー）。
               a == b = c のように、比較が代入の左辺になっているときは
@@ -144,10 +154,11 @@ ifStmt       = "if" expr block { "else" "if" expr block } [ "else" block ] ;
 whileStmt    = "while" expr block ;
 
 (* for は 2 通り。IDENT は新しい変数で、読み取り専用。ループの外では使えない。
-   範囲: for i in 0..n { }   i は int で、始まり以上・終わり未満。両端は int で、ループに入るとき 1 回だけ評価する
-                              （Python の for i in range(a, b) に対応）。
+   回数: for i n times { }   i は int で、0 から n - 1。n は int の式で、ループに入るとき 1 回だけ評価する
+                              （Python の for i in range(n) に対応）。n が 0 以下なら 1 回も回らない。
+                              旧 for i in a..b は K0114 で案内する。
    配列: for x in xs { }     x の型は要素の型から決まる。 *)
-forStmt      = "for" IDENT "in" ( expr ".." expr | expr ) block ;
+forStmt      = "for" IDENT ( expr "times" | "in" expr ) block ;
 
 
 (* ------------------------------------------------------------
@@ -192,12 +203,20 @@ arrayLiteral   = "[" [ expr { "," expr } [ "," ] ] "]" ;   (* 末尾カンマ可
    - 型の一致（代入、引数、戻り値、演算。int→float のみ暗黙変換可。配列は型が一致するものだけ）
    - T? を T として使う誤り（if x != null の中は T として可）
    - 空の配列 [] を、型が決まらない場所で使った
-   - boolean・T? 以外で表示できない型（配列・オブジェクト）を print / to_string / 補間に渡した
+   - オブジェクト（オブジェクトの入った配列を含む）を print / to_string / 補間に渡した（配列は表示できる）
    - 文字列の要素への代入（s[i] = ...）
    - 添字に負の整数リテラル（a[-1]）
-   - T? の絞り込み範囲の外で T として使った（絞り込みはローカル変数・引数のみ）
-   - void 以外の関数で return が抜けている
-   - for の範囲の端が int でない
+   - T? の絞り込み範囲の外で T として使った
+       絞り込めるのは、ローカル変数・引数と、そこから . でたどったフィールド（x、self.next、a.b）。
+       代入されたとき、メソッドや自作の関数を呼んだとき（フィールドのみ）に外れる。トップレベルの変数は絞り込まない
+   - null を返す関数（戻り値なし）以外で return が抜けている（T? の関数も含む）
+   - for の回数が int でない
+   - 添字（a[i]・a[i] = …・remove_at(i)）：負の数のリテラルはエラー（K0315）。
+       変数や式が負になるかは、実行時に検査する（式の形から 0 以上と分かるときは検査を省く）
+   警告（エラーではない。warnings を頼んだときだけ返す）
+   - K0601 使っていない変数 / K0602 実行されない行
+   - K0603 値を使わない式を、文として単独で書いた（呼び出しは対象外）
+   - K0604 値を返さない関数（null になる呼び出し）の値を、代入・引数・演算などで使った
    名前・スコープ
    - const の再代入禁止 / for の変数への代入禁止
    - 関数内でのシャドーイング（引数・ローカル・トップレベルと同名の宣言）
