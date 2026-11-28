@@ -1,0 +1,86 @@
+{
+  "name": "kururi",
+  "scopeName": "source.kururi",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#string" },
+    { "include": "#number" },
+    { "include": "#declaration" },
+    { "include": "#modifier" },
+    { "include": "#control" },
+    { "include": "#operator-word" },
+    { "include": "#constant" },
+    { "include": "#type" },
+    { "include": "#builtin" },
+    { "include": "#self" }
+  ],
+  "repository": {
+    "comment": {
+      "patterns": [
+        { "name": "comment.line.double-slash.kururi", "match": "//.*$" },
+        { "name": "comment.block.kururi", "begin": "/\\*", "end": "\\*/" }
+      ]
+    },
+    "string": {
+      "name": "string.quoted.double.kururi",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.kururi", "match": "\\\\." },
+        {
+          "name": "meta.interpolation.kururi",
+          "begin": "\\$\\{",
+          "beginCaptures": { "0": { "name": "punctuation.section.embedded.begin.kururi" } },
+          "end": "\\}",
+          "endCaptures": { "0": { "name": "punctuation.section.embedded.end.kururi" } },
+          "patterns": [{ "include": "$self" }]
+        }
+      ]
+    },
+    "number": {
+      "name": "constant.numeric.kururi",
+      "match": "\\b\\d+(?:\\.\\d+)?\\b"
+    },
+    "declaration": {
+      "patterns": [
+        {
+          "match": "\\b(function|method)\\s+([\\p{L}_][\\p{L}\\p{N}_]*)",
+          "captures": { "1": { "name": "storage.type.function.kururi" }, "2": { "name": "entity.name.function.kururi" } }
+        },
+        {
+          "match": "\\b(class|new)\\s+([\\p{L}_][\\p{L}\\p{N}_]*)",
+          "captures": { "1": { "name": "storage.type.class.kururi" }, "2": { "name": "entity.name.class.kururi" } }
+        },
+        { "name": "storage.type.kururi", "match": "\\b(var|const|function|method|class|constructor|fields)\\b" }
+      ]
+    },
+    "modifier": {
+      "name": "storage.modifier.kururi",
+      "match": "\\b(public|private)\\b"
+    },
+    "control": {
+      "name": "keyword.control.kururi",
+      "match": "\\b(if|else|while|for|in|times|break|continue|return|new)\\b"
+    },
+    "operator-word": {
+      "name": "keyword.operator.word.kururi",
+      "match": "\\b(and|or|not)\\b"
+    },
+    "constant": {
+      "name": "constant.language.kururi",
+      "match": "\\b(true|false|null)\\b"
+    },
+    "type": {
+      "name": "support.type.kururi",
+      "match": "\\b(int|float|string|boolean)\\b"
+    },
+    "builtin": {
+      "name": "support.function.builtin.kururi",
+      "match": "\\b(print|input|to_string|to_int|to_float|div|random)\\b"
+    },
+    "self": {
+      "name": "variable.language.self.kururi",
+      "match": "\\bself\\b"
+    }
+  }
+}

@@ -56,9 +56,9 @@ function main = () {
 <svg viewBox="0 0 560 200" role="img" aria-label="3つの文が、上から順に実行され、くるりんが順番に話す図">
 <rect x="10" y="14" width="330" height="172" rx="12" style="fill: var(--color-editor); stroke: var(--color-line)" />
 <g style="font: 14px var(--font-mono); fill: var(--color-ink)">
-<text x="64" y="60">print("おはよう")</text>
-<text x="64" y="104">print("今日もがんばろう")</text>
-<text x="64" y="148">print("いってらっしゃい")</text>
+<text x="64" y="60"><tspan fill="#005CC5">print</tspan>(<tspan fill="#032F62">"おはよう"</tspan>)</text>
+<text x="64" y="104"><tspan fill="#005CC5">print</tspan>(<tspan fill="#032F62">"今日もがんばろう"</tspan>)</text>
+<text x="64" y="148"><tspan fill="#005CC5">print</tspan>(<tspan fill="#032F62">"いってらっしゃい"</tspan>)</text>
 </g>
 <g style="font: 700 13px var(--font-sans); fill: var(--color-accent-ink)">
 <circle cx="38" cy="55" r="12" style="fill: var(--color-accent)" /><text x="38" y="60" text-anchor="middle">1</text>

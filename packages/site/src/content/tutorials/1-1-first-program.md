@@ -5,7 +5,7 @@ partTitle: 文と式
 chapter: 1
 summary: くるりんに、あいさつをさせる。プログラムが動くところを、まず見てみる。
 concept: プログラムと手順
-goal: くるりんに、好きな言葉を話させられる。
+goal: くるりんに、好きな言葉を話させることができる。
 kind: 式文
 words:
   - "プログラム"
@@ -51,8 +51,8 @@ function main = () {
 <svg viewBox="0 0 560 190" role="img" aria-label="function main の行が入口、print の行が手順であることを示す図">
 <rect x="10" y="20" width="350" height="140" rx="12" style="fill: var(--color-editor); stroke: var(--color-line)" />
 <g style="font: 15px var(--font-mono); fill: var(--color-ink)">
-<text x="28" y="58">function main = () {</text>
-<text x="28" y="94">&#160;&#160;&#160;&#160;print("こんにちは、くるりん！")</text>
+<text x="28" y="58"><tspan fill="#D73A49">function</tspan> <tspan fill="#6F42C1">main</tspan> = () {</text>
+<text x="28" y="94">&#160;&#160;&#160;&#160;<tspan fill="#005CC5">print</tspan>(<tspan fill="#032F62">"こんにちは、くるりん！"</tspan>)</text>
 <text x="28" y="130">}</text>
 </g>
 <g style="fill: none; stroke: var(--color-accent); stroke-width: 2">
