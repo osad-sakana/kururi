@@ -94,7 +94,7 @@ export function createRunner(handlers: RunnerHandlers): Runner {
     const created = new Worker(`${import.meta.env.BASE_URL}pyodide-worker.js`)
     created.onmessage = (event: MessageEvent<WorkerMessage>) => {
       const message = event.data
-      if (message.type === "loading") handlers.onStatus("Python を準備しています…（初回は少し時間がかかります）")
+      if (message.type === "loading") handlers.onStatus("実行環境を準備しています…（初回は少し時間がかかります）")
       else if (message.type === "running") {
         handlers.onStatus("実行中…")
         // Python の読み込みに時間がかかっても止めないよう、制限時間は実行が始まってから数える
@@ -108,7 +108,7 @@ export function createRunner(handlers: RunnerHandlers): Runner {
       } else finish()
     }
     created.onerror = () => {
-      handlers.onError("Python の実行環境を読み込めませんでした。ネットワークを確かめてください")
+      handlers.onError("実行環境を読み込めませんでした。ネットワークを確かめてください")
       discard()
       finish()
     }
