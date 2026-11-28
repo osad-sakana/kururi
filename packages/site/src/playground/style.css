@@ -30,7 +30,9 @@ section + section { border-left: 1px solid var(--color-line); }
 #editor { flex: 1; min-height: 0; }
 .right { display: grid; grid-template-rows: auto minmax(0, 1fr) auto minmax(0, 42%); }
 .pane-toggle { display: flex; align-items: center; gap: 0.5rem; width: 100%; margin: 0; border: 0; border-radius: 0; border-bottom: 1px solid var(--color-line); font-family: inherit; text-align: left; cursor: pointer; }
-.pane-toggle::before { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; rotate: 45deg; translate: 0 -2px; }
+.pane-toggle::before { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; rotate: 45deg; translate: 0 -2px; transition: rotate 0.2s; }
+/* ボタン共通の反転の hover は、この見出しには効かせない */
+.pane-toggle:hover:not(:disabled) { color: var(--color-muted); background: var(--color-panel); border-color: var(--color-line); }
 .pane-toggle[aria-expanded="false"]::before { rotate: -45deg; translate: -1px 0; }
 .right.python-closed { grid-template-rows: auto minmax(0, 1fr) auto; }
 .right.python-closed #python { display: none; }
@@ -108,3 +110,9 @@ section + section { border-left: 1px solid var(--color-line); }
 #boot .logo-rays { opacity: 0; }
 #status-wrap { flex: 1; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
 #busy { width: 1.5rem; height: 1.5rem; }
+
+/* 実行ボタンは、Kururi のコード欄の見出しの右端に置く */
+.pane-title-row { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; padding-block: 0.3rem; padding-right: 0.6rem; }
+.pane-actions { display: flex; align-items: center; gap: 0.4rem; }
+.pane-actions button { padding: 0.25rem 0.7rem; font-size: 12px; }
+.pane-actions button.primary { font-size: 13px; padding: 0.3rem 1rem; }

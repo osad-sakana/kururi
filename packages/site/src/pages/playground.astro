@@ -56,14 +56,18 @@ const home = base.endsWith("/") ? base : `${base}/`
         <button id="font-up" type="button" aria-label="文字を大きくする" title="文字を大きくする">A＋</button>
       </div>
       <button id="theme" type="button" title="見た目を切り替える（自動 / ライト / ダーク）"></button>
-      <button id="run" class="primary" type="button" disabled>実行</button>
-      <button id="step" type="button" disabled title="1 行ずつ進めながら、変数の値を見る">ステップ実行</button>
-      <button id="stop" type="button" hidden>止める</button>
       <button id="open-narapy" type="button" disabled>narapy で開く</button>
     </header>
     <main>
       <section aria-label="Kururi">
-        <div class="pane-title">KURURI</div>
+        <div class="pane-title pane-title-row">
+          <span>KURURI</span>
+          <div class="pane-actions">
+            <button id="step" type="button" disabled title="1 行ずつ進めながら、変数の値を見る">ステップ実行</button>
+            <button id="stop" type="button" hidden>止める</button>
+            <button id="run" class="primary" type="button" disabled>実行</button>
+          </div>
+        </div>
         <div id="editor"></div>
       </section>
       <section aria-label="実行結果と Python" class="right">
