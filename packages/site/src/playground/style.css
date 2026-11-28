@@ -6,7 +6,8 @@ header { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1rem; 
 .site-links { display: flex; gap: 0.8rem; font-size: 12px; }
 .site-links a { color: var(--color-muted); text-decoration: none; }
 .site-links a { padding: 0.2rem 0.5rem; border-radius: 6px; }
-.site-links a:hover { color: var(--color-canvas); background: var(--color-ink); }
+.site-links a { display: inline-block; transition: transform 0.2s ease, color 0.2s ease; }
+.site-links a:hover { color: var(--color-ink); transform: translateY(-2px); }
 .brand { display: flex; flex-direction: column; line-height: 1; }
 h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
 h1 svg { display: block; height: 30px; width: auto; }
