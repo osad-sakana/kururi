@@ -9,5 +9,5 @@ export default defineConfig({
   base: process.env.SITE_BASE ?? "/",
   trailingSlash: "ignore",
   server: { headers: isolation },
-  markdown: { shikiConfig: { langAlias: { kururi: "text" }, themes: { light: "github-light", dark: "github-dark" } } },
+  markdown: { shikiConfig: { langAlias: { kururi: "text", "kururi-error": "text", "kururi-warning": "text" }, themes: { light: "github-light", dark: "github-dark" } } },
 })

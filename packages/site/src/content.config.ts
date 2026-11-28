@@ -14,4 +14,15 @@ const tutorials = defineCollection({
   }),
 })
 
-export const collections = { tutorials }
+/** 言語仕様。他の言語を知っている人が、Kururi の書き方を引くためのページ */
+const spec = defineCollection({
+  loader: glob({ pattern: "*.md", base: "./src/content/spec" }),
+  schema: z.object({
+    title: z.string(),
+    order: z.number().int(),
+    /** 一覧に出す 1 行の説明 */
+    summary: z.string(),
+  }),
+})
+
+export const collections = { tutorials, spec }

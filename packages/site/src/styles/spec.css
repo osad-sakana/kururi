@@ -1,0 +1,29 @@
+/* 言語仕様：左に目次、右に本文 */
+.spec { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 2.5rem; align-items: start; }
+.spec-nav { position: sticky; top: 4.5rem; padding: 2.5rem 0 2rem; font-size: 0.9rem; }
+.spec-nav h2 { margin: 0 0 0.6rem; font-size: 0.8rem; font-weight: 400; color: var(--color-muted); letter-spacing: 0.04em; }
+.spec-nav ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.1rem; }
+.spec-nav a { display: block; padding: 0.3rem 0.6rem; border-radius: 8px; color: var(--color-ink); text-decoration: none; transition: background 0.15s, color 0.15s; }
+.spec-nav a:hover { background: var(--color-ink); color: var(--color-canvas); }
+.spec-nav a[aria-current="page"] { background: color-mix(in srgb, var(--color-accent) 12%, var(--color-panel)); font-weight: 700; }
+.spec .prose { min-width: 0; }
+.spec .prose p, .spec .prose li { max-width: 46rem; }
+
+/* 表 */
+.prose table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.92rem; display: block; overflow-x: auto; }
+.prose th, .prose td { text-align: left; vertical-align: top; padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--color-line); }
+.prose th { color: var(--color-muted); font-weight: 400; font-size: 0.8rem; white-space: nowrap; }
+.prose td code, .prose li code, .prose p code { font-family: var(--font-mono); font-size: 0.9em; padding: 0.05em 0.35em; border-radius: 6px; background: color-mix(in srgb, var(--color-line) 55%, transparent); }
+.prose pre code { padding: 0; background: none; font-size: inherit; }
+.prose td { max-width: 28rem; }
+
+@media (max-width: 860px) {
+  .spec { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  /* 狭い画面では、目次は本文のあとに置く */
+  .spec-nav { position: static; order: 2; padding: 0 0 2.5rem; }
+  .spec-nav ol { grid-auto-flow: row; }
+}
+.spec .prose pre { margin: 1rem 0; }
+.spec .prose h2 { margin-top: 2.6rem; }
+.spec .prose h3 { margin: 1.8rem 0 0.3rem; font-size: 1.05rem; }
+.prose td code, .prose li code, .prose p code { box-decoration-break: clone; -webkit-box-decoration-break: clone; }

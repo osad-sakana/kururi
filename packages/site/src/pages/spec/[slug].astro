@@ -1,0 +1,48 @@
+---
+import "../../styles/spec.css"
+import { getCollection, render } from "astro:content"
+import Base from "../../layouts/Base.astro"
+
+export async function getStaticPaths() {
+  const pages = (await getCollection("spec")).sort((a, b) => a.data.order - b.data.order)
+  return pages.map((page, index) => ({
+    params: { slug: page.id.replace(/^\d+-/, "") },
+    props: { page, pages, previous: pages[index - 1], next: pages[index + 1] },
+  }))
+}
+
+const { page, pages, previous, next } = Astro.props
+const { Content } = await render(page)
+const base = import.meta.env.BASE_URL
+const home = base.endsWith("/") ? base : `${base}/`
+const slugOf = (id: string) => id.replace(/^\d+-/, "")
+---
+
+<Base title={page.data.title} current="spec" lightOnly description={page.data.summary}>
+  <div class="wrap spec">
+    <nav class="spec-nav" aria-label="言語仕様の目次">
+      <h2>言語仕様</h2>
+      <ol>
+        {pages.map((item) => (
+          <li>
+            <a href={`${home}spec/${slugOf(item.id)}`} aria-current={item.id === page.id ? "page" : undefined}>{item.data.title}</a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+    <main class="prose">
+      <p class="crumb"><a href={home}>トップ</a> / <a href={`${home}spec`}>言語仕様</a></p>
+      <h1>{page.data.title}</h1>
+      <p class="lead">{page.data.summary}</p>
+      <Content />
+      <nav class="pager" aria-label="前後のページ">
+        {previous !== undefined ? (
+          <a href={`${home}spec/${slugOf(previous.id)}`}><small>前</small>{previous.data.title}</a>
+        ) : <span />}
+        {next !== undefined ? (
+          <a class="next" href={`${home}spec/${slugOf(next.id)}`}><small>次</small>{next.data.title}</a>
+        ) : <span />}
+      </nav>
+    </main>
+  </div>
+</Base>

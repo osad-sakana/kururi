@@ -1,0 +1,30 @@
+---
+import "../../styles/spec.css"
+import { getCollection } from "astro:content"
+import Base from "../../layouts/Base.astro"
+
+const base = import.meta.env.BASE_URL
+const home = base.endsWith("/") ? base : `${base}/`
+const pages = (await getCollection("spec")).sort((a, b) => a.data.order - b.data.order)
+---
+
+<Base title="言語仕様" current="spec" lightOnly description="Kururiの書き方と、その考え方をまとめた言語仕様。ほかの言語を知っている人が、Kururiの書き方を引くためのページです。">
+  <main class="wrap prose">
+    <p class="crumb"><a href={home}>トップ</a> / 言語仕様</p>
+    <h1>言語仕様</h1>
+    <p class="lead">
+      Kururiの書き方と、その背景にある考え方をまとめています。ほかの言語を知っている人が、Kururiではどう書くかを調べるためのページです。順番に読んでも、必要な所だけ引いても使えます。
+    </p>
+    <ol class="toc">
+      {pages.map((page) => (
+        <li>
+          <a class="card" href={`${home}spec/${page.id.replace(/^\d+-/, "")}`}>
+            <span class="num">{String(page.data.order).padStart(2, "0")}</span>
+            <h3>{page.data.title}</h3>
+            <p>{page.data.summary}</p>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </main>
+</Base>
