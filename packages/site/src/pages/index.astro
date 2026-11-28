@@ -10,11 +10,11 @@ import Logo from "../components/Logo.astro"
 import LogoInline from "../components/LogoInline.astro"
 import { LANGUAGES } from "../data/languages"
 import { renderInline } from "../data/inline"
+import { isChapter, slugOf, sortKey } from "../data/tutorials"
 
 const base = import.meta.env.BASE_URL
 const home = base.endsWith("/") ? base : `${base}/`
-const slugOf = (id: string) => id.replace(/^\d+-/, "")
-const lessons = (await getCollection("tutorials")).sort((a, b) => a.data.order - b.data.order)
+const lessons = (await getCollection("tutorials")).filter((lesson) => !isChapter(lesson.data)).sort((a, b) => sortKey(a.data) - sortKey(b.data))
 
 // ---- ヒーローの図：中心のロゴ（概念）を、内側の概念と外側の言語がつなぐ ----
 const CENTER = 260

@@ -1,10 +1,19 @@
 ---
 import { getCollection } from "astro:content"
 import Base from "../../layouts/Base.astro"
+import { isChapter, labelOf, slugOf, sortKey } from "../../data/tutorials"
 
 const base = import.meta.env.BASE_URL
 const home = base.endsWith("/") ? base : `${base}/`
-const lessons = (await getCollection("tutorials")).sort((a, b) => a.data.order - b.data.order)
+const all = (await getCollection("tutorials")).sort((a, b) => sortKey(a.data) - sortKey(b.data))
+// 新しい構成の章は、部ごとにまとめる。これまでの回は、そのあとに並べる
+const chapters = all.filter((lesson) => isChapter(lesson.data))
+const parts = [...new Set(chapters.map((lesson) => lesson.data.part))].map((part) => ({
+  part,
+  title: chapters.find((lesson) => lesson.data.part === part)?.data.partTitle ?? "",
+  lessons: chapters.filter((lesson) => lesson.data.part === part),
+}))
+const earlier = all.filter((lesson) => !isChapter(lesson.data))
 ---
 
 <Base title="チュートリアル" current="tutorials" lightOnly footer={false} description="Kururiで、プログラミングの概念を順番に学ぶチュートリアル。どの回も、その場で動かせます。">
@@ -12,18 +21,39 @@ const lessons = (await getCollection("tutorials")).sort((a, b) => a.data.order -
     <p class="crumb"><a href={home}>トップ</a> / チュートリアル</p>
     <h1>チュートリアル</h1>
     <p class="lead">
-      プログラミングの概念を、1つずつ順番に学びます。各回のコードは、ボタン1つでプレイグラウンドに送って、動かせます。
+      プログラミングの概念を、1つずつ順番に学びます。各回のコードは、横のプレイグラウンドに書き写して、動かせます。
     </p>
-    <ol class="toc">
-      {lessons.map((lesson) => (
-        <li>
-          <a class="card" href={`${home}tutorials/${lesson.id.replace(/^\d+-/, "")}`}>
-            <span class="num">{String(lesson.data.order).padStart(2, "0")}　{lesson.data.concept}</span>
-            <h3>{lesson.data.title}</h3>
-            <p>{lesson.data.summary}</p>
-          </a>
-        </li>
-      ))}
-    </ol>
+    {parts.map((group) => (
+      <section class="part">
+        <h2>第{group.part}部　{group.title}</h2>
+        <ol class="toc">
+          {group.lessons.map((lesson) => (
+            <li>
+              <a class="card" href={`${home}tutorials/${slugOf(lesson.id)}`}>
+                <span class="num">{labelOf(lesson.data)}　{lesson.data.concept}</span>
+                <h3>{lesson.data.title}</h3>
+                <p>{lesson.data.summary}</p>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
+    {earlier.length > 0 && (
+      <section class="part">
+        <h2>これまでの回</h2>
+        <ol class="toc">
+          {earlier.map((lesson) => (
+            <li>
+              <a class="card" href={`${home}tutorials/${slugOf(lesson.id)}`}>
+                <span class="num">{String(lesson.data.order ?? 0).padStart(2, "0")}　{lesson.data.concept}</span>
+                <h3>{lesson.data.title}</h3>
+                <p>{lesson.data.summary}</p>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
   </main>
 </Base>

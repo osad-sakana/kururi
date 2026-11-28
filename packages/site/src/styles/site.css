@@ -157,3 +157,17 @@ ul.plain li { margin: 0.3rem 0; }
 .site-header nav a.icon-link { padding: 0.35rem 0.5rem; }
 .site-header nav a.icon-link svg { display: block; }
 .site-footer a.icon-link { padding: 0.25rem 0.5rem; }
+
+/* チュートリアル：新しい構成の章 */
+.chapter-no { display: inline-block; margin-right: 0.6rem; padding: 0.05rem 0.6rem; border-radius: 8px; background: var(--color-accent); color: var(--color-accent-ink); font: 700 0.6em var(--font-mono); vertical-align: 0.15em; }
+.prose .goal { margin: 0.6rem 0; padding: 0.7rem 1rem; border-radius: 12px; background: color-mix(in srgb, var(--color-accent) 9%, var(--color-panel)); font-weight: 700; }
+.prose .goal span { display: block; font-size: 12px; font-weight: 400; color: var(--color-muted); }
+.chapter-meta { list-style: none; margin: 0.4rem 0 0.8rem; padding: 0; display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; font-size: 13px; }
+.chapter-meta span { margin-right: 0.5rem; color: var(--color-muted); }
+.kind-badge { padding: 0.05rem 0.55rem; border-radius: 6px; background: color-mix(in srgb, var(--color-spark) 22%, transparent); font-weight: 700; }
+.prose .words ul { display: flex; flex-wrap: wrap; gap: 0.4rem 0.6rem; list-style: none; padding: 0; }
+.prose .words li { padding: 0.15rem 0.7rem; border: 1px solid var(--color-line); border-radius: 999px; font-size: 14px; }
+.prose details { margin: 0.8rem 0; padding: 0.6rem 1rem; border: 1px solid var(--color-line); border-radius: 12px; background: var(--color-panel); }
+.prose details > summary { cursor: pointer; font-weight: 700; }
+.prose details[open] > summary { margin-bottom: 0.6rem; }
+.prose .part h2 { margin: 2.2rem 0 0; }
