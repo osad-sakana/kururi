@@ -18,13 +18,13 @@ words:
 
 <div class="say">
 
-最後の部は、<strong>ぼくみたいなもの</strong>を、作る話だよ。名前と、できることを、まとめて持っているんだ！
+最後の部は、ぼくみたいなものを作る話だよ。名前と、できることを、まとめて持っているんだ！
 
 </div>
 
 ## なぜ必要か
 
-数を、数え上げる「カウンター」を、作りたいとします。数を入れる変数と、増やす関数と、表示する関数が、<strong>別々に</strong>あると、どれが、どれの仲間なのか、分かりにくくなります。
+数を数える「カウンター」を作りたいとします。数を入れる変数、増やす関数、表示する関数がばらばらにあると、どれがどれの仲間なのか分かりにくくなります。
 
 ```kururi
 var count: int = 0
@@ -43,7 +43,7 @@ function main = () {
 }
 ```
 
-カウンターを<strong>2つ</strong>使いたくなったら、変数も関数も、2組ずつ必要です。<strong>関連するものを、ひとまとめ</strong>にできたら、便利です。
+カウンターを2つ使いたくなれば、変数も関数も2組ずつ要ります。関連するものをひとまとめにできたら、ずっと楽になります。
 
 ## やってみる
 
@@ -80,7 +80,7 @@ function main = () {
 
 ## しくみ
 
-`class Counter = { ... }`で、<strong>クラス</strong>を作ります。クラスは、モノの<strong>設計図</strong>です。名前は、先頭を大文字にします（`UpperCamelCase`）。
+`class Counter = { ... }`と書くと、<strong>クラス</strong>ができます。クラスはモノの設計図です。名前は`UpperCamelCase`で、先頭を大文字にします。
 
 <figure class="diagram">
 <svg viewBox="0 0 560 250" role="img" aria-label="Counter クラスの、fields、constructor、method の、3つの部分を示す図">
@@ -99,25 +99,25 @@ function main = () {
 <text x="390" y="102">持っているデータ</text><text x="390" y="160">new で作るときの手順</text><text x="390" y="218">できること（動き）</text>
 </g>
 </svg>
-<figcaption>クラスは、3つの部分でできています。同じ色の部分が、対応しています。</figcaption>
+<figcaption>クラスは3つの部分でできています。同じ色の部分どうしが対応しています。</figcaption>
 </figure>
 
-- <strong>`fields`</strong>：クラスが持っている<strong>データ</strong>（フィールド）です。`名前: 型 = 初期値`の形で書きます。
-- <strong>`constructor`</strong>：`new Counter(10)`のように、モノを作るときに、<strong>最初に実行される手順</strong>です。
-- <strong>`method`</strong>：できること（動き）です。関数と、同じ書き方です。`counter.up()`のように、呼び出します。
+- `fields`には、クラスが持つデータ、つまりフィールドを書きます。`名前: 型 = 初期値`の形です。
+- `constructor`は、`new Counter(10)`のようにモノを作るとき、最初に実行される手順です。
+- `method`は、できること、つまり動きです。書き方は関数と同じで、`counter.up()`のように呼び出します。
 
-クラスの中では、`self`が、<strong>そのモノ自身</strong>を指します。フィールドは、`self.count`のように、`self.`を付けて、読み書きします。
+クラスの中では、`self`がそのモノ自身を指します。フィールドは、`self.count`のように`self.`を付けて読み書きします。
 
 ## 広げてみる
 
-`new クラス名(引数)`で、クラスから、<strong>モノ</strong>を作ります。`var counter: Counter = new Counter(10)`の、`Counter`は、変数の<strong>型</strong>です。クラスも、型になります。
+`new クラス名(引数)`と書くと、クラスからモノを作れます。`var counter: Counter = new Counter(10)`の`Counter`は、変数の型です。クラスも型になるわけです。
 
 <div class="eval" aria-label="new Counter(10) を評価すると、count が 10 の Counter になる">
 <span>new Counter(10)</span><i>→</i><span>count が 10 の Counter</span>
-<small>new も式です。評価すると、新しいモノが、できあがります。</small>
+<small>new も式です。評価すると、新しいモノができあがります。</small>
 </div>
 
-メソッドは、<strong>値を返す</strong>こともできます。関数と、同じ書き方です。
+メソッドも、関数と同じ書き方で値を返せます。
 
 ```kururi
 class Counter = {
@@ -145,7 +145,7 @@ function main = () {
 
 ## わざと間違える
 
-メソッドの中で、`self.`を、<strong>付け忘れて</strong>みましょう。
+メソッドの中で、`self.`をわざと付け忘れてみます。
 
 ```kururi-error K0201
 class Counter = {
@@ -164,21 +164,21 @@ function main = () {
 
 <div class="say">
 
-`count`だけだと、「どこの`count`？」って、迷っちゃう。<strong>このモノの`count`</strong>は、`self.count`って、書いてね。
+`count`だけだと、「どこの`count`？」って迷っちゃう。このモノの`count`は、`self.count`って書いてね。
 
 </div>
 
 ## まとめ
 
-- <strong>クラス</strong>は、データ（`fields`）と、手順（`method`）を、ひとまとめにした、設計図です。
+- クラスは、データ（`fields`）と手順（`method`）をひとまとめにした設計図です。
 - `constructor`は、`new`で作るときの手順です。`self`は、そのモノ自身を指します。
-- クラスから作ったモノも、<strong>型</strong>を持ちます。
+- クラスから作ったモノにも、型があります。
 
 ## 練習
 
-1. `name`と、`say_hello`メソッドを持つ、`Robot`クラスを、作ってください。
-2. 上のクラスから、`new`で、モノを作って、`say_hello`を呼んでください。
-3. `Counter`に、`reset`メソッドを足して、`count`を`0`に戻してください。
+1. `name`と`say_hello`メソッドを持つ`Robot`クラスを作ってください。
+2. 作ったクラスから`new`でモノを作り、`say_hello`を呼んでください。
+3. `Counter`に`reset`メソッドを足して、`count`を`0`に戻してください。
 
 <details>
 <summary>答えの例</summary>
@@ -226,4 +226,4 @@ function main = () {
 
 ## つぎへ
 
-`public`を付けると、<strong>だれでも</strong>、`counter.count = 100`のように、書き換えられます。勝手に書き換えられると、困るときは、どうすればよいでしょう。
+`public`を付けると、だれでも`counter.count = 100`のように書き換えられます。勝手に書き換えられては困るとき、どうすればよいのでしょう。
